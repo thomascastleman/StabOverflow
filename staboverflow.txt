@@ -4,16 +4,15 @@
 Questions:
 	- tags
 	- comments
-	- upvotes / downvotes
+	- upvotes
 	- ref to asker
 	- time posted
 
 Answers:
 	- comments
-	- upvotes / downvotes
+	- upvotes
 	- ref to answerer
 	- time posted
-
 
 Could the email auth just allow any valid email with the domain "students.stab.org" or "stab.org" ?
 
@@ -46,7 +45,7 @@ Class Page: (is this necessary?)
 Individual Question Page: (clicking on an individual question)
 	- same nav bar
 	- show question title at very top
-	- renders question markdown and code
+	- renders question markdown
 	- show question data (asker, time asked, votes, class if applicable)
 	- buttons for upvoting / downvoting / commenting
 	- question comments posted under question
@@ -64,21 +63,41 @@ Search Results Page:
 	- table of question link results relevant to posted search
 
 User Account Page:
-	- show username, description
+	- show username, description, (photo?)
 	- if admin, show options:
 		- delete a class, add a class
 		- add new trusted student emails (through uploading csv file or something)
 
 --------------- User Stories ---------------
 
-[User] --> not logged in, anyone
+[User] --> not logged in, anyone can VIEW but not EDIT
 [Student] --> logged in as student
 [Admin] --> logged in as admin
 
-1. [User] GETs / and sees landing page.
+1. [User] GETs / and sees landing page with recent questions.
 
-2. [User] hits "log in" button, authenticates with their stab email, session starts, becomes either [student] or [admin]
+2. [User] clicks "log in" button (direct to /login), authenticates with stab email, session starts, becomes either [student] or [admin]
+
+3. [Student] clicks "Ask a Question" button, gets new question page, types question data (title, body (markdown), tags, class), POSTs data to "/newQuestion"
+
+4. [Student] clicks on a question link, which submits a GET with the question ID, page with all question data is rendered (question, question comments, answers, answer comments)
+
+5. [Student] on indiv. question page clicks "Add Comment" on question/answer, text box appears, plaintext comment is POSTed along with question/answer ID to "/newQuestionComment" or "/newAnswerComment" respectively
+
+7. [Student] clicks upvote (we're only doing upvoting) on question/answer, question/answer ID is POSTed to "/upvote"
+
+8. [Student] types answer into answer box at bottom of indiv. question page, POSTs answer plaintext and corresponding question ID to "/newAnswer"
+
+9. [User] types free text query into nav search bar, query POSTed to "/search", receives search results page with question links relevant to that query
+
+10. [User] types query from search bar on search page, POSTed to "/search" and results rendered
+
+11. Having searched ("/search"), [User] selects a filter from either of the two filter types:
+	- Class filters: select a class to limit questions to
+	- Question type filter: "All", "Unanswered", ...
+
+12. From landing page, [User] clicks "Browse Questions", this POSTs a blank query to "/search"
 
 
-
+--------------- Database Schema ---------------
 
