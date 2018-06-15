@@ -76,15 +76,15 @@ User Account Page:
 
 2. [User] clicks "log in" button (direct to /login), authenticates with stab email, session starts, becomes either [student] or [admin]
 
-3. [Student] clicks "Ask a Question" button, gets new question page, types question data (title, body (markdown), class), POSTs data to "/newQuestion"
+3. [Student] clicks "Ask a Question" button, gets new question page, types question data (title, body (markdown), class), POSTs data to "/newPost", specifying question
 
 4. [Student] clicks on a question link, which submits a GET with the question ID, page with all question data is rendered (question, question comments, answers, answer comments)
 
-5. [Student] on indiv. question page clicks "Add Comment" on question/answer, text box appears, plaintext comment is POSTed along with question/answer ID to "/newQuestionComment" or "/newAnswerComment" respectively
+5. [Student] on indiv. question page clicks "Add Comment" on question/answer, text box appears, plaintext comment is POSTed along with question/answer ID to "/newComment"
 
 7. [Student] clicks upvote (we're only doing upvoting) on question/answer, question/answer ID is POSTed to "/upvote"
 
-8. [Student] types answer into answer box at bottom of indiv. question page, POSTs answer plaintext and corresponding question ID to "/newAnswer"
+8. [Student] types answer into answer box at bottom of indiv. question page, POSTs answer plaintext and corresponding question ID to "/newPost" specifying it is an answer
 
 9. [User] types free text query into nav search bar, query POSTed to "/search", receives search results page with question links relevant to that query
 
@@ -100,7 +100,7 @@ User Account Page:
 
 14. [Admin] GETs their own profile, sees options to add / delete class categories (this needs work)
 
-15. [Admin] clicks delete button on a question, comment, or answer, that ID along with its status ("question", "comment", ...) is POSTed to "/deleteQuestion", "/deleteComment", or "/deleteAnswer"
+15. [Admin] clicks delete button on a question, comment, or answer, that ID along with its status ("question", "comment", ...) is POSTed to "/deletePost" or "/deleteComment"
 
 --------------- Database Schema ---------------
 
