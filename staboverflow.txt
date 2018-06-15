@@ -2,7 +2,6 @@
 ---------------:::: StabOverflow ::::---------------
 
 Questions:
-	- tags
 	- comments
 	- upvotes
 	- ref to asker
@@ -30,7 +29,6 @@ Landing Page:
 
 Ask A Question Page:
 	- title input
-	- tags input
 	- main question body input:
 		- formatting -- need to be able to use bold, italics, underline, links, most importantly code 
 			- (something like https://github.com/markdown-it/markdown-it ?)
@@ -78,7 +76,7 @@ User Account Page:
 
 2. [User] clicks "log in" button (direct to /login), authenticates with stab email, session starts, becomes either [student] or [admin]
 
-3. [Student] clicks "Ask a Question" button, gets new question page, types question data (title, body (markdown), tags, class), POSTs data to "/newQuestion"
+3. [Student] clicks "Ask a Question" button, gets new question page, types question data (title, body (markdown), class), POSTs data to "/newQuestion"
 
 4. [Student] clicks on a question link, which submits a GET with the question ID, page with all question data is rendered (question, question comments, answers, answer comments)
 
@@ -93,11 +91,32 @@ User Account Page:
 10. [User] types query from search bar on search page, POSTed to "/search" and results rendered
 
 11. Having searched ("/search"), [User] selects a filter from either of the two filter types:
-	- Class filters: select a class to limit questions to
+	- Class filters: select a class to limit questions to (CSP, HDS ...)
 	- Question type filter: "All", "Unanswered", ...
 
 12. From landing page, [User] clicks "Browse Questions", this POSTs a blank query to "/search"
 
+13. [User] GETs "/users/:id", user profile is rendered (username, name, bio, image, ...) with questions they've asked
+
+14. [Admin] GETs their own profile, sees options to add / delete class categories (this needs work)
+
+15. [Admin] clicks delete button on a question, comment, or answer, that ID along with its status ("question", "comment", ...) is POSTed to "/deleteQuestion", "/deleteComment", or "/deleteAnswer"
 
 --------------- Database Schema ---------------
 
+// questions and answers
+TABLE posts
+	uid
+	parent_uid
+	type_uid
+	creation_date
+	title
+	body
+	owner_uid
+	owner_display_name
+	answer_count
+	upvotes
+
+
+
+TABLE comments
