@@ -17,7 +17,7 @@ Answers:
 
 Could the email auth just allow any valid email with the domain "students.stab.org" or "stab.org" ?
 
---------------- Site Layout ---------------
+--------------- ((very) Tentative) Site Layout ---------------
 
 Landing Page:
 	- nav bar:
@@ -36,6 +36,7 @@ Ask A Question Page:
 		- formatting -- need to be able to use bold, italics, underline, links, most importantly code 
 			- (something like https://github.com/markdown-it/markdown-it ?)
 			- https://github.com/google/code-prettify for syntax highlighting
+			- Client Side markdown renderer: https://github.com/showdownjs/showdown
 
 Class Page:
 	- same nav bar
@@ -67,7 +68,6 @@ User Account Page:
 	- if admin, show options:
 		- delete a class, add a class
 		- add new trusted student emails (through uploading csv file or something)
-
 
 --------------- User Stories ---------------
 
