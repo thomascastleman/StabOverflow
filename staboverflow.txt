@@ -107,16 +107,33 @@ User Account Page:
 // questions and answers
 TABLE posts
 	uid
-	parent_uid
+	question_uid
 	type_uid
 	creation_date
 	title
 	body
 	owner_uid
-	owner_display_name
+	owner_username
 	answer_count
 	upvotes
 
-
-
 TABLE comments
+	uid
+	parent_uid
+	question_uid
+	body
+	creation_date
+	owner_uid
+	owner_username
+
+// types are "Question" and "Answer"
+TABLE post_types
+	uid
+	name
+
+TABLE users
+	uid
+	username
+	bio
+	email
+	isAdmin
