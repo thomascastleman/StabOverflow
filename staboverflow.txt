@@ -1,0 +1,73 @@
+
+---------------:::: StabOverflow ::::---------------
+
+Questions:
+	- tags
+	- comments
+	- upvotes / downvotes
+	- ref to asker
+	- time posted
+
+Answers:
+	- comments
+	- upvotes / downvotes
+	- ref to answerer
+	- time posted
+
+
+Could the email auth just allow any valid email with the domain "students.stab.org" or "stab.org" ?
+
+--------------- Site Layout ---------------
+
+Landing Page:
+	- nav bar:
+		- StabOverflow logo
+		- search bar (whole site)
+		- log in button
+		- buttons for each class page (CSP, HDS ...) (or maybe a dropdown?)
+		- button for Questions page ("Browse Questions")
+	- table of recent questions (links), questions with most upvotes (option to toggle between these)
+	- button to ask question (requires login)
+
+Ask A Question Page:
+	- title input
+	- tags input
+	- main question body input:
+		- formatting -- need to be able to use bold, italics, underline, links, most importantly code 
+			- (something like https://github.com/markdown-it/markdown-it ?)
+			- https://github.com/google/code-prettify for syntax highlighting
+
+Class Page:
+	- same nav bar
+	- secondary search bar, which searches only under this class (formats a query and posts to search results page)
+	- table of questions recently asked under that class
+
+Individual Question Page: (clicking on an individual question)
+	- same nav bar
+	- show question title at very top
+	- renders question markdown and code
+	- show question data (asker, time asked, votes, class if applicable)
+	- buttons for upvoting / downvoting / commenting
+	- question comments posted under question
+	- answers / answer comments posted below
+	- option to delete question (this requires admin privileges)
+
+Questions Page:
+	- same nav bar
+	- tabs: All, Unanswered, and one for each class
+	- question links (maybe loaded in pages?)
+
+Search Results Page:
+	- same nav bar
+	- query at top
+	- table of question link results relevant to posted search
+
+User Account Page:
+	- show username, description
+	- if admin, show options:
+		- delete a class, add a class
+		- add new trusted student emails (through uploading csv file or something)
+
+
+--------------- User Stories ---------------
+
