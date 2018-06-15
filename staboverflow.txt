@@ -38,7 +38,7 @@ Ask A Question Page:
 			- https://github.com/google/code-prettify for syntax highlighting
 			- Client Side markdown renderer: https://github.com/showdownjs/showdown
 
-Class Page:
+Class Page: (is this necessary?)
 	- same nav bar
 	- secondary search bar, which searches only under this class (formats a query and posts to search results page)
 	- table of questions recently asked under that class
@@ -70,4 +70,15 @@ User Account Page:
 		- add new trusted student emails (through uploading csv file or something)
 
 --------------- User Stories ---------------
+
+[User] --> not logged in, anyone
+[Student] --> logged in as student
+[Admin] --> logged in as admin
+
+1. [User] GETs / and sees landing page.
+
+2. [User] hits "log in" button, authenticates with their stab email, session starts, becomes either [student] or [admin]
+
+
+
 
