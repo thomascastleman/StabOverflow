@@ -20,6 +20,7 @@ Ask A Question Page:
 			- (something like https://github.com/markdown-it/markdown-it ?)
 			- https://github.com/google/code-prettify for syntax highlighting
 			- Client Side markdown renderer: https://github.com/showdownjs/showdown
+		- should have a live markdown preview
 	- live markdown preview (clientside renderer)
 
 Individual Question Page: (clicking on an individual question)
@@ -50,37 +51,45 @@ User Account Page:
 [Student] --> logged in as student (make posts, comments, edit profile)
 [Admin] --> logged in as admin (delete posts, comments, add/delete categories)
 
+
+---- [User] STORIES ----
 1. [User] GETs / and sees landing page with recent questions.
 
 2. [User] clicks "log in" button (direct to /login), authenticates with stab email, session starts, becomes either [student] or [admin]
 
-3. [Student] clicks "Ask a Question" button, gets new question page, types question data (title, body (markdown), class), POSTs data to "/newPost", specifying question
+3. [User] types free text query into nav search bar, query POSTed to "/search", receives search results page with question links relevant to that query
 
-4. [Student] clicks on a question link, which GETs "/questions/:id", page with all question data is rendered (question, question comments, answers, answer comments, write an answer box at bottom)
+4. [User] types query from search bar on search page, POSTed to "/search" and results rendered
 
-5. [Student] on indiv. question page clicks "Add Comment" on question/answer, text box appears, plaintext comment (maybe markdown?) is POSTed with comment data to "/newComment"
-
-7. [Student] clicks upvote (we're only doing upvoting) on question/answer, question/answer ID is POSTed to "/upvote"
-
-8. [Student] types answer into answer box at bottom of indiv. question page, POSTs answer data and corresponding question ID to "/newPost" specifying it is an answer
-
-9. [User] types free text query into nav search bar, query POSTed to "/search", receives search results page with question links relevant to that query
-
-10. [User] types query from search bar on search page, POSTed to "/search" and results rendered
-
-11. Having searched ("/search"), [User] selects a filter from either of the two filter types:
+5. Having searched ("/search"), [User] selects a filter from either of the two filter types:
 	- Category filters: select a class to limit questions to (CSP, HDS ...)
-	- Question type filter: "All", "Unanswered", ...
+	- Question type filter: "All" or "Unanswered"
+and submits the query again, now with filters
 
-12. From landing page, [User] clicks "Browse Questions", this POSTs a blank query to "/search" and renders result
+6. From landing page, [User] clicks "Browse Questions", this POSTs a blank query to "/search" and renders result
 
-13. [User] GETs "/users/:id", a user profile is rendered (username, name, bio, image, ...) with questions they've asked
+7. [User] GETs "/users/:id", a user profile is rendered (username, name, bio, image, ...) with questions they've asked
 
-14. Whilst signed in, [Student] gets their /users/:id page and clicks "Edit Profile", posts new data to "/updateProfile"
 
-15. From their user profile, [Admin] POSTs the name of a new category to "/newCategory", or POSTs the uid of an existing category to "/deleteCategory"
+---- [Student] STORIES ----
 
-16. [Admin] clicks (hidden) delete button on a question/answer/comment and after a confirmation, that ID along with its status (question/answer) is POSTed to "/deletePost" or "/deleteComment"
+1. [Student] clicks "Ask a Question" button, gets new question page, types question data (title, body (markdown), class), POSTs data to "/newPost", specifying question
+
+2. [Student] clicks on a question link, which GETs "/questions/:id", page with all question data is rendered (question, question comments, answers, answer comments, write an answer box at bottom)
+
+3. [Student] on indiv. question page clicks "Add Comment" on question/answer, text box appears, plaintext comment (maybe markdown?) is POSTed with comment data to "/newComment"
+
+4. [Student] clicks upvote (we're only doing upvoting) on question/answer, question/answer ID is POSTed to "/upvote"
+
+5. [Student] types answer into answer box at bottom of indiv. question page, POSTs answer data and corresponding question ID to "/newPost" specifying it is an answer
+
+6. Whilst signed in, [Student] gets their /users/:id page and clicks "Edit Profile", posts new data to "/updateProfile"
+
+
+---- [Admin] STORIES ----
+1. From their user profile, [Admin] POSTs the name of a new category to "/newCategory", or POSTs the uid of an existing category to "/deleteCategory"
+
+2. [Admin] clicks (hidden) delete button on a question/answer/comment and after a confirmation, that ID along with its status (question/answer) is POSTed to "/deletePost" or "/deleteComment"
 
 --------------- Database Schema ---------------
 
@@ -133,6 +142,9 @@ TABLE users
 --------------- Searching ---------------
 
 	- search functionality can utilize the tags attached to a question to determine its relevance to free text queries
+	- filters will be either be specified in the query or sent in the request
+		- filter by categories by checking a post's category_uid
+		- check if unanswered by accessing answer_count
 
 --------------- Authentication ---------------
 
