@@ -31,7 +31,7 @@ CREATE TABLE post_types (
 -- all questions and answers
 CREATE TABLE posts (
 	uid INT NOT NULL AUTO_INCREMENT,
-	question_uid INT,
+	parent_question_uid INT,
 	type_uid INT,
 	category_uid INT,
 	owner_uid INT,
@@ -51,14 +51,14 @@ CREATE TABLE posts (
 CREATE TABLE comments (
 	uid INT NOT NULL AUTO_INCREMENT,
 	parent_uid INT,
-	question_uid INT,
+	parent_question_uid INT,
 	owner_uid INT,
 	owner_name VARCHAR(32),
 	creation_date DATETIME,
 	body TEXT,
 	PRIMARY KEY (uid),
 	FOREIGN KEY (parent_uid) REFERENCES posts(uid),
-	FOREIGN KEY (question_uid) REFERENCES posts(uid),
+	FOREIGN KEY (parent_question_uid) REFERENCES posts(uid),
 	FOREIGN KEY (owner_uid) REFERENCES users(uid)
 );
 
@@ -70,3 +70,6 @@ CREATE TABLE tags (
 	PRIMARY KEY (uid),
 	FOREIGN KEY (post_uid) REFERENCES posts(uid)
 );
+
+-- establish types of posts
+INSERT INTO post_types (name) VALUES ("Question"), ("Answer");
