@@ -8,7 +8,9 @@ Landing Page:
 	- nav bar:
 		- StabOverflow logo
 		- search bar (whole site)
-		- log in button
+		- "Log In" button --> "/login" (only if not logged in)
+		- "Sign Up" button --> "/signup" (only if not logged in)
+		- "Log Out" button --> "/logout" (only if logged in)
 		- button to "Browse Questions"
 	- table of recent questions (links), questions with most upvotes (option to toggle between these maybe)
 	- button to ask question (requires login)
@@ -53,9 +55,10 @@ User Account Page:
 
 
 ---- [User] STORIES ----
+
 1. [User] GETs / and sees landing page with recent questions.
 
-2. Previous [User] clicks "log in" button (direct to /login), authenticates, session starts, becomes either [student] or [admin], directed to "/" on success ("/login" on fail)
+2. Previous [User] clicks "log in" button (direct to /login), authenticates, session starts, becomes either [Student] or [Admin], directed to "/" on success ("/login" on fail)
 
 3. [User] types free text query into nav search bar, query POSTed to "/search", receives search results page with question links relevant to that query
 
@@ -70,30 +73,53 @@ and submits the query again, now with filters (perhaps query is automatically re
 
 7. [User] GETs "/users/:id", a user profile is rendered (username, name, bio, image, ...) with (optional) questions they've asked
 
-8. [User] logs in for first time, authenticates with "students.stab.org" (confirmation email), session starts, redirected to "/createProfile"
+8. [User] GETs "/signup" and is added to system, provided they have a "students.stab.org" email
 
-9. [User] sent to "/createProfile", types full name, username (ensure unique), and short description, POSTs to "/updateProfile"
+9. [User] clicks on a question link, which GETs "/questions/:id", page with all question data is rendered (question, question comments, answers, answer comments, write an answer box at bottom)
 
 
 ---- [Student] STORIES ----
 
 1. [Student] clicks "Ask a Question" button, gets new question page, types question data (title, body (markdown), class), POSTs data to "/newPost", specifying question
 
-2. [Student] clicks on a question link, which GETs "/questions/:id", page with all question data is rendered (question, question comments, answers, answer comments, write an answer box at bottom)
+2. [Student] on indiv. question page clicks "Add Comment" on question/answer, text box appears, plaintext comment (maybe markdown?) is POSTed with comment data to "/newComment"
 
-3. [Student] on indiv. question page clicks "Add Comment" on question/answer, text box appears, plaintext comment (maybe markdown?) is POSTed with comment data to "/newComment"
+3. [Student] clicks upvote (we're only doing upvoting) on question/answer, question/answer ID is POSTed to "/upvote"
 
-4. [Student] clicks upvote (we're only doing upvoting) on question/answer, question/answer ID is POSTed to "/upvote"
+4. [Student] types answer into answer box at bottom of indiv. question page, POSTs answer data and corresponding question ID to "/newPost" specifying it is an answer
 
-5. [Student] types answer into answer box at bottom of indiv. question page, POSTs answer data and corresponding question ID to "/newPost" specifying it is an answer
-
-6. Whilst signed in, [Student] gets their /users/:id page and clicks "Edit Profile", posts new data to "/updateProfile"
+5. Whilst signed in, [Student] gets their /users/:id page and clicks "Edit Profile", posts new data to "/updateProfile"
 
 
 ---- [Admin] STORIES ----
+
 1. From their user profile, [Admin] POSTs the name of a new category to "/newCategory", or POSTs the uid of an existing category to "/deleteCategory"
 
 2. [Admin] clicks (hidden) delete button on a question/answer/comment and after a confirmation, that ID along with its status (question/answer) is POSTed to "/deletePost" or "/deleteComment"
+
+
+-- Summary of Privileges --
+
+[Users] can:
+	- see landing page
+	- search our question database
+	- view a question and all of its comments/answers
+	- view user profiles
+
+[Students] can:
+	- do everything [Users] can
+	- ask questions
+	- answer questions
+	- make comments
+	- upvote questions and answers
+	- edit THEIR OWN user profile info (full name and bio)
+
+[Admins] can:
+	- do everything [Students] can
+	- add new categories
+	- delete existing categories
+	- delete questions, answers, and comments
+	- (possibly?) add other admins?
 
 --------------- Database Schema ---------------
 
@@ -135,12 +161,11 @@ TABLE categories
 TABLE users
 	uid
 	full_name
-	username
 	bio
 	email
 	isAdmin
 
-// used to verify first-logins??
+// used to verify first-logins
 TABLE pending_accounts
 	uid
 	code	// unique code sent in confirmation email
@@ -160,7 +185,11 @@ TABLE pending_accounts
 	- on login, if no user exists, have them enter data (full name, username, ...)
 
 First login procedure:
-	- if email is in fact "students.stab.org", email and a unique code are stored in pending_accounts table, send confirmation email to that address
+	- if email is a (previously unseen) "students.stab.org" account, email and a unique code are stored in pending_accounts table, send confirmation email to that address
 	- confirmation email POSTs code and user's email to "/confirmation"
 	- at the "/confirmation" endpoint, check if there exists a row with that same unique code and same email, 
-	- if so, add new entry to users table, entering their email and setting isAdmin to false, redirect to 
+	- if so, delete that entry in pending_accounts, add new entry to users table, entering their email and setting isAdmin to false, redirect to "/login"
+
+MAYBE NOT
+Maybe, when "/signup" is gotted, we ask them to authenticate with "some" google email, which, once it has been proved real, we check to see if it is "students.stab.org", and if so, we enter them into the users table
+	- in this case we don't need a confirmation email or endpoint or pending_accounts table
