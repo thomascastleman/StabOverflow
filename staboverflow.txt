@@ -55,20 +55,24 @@ User Account Page:
 ---- [User] STORIES ----
 1. [User] GETs / and sees landing page with recent questions.
 
-2. [User] clicks "log in" button (direct to /login), authenticates with stab email, session starts, becomes either [student] or [admin]
+2. Previous [User] clicks "log in" button (direct to /login), authenticates, session starts, becomes either [student] or [admin], directed to "/" on success ("/login" on fail)
 
 3. [User] types free text query into nav search bar, query POSTed to "/search", receives search results page with question links relevant to that query
 
-4. [User] types query from search bar on search page, POSTed to "/search" and results rendered
+4. [User] types query into search bar on search page, POSTed to "/search" and results rendered
 
 5. Having searched ("/search"), [User] selects a filter from either of the two filter types:
 	- Category filters: select a class to limit questions to (CSP, HDS ...)
 	- Question type filter: "All" or "Unanswered"
-and submits the query again, now with filters
+and submits the query again, now with filters (perhaps query is automatically resubmitted on filter change)
 
 6. From landing page, [User] clicks "Browse Questions", this POSTs a blank query to "/search" and renders result
 
-7. [User] GETs "/users/:id", a user profile is rendered (username, name, bio, image, ...) with questions they've asked
+7. [User] GETs "/users/:id", a user profile is rendered (username, name, bio, image, ...) with (optional) questions they've asked
+
+8. [User] logs in for first time, authenticates with "students.stab.org" (confirmation email), session starts, redirected to "/createProfile"
+
+9. [User] sent to "/createProfile", types full name, username (ensure unique), and short description, POSTs to "/updateProfile"
 
 
 ---- [Student] STORIES ----
@@ -93,43 +97,40 @@ and submits the query again, now with filters
 
 --------------- Database Schema ---------------
 
-// questions and answers
 TABLE posts
 	uid
-	question_uid
-	type_uid
-	category_uid
-	creation_date
-	owner_uid
-	owner_username
-	answer_count
-	upvotes
-	title
-	body
+	question_uid	// which question post does this post relate to
+	type_uid		// question or answer
+	category_uid	// which class (if any)
+	creation_date	// when created
+	owner_uid		// id of poster
+	owner_username	// display name (for speed)
+	answer_count	// so can check if unanswered
+	upvotes			// for ordering
+	title			// meat of the question
+	body			// question body, markdown
 
 TABLE comments
 	uid
-	parent_uid
-	question_uid
-	body
-	creation_date
-	owner_uid
-	owner_username
+	parent_uid		// id of immediate parent (either question or answer)
+	question_uid	// which question ultimately does this comment relate to
+	body			// body of question (maybe markdown)
+	creation_date	// when created
+	owner_uid		// id of poster
+	owner_username	// display name
 
 TABLE tags
 	uid
-	tag
-	post_uid
+	tag				// what is the tag ("recursion", "nodejs", ...)
+	post_uid		// which question was it tagged on 
 
-// types are "Question" and "Answer"
 TABLE post_types
 	uid
-	name
+	name			// is a post a "Question" or an "Answer"
 
-// CSP, HSE, HDS ...
 TABLE categories
 	uid
-	name
+	name			// "CSP", "HDS", "HSE", ...
 
 TABLE users
 	uid
@@ -138,6 +139,12 @@ TABLE users
 	bio
 	email
 	isAdmin
+
+// used to verify first-logins??
+TABLE pending_accounts
+	uid
+	code	// unique code sent in confirmation email
+	email	// "students.stab.org" email that attempted to log in
 
 --------------- Searching ---------------
 
@@ -151,3 +158,9 @@ TABLE users
 	- Valid emails: "students.stab.org" or "stab.org"
 	- Use confirmation email to verify legitimate email
 	- on login, if no user exists, have them enter data (full name, username, ...)
+
+First login procedure:
+	- if email is in fact "students.stab.org", email and a unique code are stored in pending_accounts table, send confirmation email to that address
+	- confirmation email POSTs code and user's email to "/confirmation"
+	- at the "/confirmation" endpoint, check if there exists a row with that same unique code and same email, 
+	- if so, add new entry to users table, entering their email and setting isAdmin to false, redirect to 
