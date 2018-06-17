@@ -34,7 +34,7 @@ Individual Question Page: (clicking on an individual question)
 	- question comments posted under question
 	- answers / answer comments posted below
 	- option to delete question (this requires admin privileges, only visible if admin also)
-	- at bottom, answer box to write an answer (with markdown preview)
+	- at bottom, answer box to write an answer (with markdown preview) (only render if logged in)
 
 Search Results Page:
 	- same nav bar
@@ -52,7 +52,6 @@ User Account Page:
 [User] --> not logged in, anyone can VIEW but not PARTICIPATE
 [Student] --> logged in as student (make posts, comments, edit profile)
 [Admin] --> logged in as admin (delete posts, comments, add/delete categories)
-
 
 ---- [User] STORIES ----
 
@@ -130,7 +129,7 @@ TABLE posts
 	category_uid	// which class (if any)
 	creation_date	// when created
 	owner_uid		// id of poster
-	owner_username	// display name (for speed)
+	owner_name		// display name (for speed)
 	answer_count	// so can check if unanswered
 	upvotes			// for ordering
 	title			// meat of the question
@@ -143,7 +142,7 @@ TABLE comments
 	body			// body of question (maybe markdown)
 	creation_date	// when created
 	owner_uid		// id of poster
-	owner_username	// display name
+	owner_name		// display name
 
 TABLE tags
 	uid
@@ -165,7 +164,7 @@ TABLE users
 	email
 	isAdmin
 
-// used to verify first-logins
+// used to verify first-logins (maybe not)
 TABLE pending_accounts
 	uid
 	code	// unique code sent in confirmation email
@@ -185,11 +184,13 @@ TABLE pending_accounts
 	- on login, if no user exists, have them enter data (full name, username, ...)
 
 First login procedure:
+
+CONFIRMATION EMAIL IDEA:
 	- if email is a (previously unseen) "students.stab.org" account, email and a unique code are stored in pending_accounts table, send confirmation email to that address
 	- confirmation email POSTs code and user's email to "/confirmation"
 	- at the "/confirmation" endpoint, check if there exists a row with that same unique code and same email, 
 	- if so, delete that entry in pending_accounts, add new entry to users table, entering their email and setting isAdmin to false, redirect to "/login"
 
-MAYBE NOT
-Maybe, when "/signup" is gotted, we ask them to authenticate with "some" google email, which, once it has been proved real, we check to see if it is "students.stab.org", and if so, we enter them into the users table
+MUCH SIMPLER IDEA:
+	- when "/signup" is gotted, we ask them to authenticate with "some" google email, which, once it has been proved real, we check to see if it is "students.stab.org", and if so, we enter them into the users table
 	- in this case we don't need a confirmation email or endpoint or pending_accounts table
