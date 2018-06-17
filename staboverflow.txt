@@ -11,6 +11,7 @@ Landing Page:
 		- "Log In" button --> "/login" (only if not logged in)
 		- "Sign Up" button --> "/signup" (only if not logged in)
 		- "Log Out" button --> "/logout" (only if logged in)
+		- "My Profile" button --> "/users/:id" (only if logged in)
 		- button to "Browse Questions"
 	- table of recent questions (links), questions with most upvotes (option to toggle between these maybe)
 	- button to ask question (requires login)
@@ -49,32 +50,32 @@ User Account Page:
 
 --------------- User Stories ---------------
 
-[User] --> not logged in, anyone can VIEW but not PARTICIPATE
+[Visitor] --> not logged in, anyone can VIEW but not PARTICIPATE
 [Student] --> logged in as student (make posts, comments, edit profile)
 [Admin] --> logged in as admin (delete posts, comments, add/delete categories)
 
----- [User] STORIES ----
+---- [Visitor] STORIES ----
 
-1. [User] GETs / and sees landing page with recent questions.
+1. [Visitor] GETs / and sees landing page with recent questions.
 
-2. Previous [User] clicks "log in" button (direct to /login), authenticates, session starts, becomes either [Student] or [Admin], directed to "/" on success ("/login" on fail)
+2. [Visitor] (in the system) clicks "log in" button (direct to /login), authenticates, session starts, becomes either [Student] or [Admin], directed to "/" on success ("/login" on fail)
 
-3. [User] types free text query into nav search bar, query POSTed to "/search", receives search results page with question links relevant to that query
+3. [Visitor] types free text query into nav search bar, query POSTed to "/search", receives search results page with question links relevant to that query
 
-4. [User] types query into search bar on search page, POSTed to "/search" and results rendered
+4. [Visitor] types query into search bar on search page, POSTed to "/search" and results rendered
 
-5. Having searched ("/search"), [User] selects a filter from either of the two filter types:
+5. Having searched ("/search"), [Visitor] selects a filter from either of the two filter types:
 	- Category filters: select a class to limit questions to (CSP, HDS ...)
 	- Question type filter: "All" or "Unanswered"
 and submits the query again, now with filters (perhaps query is automatically resubmitted on filter change)
 
-6. From landing page, [User] clicks "Browse Questions", this POSTs a blank query to "/search" and renders result
+6. From landing page, [Visitor] clicks "Browse Questions", this POSTs a blank query to "/search" and renders result
 
-7. [User] GETs "/users/:id", a user profile is rendered (username, name, bio, image, ...) with (optional) questions they've asked
+7. [Visitor] GETs "/users/:id", a user profile is rendered (username, name, bio, image, ...) with (optional) questions they've asked
 
-8. [User] GETs "/signup" and is added to system, provided they have a "students.stab.org" email
+8. [Visitor] GETs "/signup" and is added to system, provided they have a "students.stab.org" email
 
-9. [User] clicks on a question link, which GETs "/questions/:id", page with all question data is rendered (question, question comments, answers, answer comments, write an answer box at bottom)
+9. [Visitor] clicks on a question link, which GETs "/questions/:id", page with all question data is rendered (question, question comments, answers, answer comments) (answer box only rendered if logged in)
 
 
 ---- [Student] STORIES ----
@@ -87,7 +88,7 @@ and submits the query again, now with filters (perhaps query is automatically re
 
 4. [Student] types answer into answer box at bottom of indiv. question page, POSTs answer data and corresponding question ID to "/newPost" specifying it is an answer
 
-5. Whilst signed in, [Student] gets their /users/:id page and clicks "Edit Profile", posts new data to "/updateProfile"
+5. Whilst signed in, [Student] gets their "/users/:id" page and clicks "Edit Profile", posts new data to "/updateProfile"
 
 
 ---- [Admin] STORIES ----
@@ -96,17 +97,23 @@ and submits the query again, now with filters (perhaps query is automatically re
 
 2. [Admin] clicks (hidden) delete button on a question/answer/comment and after a confirmation, that ID along with its status (question/answer) is POSTed to "/deletePost" or "/deleteComment"
 
+3. [Admin] POSTs an email address and full name to "/addAccount", which is added into users table if not already existing (now that person can just log in, they don't require sign up)
+
+4. [Admin] POSTs an email address to "/makeAdmin", that account is given admin privileges. If does not exist, error page is rendered
+
+5. [Admin] POSTs an email address to "/removeAdmin", that account is un-admined, even if was already not admin. If does not exist, error page rendered.
+
 
 -- Summary of Privileges --
 
-[Users] can:
+[Visitors] can:
 	- see landing page
 	- search our question database
 	- view a question and all of its comments/answers
 	- view user profiles
 
 [Students] can:
-	- do everything [Users] can
+	- do everything [Visitors] can
 	- ask questions
 	- answer questions
 	- make comments
@@ -118,7 +125,8 @@ and submits the query again, now with filters (perhaps query is automatically re
 	- add new categories
 	- delete existing categories
 	- delete questions, answers, and comments
-	- (possibly?) add other admins?
+	- manually add users (enter an email / name)
+	- change the isAdmin privilege of any user
 
 --------------- Database Schema ---------------
 
@@ -180,17 +188,19 @@ TABLE pending_accounts
 --------------- Authentication ---------------
 
 	- Valid emails: "students.stab.org" or "stab.org"
-	- Use confirmation email to verify legitimate email
-	- on login, if no user exists, have them enter data (full name, username, ...)
 
-First login procedure:
+Sign up procedure:
+	CONFIRMATION EMAIL IDEA:
+		- if email is a (previously unseen) "students.stab.org" account, email and a unique code are stored in pending_accounts table, send confirmation email to that address
+		- confirmation email POSTs code and user's email to "/confirmation"
+		- at the "/confirmation" endpoint, check if there exists a row with that same unique code and same email, 
+		- if so, delete that entry in pending_accounts, add new entry to users table, entering their email and setting isAdmin to false, redirect to "/login"
 
-CONFIRMATION EMAIL IDEA:
-	- if email is a (previously unseen) "students.stab.org" account, email and a unique code are stored in pending_accounts table, send confirmation email to that address
-	- confirmation email POSTs code and user's email to "/confirmation"
-	- at the "/confirmation" endpoint, check if there exists a row with that same unique code and same email, 
-	- if so, delete that entry in pending_accounts, add new entry to users table, entering their email and setting isAdmin to false, redirect to "/login"
+	MUCH SIMPLER IDEA:
+		- when "/signup" is gotted, we ask them to authenticate with "some" google email, which, once it has been proved real, we check to see if it is "students.stab.org", and if so, we enter them into the users table
+			- maybe they entered their full name earlier so we can just add that into their user entry
+				- actually could we pull full name from Google?
 
-MUCH SIMPLER IDEA:
-	- when "/signup" is gotted, we ask them to authenticate with "some" google email, which, once it has been proved real, we check to see if it is "students.stab.org", and if so, we enter them into the users table
-	- in this case we don't need a confirmation email or endpoint or pending_accounts table
+Log in procedure:
+	- URL that user was at before logging in is POSTed to "/login", where they then authenticate and are redirected back to that URL
+		- this way, if someone is logged out and attempts to do something beyond their privileges, we have them POST to login, so once they are auth'd they come right back to the page they were on
