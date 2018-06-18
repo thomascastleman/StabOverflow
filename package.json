@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/thomascastleman/StabOverflow/issues"
   },
-  "homepage": "https://github.com/thomascastleman/StabOverflow#readme"
+  "homepage": "https://github.com/thomascastleman/StabOverflow#readme",
+  "dependencies": {
+    "express": "^4.16.3"
+  }
 }

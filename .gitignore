@@ -1,6 +1,8 @@
 # Credentials file
 /credentials.js
 
+package-lock.json
+
 # Dependency directories
 node_modules/
 jspm_packages/
