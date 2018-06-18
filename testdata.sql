@@ -1,5 +1,5 @@
 
-USE staboverflow;
+SOURCE create_db.sql;
 
 INSERT INTO users (email, full_name, is_admin) VALUES
 	("user1@gmail.com", "User One", 0),
