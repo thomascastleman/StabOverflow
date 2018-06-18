@@ -23,6 +23,7 @@ passport.serializeUser(function(user, done) {
 });
 
 passport.deserializeUser(function(user, done) {
+	user.variable = "this is a test";
 	done(null, user);
 });
 
@@ -50,12 +51,13 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 app.get('/auth/google', passport.authenticate('google', { scope: [
-	'https://www.googleapis.com/auth/userinfo.profile',
-	'https://www.googleapis.com/auth/userinfo.email'] 
+		'https://www.googleapis.com/auth/userinfo.profile',
+		'https://www.googleapis.com/auth/userinfo.email'
+	] 
 }));
 
 app.get('/auth/google/callback',
-	passport.authenticate('google', { 
+	passport.authenticate('google', {
 		successRedirect: '/',
 		failureRedirect: '/failure'
 }));
