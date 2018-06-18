@@ -1,0 +1,19 @@
+{
+  "name": "staboverflow",
+  "version": "1.0.0",
+  "description": "Online question-and-answer community for St. Anne's Belfield CS Department",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/thomascastleman/StabOverflow.git"
+  },
+  "author": "Thomas Castleman and Johnny Lindbergh",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/thomascastleman/StabOverflow/issues"
+  },
+  "homepage": "https://github.com/thomascastleman/StabOverflow#readme"
+}
