@@ -17,6 +17,13 @@
   },
   "homepage": "https://github.com/thomascastleman/StabOverflow#readme",
   "dependencies": {
-    "express": "^4.16.3"
+    "body-parser": "^1.18.3",
+    "cookie-parser": "^1.4.3",
+    "cookie-session": "^2.0.0-beta.3",
+    "express": "^4.16.3",
+    "moment": "^2.22.2",
+    "mustache-express": "^1.2.6",
+    "passport": "^0.4.0",
+    "passport-google-oauth2": "^0.1.6"
   }
 }
