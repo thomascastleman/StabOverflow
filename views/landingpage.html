@@ -7,7 +7,9 @@
 	<body>
 		<div id="navbar">
 			<!-- put StabOverflow image here -->
-			<input type="text" placeholder="Search StabOverflow...">
+			<form name="search" method="POST" action="/search">
+				<input name="query" type="text" placeholder="Search StabOverflow..." onchange="document.search.submit()">
+			</form>
 			<button>Browse Questions</button>
 			{{#loggedIn}}
 				<button>Log Out</button>
@@ -19,9 +21,9 @@
 			{{/loggedIn}}
 		</div>
 
-		<button>Ask a Question</button>
+		<a href="/ask"><button>Ask a Question</button></a>
 
-		<h1>Recent Questions</h1>
+		<h2>Recent Questions</h2>
 		<div>
 			{{#questions}}
 				<div onclick="window.location.href='/questions/{{uid}}'">

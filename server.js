@@ -102,3 +102,31 @@ app.get('/', function(req, res) {
 		]
 	});
 });
+
+app.get('/ask', function(req, res) {
+	res.render('ask.html', {
+		loggedIn: true,
+		categories: [
+			{ name: "CSP" },
+			{ name: "HDS" },
+			{ name: "HSE" }
+		]
+	});
+});
+
+app.post('/newPost', function(req, res) {
+	console.log(req.body);
+	res.redirect('/');
+});
+
+app.get('/questions/:id', function(req, res) {
+	res.end(req.params.id);
+});
+
+app.get('/search', function(req, res) {
+	res.render('search.html');
+});
+
+app.post('/search', function(req, res) {
+	res.send("You searched for \"" + req.body.query + "\"");
+})

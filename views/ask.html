@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>StabOverflow</title>
+	</head>
+	<body>
+		<!-- PUT NAVBAR HERE -->
+
+		<form method="POST" action="/newPost">
+
+			<!-- Hold off on this and look at PageDown more -->
+			<!-- place for question input -->
+			<div>
+				Title <input type="text" name="title"><br>
+				<textarea name="body"></textarea>
+			</div>
+
+			<!-- place for markdown preview -->
+			<div>
+				
+			</div>
+
+			Tags <input type="text" name="tags"><br>
+
+			Category
+			<select name="category">
+				<option value="None">None</option>
+				{{#categories}}
+					<option value="{{name}}">{{name}}</option>
+				{{/categories}}
+			</select>
+			<br>
+
+			<button type="submit">Post Your Question</button>
+		</form>
+	</body>
+</html>

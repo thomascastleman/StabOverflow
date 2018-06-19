@@ -23,6 +23,9 @@ Ask A Question Page:
 			- (something like https://github.com/markdown-it/markdown-it ?)
 			- https://github.com/google/code-prettify for syntax highlighting
 			- Client Side markdown renderer: https://github.com/showdownjs/showdown
+				- Here's another possibly better one: https://github.com/benweet/stackedit
+				- maybe should use PageDown (what stackoverflow uses)
+					- https://code.google.com/archive/p/pagedown/wikis/PageDown.wiki
 		- should have a live markdown preview
 	- live markdown preview (clientside renderer)
 
