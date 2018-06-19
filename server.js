@@ -70,3 +70,35 @@ app.get('/logout', function(req, res){
 var server = app.listen(8080, function() {
 	console.log("StabOverflow server listening on port %d", server.address().port);
 });
+
+
+
+// templates testing:
+
+app.get('/', function(req, res) {
+	res.render('landingpage.html', {
+		loggedIn: false,
+		questions: [
+			{
+				uid: 1,
+				title: "Test question no. 1?",
+				upvotes: 24,
+				answer_count: 1,
+				owner_name: "Test Name",
+				owner_uid: 314,
+				category: "CSP",
+				when_asked: "20 min ago",
+			},
+			{
+				uid: 2,
+				title: "Another test question?",
+				upvotes: 16,
+				answer_count: 0,
+				owner_name: "User Number 2",
+				owner_uid: 287,
+				category: "HSE",
+				when_asked: "46 min ago",
+			}
+		]
+	});
+});

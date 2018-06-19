@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>StabOverflow</title>
+	</head>
+	<body>
+		<div id="navbar">
+			<!-- put StabOverflow image here -->
+			<input type="text" placeholder="Search StabOverflow...">
+			<button>Browse Questions</button>
+			{{#loggedIn}}
+				<button>Log Out</button>
+				<button>My Profile</button>
+			{{/loggedIn}}
+			{{^loggedIn}}
+				<button>Log In</button>
+				<button>Sign Up</button>
+			{{/loggedIn}}
+		</div>
+
+		<button>Ask a Question</button>
+
+		<h1>Recent Questions</h1>
+		<div>
+			{{#questions}}
+				<div onclick="window.location.href='/questions/{{uid}}'">
+					<div>Category: {{category}}</div>
+					<div>{{upvotes}} upvotes</div>
+					<div>{{answer_count}} answers</div>
+					<div>{{title}}</div>
+					<div>asked {{when_asked}} by <a href="/users/{{owner_uid}}">{{owner_name}}</a></div>
+				</div>
+			{{/questions}}
+		</div>
+	</body>
+</html>
