@@ -124,9 +124,38 @@ app.get('/questions/:id', function(req, res) {
 });
 
 app.get('/search', function(req, res) {
-	res.render('search.html');
+	res.render('search.html', {
+		loggedIn: true,
+		categories: [
+			{ name: "CSP" },
+			{ name: "HDS" },
+			{ name: "HSE" }
+		],
+		results: [
+			{
+				uid: 1,
+				title: "How do I do this?",
+				upvotes: 24,
+				answer_count: 1,
+				owner_name: "Test Name",
+				owner_uid: 314,
+				category: "CSP",
+				when_asked: "20 min ago",
+			},
+			{
+				uid: 2,
+				title: "What is the best way to ask a question?",
+				upvotes: 16,
+				answer_count: 0,
+				owner_name: "User Number 2",
+				owner_uid: 287,
+				category: "HSE",
+				when_asked: "46 min ago",
+			}
+		]
+	});
 });
 
 app.post('/search', function(req, res) {
-	res.send("You searched for \"" + req.body.query + "\"");
+	res.send(req.body);
 })

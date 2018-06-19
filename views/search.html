@@ -9,11 +9,38 @@
 
 		<form name="secondary" method="POST" action="/search">
 			<input name="query" type="text">
-			<input type="submit" value="Search">
-			
+			<input type="submit" value="Search"><br>
+
+			Filter by Category
+			<select name="category">
+				<option value="All">All</option>
+				{{#categories}}
+					<option value="{{name}}">{{name}}</option>
+				{{/categories}}
+			</select>
+			<br>
+
+			Filter by answers
+			<select name="answeredStatus">
+				<option value="All">All</option>
+				<option value="Unanswered">Unanswered</option>
+				<option value="Answered">Answered</option>
+			</select>
 		</form>
 
+		<h2>Results</h2>
 
+		<div>
+			{{#results}}
+				<div onclick="window.location.href='/questions/{{uid}}'">
+					<div>Category: {{category}}</div>
+					<div>{{upvotes}} upvotes</div>
+					<div>{{answer_count}} answers</div>
+					<div>{{title}}</div>
+					<div>asked {{when_asked}} by <a href="/users/{{owner_uid}}">{{owner_name}}</a></div>
+				</div>
+			{{/results}}
+		</div>
 
 	</body>
 </html>
