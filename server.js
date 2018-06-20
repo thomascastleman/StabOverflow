@@ -159,3 +159,12 @@ app.get('/search', function(req, res) {
 app.post('/search', function(req, res) {
 	res.send(req.body);
 })
+
+app.get('/users/:id', function(req, res) {
+	res.render('user.html', {
+		full_name: "Fake User",
+		bio: "I am a fake user who is not actually real.",
+		questions_asked: 36,
+		answers_given: 12
+	});
+});

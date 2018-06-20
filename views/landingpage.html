@@ -27,10 +27,10 @@
 		<div>
 			{{#questions}}
 				<div onclick="window.location.href='/questions/{{uid}}'">
+					<div>{{title}}</div>
 					<div>Category: {{category}}</div>
 					<div>{{upvotes}} upvotes</div>
 					<div>{{answer_count}} answers</div>
-					<div>{{title}}</div>
 					<div>asked {{when_asked}} by <a href="/users/{{owner_uid}}">{{owner_name}}</a></div>
 				</div>
 			{{/questions}}
