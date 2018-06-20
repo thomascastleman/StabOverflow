@@ -26,7 +26,6 @@ Ask A Question Page:
 				- Here's another possibly better one: https://github.com/benweet/stackedit
 				- maybe should use PageDown (what stackoverflow uses)
 					- https://code.google.com/archive/p/pagedown/wikis/PageDown.wiki
-		- should have a live markdown preview
 	- live markdown preview (clientside renderer)
 
 Individual Question Page: (clicking on an individual question)
