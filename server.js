@@ -27,6 +27,13 @@ passport.deserializeUser(function(user, done) {
 	done(null, user);
 });
 
+// -----
+// I believe this is a hack -- johnny you need to enable the Google+ API apparently
+GoogleStrategy.prototype.userProfile = function(token, done) {
+  done(null, {})
+}
+// -----
+
 passport.use(new GoogleStrategy({
 		clientID:		creds.GOOGLE_CLIENT_ID,
 		clientSecret:	creds.GOOGLE_CLIENT_SECRET,
@@ -62,9 +69,17 @@ app.get('/auth/google/callback',
 		failureRedirect: '/failure'
 }));
 
+app.get('/failure', function(req, res) {
+	res.send("Failure :(");
+});
+
 app.get('/logout', function(req, res){
 	req.logout();
 	res.redirect('/');
+});
+
+app.get('/testauth', function(req, res) {
+	res.send(JSON.stringify(req.user));
 });
 
 var server = app.listen(8080, function() {
