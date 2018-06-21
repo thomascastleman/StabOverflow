@@ -107,16 +107,15 @@ app.get('/ask', function(req, res) {
 	res.render('ask.html', {
 		loggedIn: true,
 		categories: [
-			{ name: "CSP" },
-			{ name: "HDS" },
-			{ name: "HSE" }
+			{ name: "CSP", uid: 1 },
+			{ name: "HDS", uid: 2 },
+			{ name: "HSE", uid: 3 }
 		]
 	});
 });
 
 app.post('/newPost', function(req, res) {
-	console.log(req.body);
-	res.redirect('/');
+	res.send(req.body);
 });
 
 app.get('/questions/:id', function(req, res) {
@@ -127,9 +126,9 @@ app.get('/search', function(req, res) {
 	res.render('search.html', {
 		loggedIn: true,
 		categories: [
-			{ name: "CSP" },
-			{ name: "HDS" },
-			{ name: "HSE" }
+			{ name: "CSP", uid: 1 },
+			{ name: "HDS", uid: 2 },
+			{ name: "HSE", uid: 3 }
 		],
 		results: [
 			{
