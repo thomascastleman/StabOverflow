@@ -8,20 +8,22 @@
 		<div id="navbar">
 			<!-- put StabOverflow image here -->
 			<form name="search" method="POST" action="/search">
-				<input name="query" type="text" placeholder="Search StabOverflow..." onchange="document.search.submit()">
+				<input name="category" value="0" hidden>
+				<input name="answeredStatus" value="All" hidden>
+				<input name="query" type="text" placeholder="Search StabOverflow" onchange="document.search.submit()">
 			</form>
-			<button>Browse Questions</button>
+			<a href="/search">Browse Questions</a>
 			{{#loggedIn}}
-				<button>Log Out</button>
-				<button>My Profile</button>
+				<a>Log Out</a>
+				<a>My Profile</a>
 			{{/loggedIn}}
 			{{^loggedIn}}
-				<button>Log In</button>
-				<button>Sign Up</button>
+				<a>Log In</a>
+				<a>Sign Up</a>
 			{{/loggedIn}}
 		</div>
 
-		<a href="/ask"><button>Ask a Question</button></a>
+		<a href="/ask">Ask a Question</a>
 
 		<h2>Recent Questions</h2>
 		<div>

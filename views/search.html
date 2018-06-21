@@ -15,7 +15,7 @@
 			<select name="category">
 				<option value="All">All</option>
 				{{#categories}}
-					<option value="{{name}}">{{name}}</option>
+					<option value="{{uid}}">{{name}}</option>
 				{{/categories}}
 			</select>
 			<br>
@@ -28,16 +28,23 @@
 			</select>
 		</form>
 
-		<h2>Results</h2>
+		<h2>Search Results</h2>
 
 		<div>
 			{{#results}}
-				<div onclick="window.location.href='/questions/{{uid}}'">
-					<div>{{title}}</div>
-					<div>Category: {{category}}</div>
-					<div>{{upvotes}} upvotes</div>
-					<div>{{answer_count}} answers</div>
-					<div>asked {{when_asked}} by <a href="/users/{{owner_uid}}">{{owner_name}}</a></div>
+				<div>
+					<!-- category, upvotes, answers -->
+					<div onclick="window.location.href='/questions/{{uid}}'">
+						<div>Category: {{category}}</div>
+						<div>{{upvotes}} upvotes</div>
+						<div>{{answer_count}} answers</div>
+					</div>
+
+					<!-- title, owner, time, tags -->
+					<div>
+						<div><a href='/questions/{{uid}}'>{{title}}</a></div>
+						<div>asked {{when_asked}} by <a href="/users/{{owner_uid}}">{{owner_name}}</a></div>
+					</div>
 				</div>
 			{{/results}}
 		</div>
