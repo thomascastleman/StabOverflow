@@ -26,12 +26,19 @@
 		<h2>Recent Questions</h2>
 		<div>
 			{{#questions}}
-				<div onclick="window.location.href='/questions/{{uid}}'">
-					<div>{{title}}</div>
-					<div>Category: {{category}}</div>
-					<div>{{upvotes}} upvotes</div>
-					<div>{{answer_count}} answers</div>
-					<div>asked {{when_asked}} by <a href="/users/{{owner_uid}}">{{owner_name}}</a></div>
+				<div>
+					<!-- category, upvotes, answers -->
+					<div onclick="window.location.href='/questions/{{uid}}'">
+						<div>Category: {{category}}</div>
+						<div>{{upvotes}} upvotes</div>
+						<div>{{answer_count}} answers</div>
+					</div>
+
+					<!-- title, owner, time, tags -->
+					<div>
+						<div><a href='/questions/{{uid}}'>{{title}}</a></div>
+						<div>asked {{when_asked}} by <a href="/users/{{owner_uid}}">{{owner_name}}</a></div>
+					</div>
 				</div>
 			{{/questions}}
 		</div>
