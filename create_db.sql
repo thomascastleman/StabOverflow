@@ -62,3 +62,13 @@ CREATE TABLE tags (
 	PRIMARY KEY (uid),
 	FOREIGN KEY (post_uid) REFERENCES posts(uid)
 );
+
+-- which users have upvoted which posts
+CREATE TABLE upvotes (
+	uid INT NOT NULL AUTO_INCREMENT,
+	post_uid INT,
+	user_uid INT,
+	PRIMARY KEY (uid),
+	FOREIGN KEY (post_uid) REFERENCES posts(uid),
+	FOREIGN KEY (user_uid) REFERENCES users(uid)
+);

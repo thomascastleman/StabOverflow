@@ -91,6 +91,7 @@
 			</div>
 
 			{{#loggedIn}}
+				<!-- write an answer form -->
 				<h2>Your Answer</h2>
 				<form method="POST" action="/newPost">
 					<input hidden name="type" value="0">
@@ -117,53 +118,3 @@
 
 	</body>
 </html>
-
-
-
-<!--
-	render object
-	{
-		title:
-		body: 
-		category: 
-		category_uid: // so we can link to category /search
-		owner_uid: // link to users page
-		owner_name: 
-		creation_date
-		answer_count:
-		upvotes
-		tags: ["tag1", "tag2", "tag3"]
-
-		comments: [
-			{
-				body:
-				owner_uid: // link to users page
-				owner_name: 
-				creation_date:
-			},
-			...
-		]
-
-		answers: [
-			{
-				body: 
-				owner_uid: // link to users page
-				owner_name: 
-				creation_date
-				upvotes
-
-				comments: [
-					{
-						body:
-						owner_uid: // link
-						owner_name: 
-						creation_date:
-					},
-					...
-				]
-			},
-			...
-		]
-	}
-
--->
