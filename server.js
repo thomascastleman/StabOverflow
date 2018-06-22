@@ -207,10 +207,6 @@ app.post('/newPost', function(req, res) {
 	res.send(req.body);
 });
 
-app.get('/questions/:id', function(req, res) {
-	res.end(req.params.id);
-});
-
 app.get('/search', function(req, res) {
 	res.render('search.html', {
 		loggedIn: true,
@@ -246,4 +242,79 @@ app.get('/search', function(req, res) {
 
 app.post('/search', function(req, res) {
 	res.send(req.body);
-})
+});
+
+app.get('/questions/:id', function(req, res) {
+	res.render('question.html', {
+		title: "How do I ask a question?",
+		body: "<p>This is my <em>question.</em></p>",
+		category: "HDS",
+		category_uid: 2,
+		has_category: true,
+		owner_uid: 1,
+		owner_name: "User One",
+		creation_date: "6-22-18 10:43",
+		answer_count: 2,
+		upvotes: 14,
+		tags: [
+			{ tag: "test"},
+			{ tag: "question"}
+		],
+
+		comments: [
+			{
+				body: "<p>This is a comment on the question.</p>",
+				owner_uid: 4,
+				owner_name: "User Four",
+				creation_date: "6-22-18 12:01"
+			},
+			{
+				body: "<p>Here is a second comment on the original question</p>",
+				owner_uid: 3,
+				owner_name: "User Three",
+				creation_date: "6-22-18 14:53"
+			}
+		],
+
+		answers: [
+			{
+				body: "<h2>Your question has an answer.</h2><p>Here is my answer to your question</p>",
+				owner_uid: 5,
+				owner_name: "User 5",
+				creation_date: "6-24-18 09:13",
+				upvotes: 12,
+
+				comments: [
+					{
+						body: "<p>Here is a new comment on an answer</p>",
+						owner_uid: 3,
+						owner_name: "User Three",
+						creation_date: "6-22-18 14:53"
+					},
+					{
+						body: "<p>Here is a second comment on the answer</p>",
+						owner_uid: 3,
+						owner_name: "User Three",
+						creation_date: "6-22-18 14:53"
+					}
+				]
+			},
+			{
+				body: "<h2>Your question has ANOTHER answer.</h2><p>Here is my other answer to your question</p>",
+				owner_uid: 2,
+				owner_name: "User 2",
+				creation_date: "6-24-18 09:13",
+				upvotes: 18,
+
+				comments: [
+					{
+						body: "<p>what a great answer</p>",
+						owner_uid: 1,
+						owner_name: "User One",
+						creation_date: "6-22-18 14:53"
+					}
+				]
+			}
+		]
+	});
+});
