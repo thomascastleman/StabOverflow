@@ -88,15 +88,30 @@ function checkReturnTo(req, res, next) {
 	next();
 }
 
-// middleware to restrict page to authenticated users
+// middleware to restrict pages to different levels of users
 function restrictTo(roles) {
-	if (roles === 'authenticated') return function (req, res, next) {
-		if (req.isAuthenticated()) return next();
-		else res.redirect('/auth/google?returnTo=' + querystring.escape(req.url));
-	};
-	else return function(req, res, next) {
-		next();
-	};
+	if (roles === 'authenticated') {
+		return function (req, res, next) {
+			if (req.isAuthenticated()) return next();
+			else res.redirect('/auth/google?returnTo=' + querystring.escape(req.url));
+		};
+	} else if (roles === 'admin') {
+		return function(req, res, next) {
+			if (req.isAuthenticated()) {
+				if (req.user.isAdmin) {
+					return next();
+				} else {
+					res.redirect('/');
+				}
+			} else {
+				res.redirect('/auth/google?returnTo=' + querystring.escape(req.url));
+			}
+		};
+	} else {
+		return function(req, res, next) {
+			next();
+		};
+	}
 }
 
 // ask a question page, restricted
@@ -246,6 +261,9 @@ app.post('/search', function(req, res) {
 
 app.get('/questions/:id', function(req, res) {
 	res.render('question.html', {
+		loggedIn: req.isAuthenticated(),
+
+		uid: 3,
 		title: "How do I ask a question?",
 		body: "<p>This is my <em>question.</em></p>",
 		category: "HDS",
