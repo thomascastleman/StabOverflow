@@ -159,10 +159,6 @@ TABLE tags
 	tag				// what is the tag ("recursion", "nodejs", ...)
 	post_uid		// which question was it tagged on 
 
-TABLE post_types
-	uid
-	name			// is a post a "Question" or an "Answer"
-
 TABLE categories
 	uid
 	name			// "CSP", "HDS", "HSE", ...
@@ -202,7 +198,3 @@ Sign up procedure:
 		- when "/signup" is gotted, we ask them to authenticate with "some" google email, which, once it has been proved real, we check to see if it is "students.stab.org", and if so, we enter them into the users table
 			- maybe they entered their full name earlier so we can just add that into their user entry
 				- actually could we pull full name from Google?
-
-Log in procedure:
-	- URL that user was at before logging in is POSTed to "/login", where they then authenticate and are redirected back to that URL
-		- this way, if someone is logged out and attempts to do something beyond their privileges, we have them POST to login, so once they are auth'd they come right back to the page they were on
