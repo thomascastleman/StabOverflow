@@ -60,7 +60,7 @@ User Account Page:
 
 1. [Visitor] GETs / and sees landing page with recent questions.
 
-2. [Visitor] (in the system) clicks "log in" button (direct to /login), authenticates, session starts, becomes either [Student] or [Admin], directed to "/" on success ("/login" on fail)
+2. [Visitor] (in the system) clicks "log in" button (direct to /login), authenticates, becomes either [Student] or [Admin], redirected to their previous URL.
 
 3. [Visitor] types free text query into nav search bar, query POSTed to "/search", receives search results page with question links relevant to that query
 
@@ -71,9 +71,9 @@ User Account Page:
 	- Question type filter: "All" or "Unanswered"
 and submits the query again, now with filters (perhaps query is automatically resubmitted on filter change)
 
-6. From landing page, [Visitor] clicks "Browse Questions", this POSTs a blank query to "/search" and renders result
+6. From landing page, [Visitor] clicks "Browse Questions", this GETs "/search" and renders result
 
-7. [Visitor] GETs "/users/:id", a user profile is rendered (username, name, bio, image, ...) with (optional) questions they've asked
+7. [Visitor] GETs "/users/:id", a user profile is rendered (username, name, bio, image, ...) with stats (questions asked, answers given), and (optional) questions they've asked.
 
 8. [Visitor] GETs "/signup" and is added to system, provided they have a "students.stab.org" email
 

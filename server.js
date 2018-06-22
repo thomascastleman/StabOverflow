@@ -102,7 +102,6 @@ function restrictTo(roles) {
 // ask a question page, restricted
 app.get('/ask', restrictTo('authenticated'), function(req, res) {
 	con.query('SELECT * FROM categories;', function(err, rows) {
-		console.log(err);
 		if (!err && rows !== undefined && rows.length > 0) {
 			res.render('ask.html', {
 				loggedIn: true,		// page restricted to auth'd users
