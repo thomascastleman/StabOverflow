@@ -218,7 +218,7 @@ app.get('/', function(req, res) {
 	});
 });
 
-app.post('/newPost', function(req, res) {
+app.post('/newPost', restrictTo('authenticated'), function(req, res) {
 	res.send(req.body);
 });
 
@@ -263,7 +263,7 @@ app.get('/questions/:id', function(req, res) {
 	res.render('question.html', {
 		loggedIn: req.isAuthenticated(),
 
-		uid: 3,
+		question_uid: 3,
 		title: "How do I ask a question?",
 		body: "<p>This is my <em>question.</em></p>",
 		category: "HDS",
@@ -301,6 +301,7 @@ app.get('/questions/:id', function(req, res) {
 				owner_name: "User 5",
 				creation_date: "6-24-18 09:13",
 				upvotes: 12,
+				answer_uid: 8,
 
 				comments: [
 					{
@@ -335,4 +336,8 @@ app.get('/questions/:id', function(req, res) {
 			}
 		]
 	});
+});
+
+app.post('/newComment', restrictTo('authenticated'), function(req, res) {
+	res.send(req.body);
 });
