@@ -10,16 +10,16 @@ INSERT INTO users (email, full_name, is_admin) VALUES
 
 INSERT INTO categories (name) VALUES ("CSP"), ("HDS"), ("HSE");
 
-INSERT INTO posts (parent_question_uid, type_uid, category_uid, owner_uid, owner_name, creation_date, title, body) VALUES
+INSERT INTO posts (parent_question_uid, type, category_uid, owner_uid, owner_name, creation_date, title, body) VALUES
 	-- a question and two answers
 	(NULL, 1, 2, 2, "User Two", NOW(), "How do I ask a test question?", "This is a test question for testing purposes"),
-	(1, 2, NULL, 3, "User Three", NOW(), NULL, "Here is the answer to your question."),
-	(1, 2, NULL, 4, "User Four", NOW(), NULL, "I also have an answer to question 1."),
+	(1, 0, NULL, 3, "User Three", NOW(), NULL, "Here is the answer to your question."),
+	(1, 0, NULL, 4, "User Four", NOW(), NULL, "I also have an answer to question 1."),
 
 	(NULL, 1, 1, 5, "User Five", NOW(), "How do I ask a second question?", "I am having trouble asking a question."),
-	(4, 2, NULL, 1, "User One", NOW(), NULL, "This is how you answer your question"),
-	(4, 2, NULL, 3, "User Three", NOW(), NULL, "This is user 3 answering your question."),
-	(4, 2, NULL, 4, "User Four", NOW(), NULL, "Here's a third answer to your question.");
+	(4, 0, NULL, 1, "User One", NOW(), NULL, "This is how you answer your question"),
+	(4, 0, NULL, 3, "User Three", NOW(), NULL, "This is user 3 answering your question."),
+	(4, 0, NULL, 4, "User Four", NOW(), NULL, "Here's a third answer to your question.");
 
 INSERT INTO tags (tag, post_uid) VALUES
 	("test-question", 1),

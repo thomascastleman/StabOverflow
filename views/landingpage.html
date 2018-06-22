@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>StabOverflow</title>
+	</head>
+	<body>
+		<div id="navbar">
+			<!-- put StabOverflow image here -->
+			<form name="search" method="POST" action="/search">
+				<input name="category" value="0" hidden>
+				<input name="answeredStatus" value="All" hidden>
+				<input name="query" type="text" placeholder="Search StabOverflow" onchange="document.search.submit()">
+			</form>
+			<a href="/search">Browse Questions</a>
+			{{#loggedIn}}
+				<a>Log Out</a>
+				<a>My Profile</a>
+			{{/loggedIn}}
+			{{^loggedIn}}
+				<a>Log In</a>
+				<a>Sign Up</a>
+			{{/loggedIn}}
+		</div>
+
+		<a href="/ask">Ask a Question</a>
+
+		<h2>Recent Questions</h2>
+		<div>
+			{{#questions}}
+				<div>
+					<!-- category, upvotes, answers -->
+					<div onclick="window.location.href='/questions/{{uid}}'">
+						<div>Category: {{category}}</div>
+						<div>{{upvotes}} upvotes</div>
+						<div>{{answer_count}} answers</div>
+					</div>
+
+					<!-- title, owner, time, tags -->
+					<div>
+						<div><a href='/questions/{{uid}}'>{{title}}</a></div>
+						<div>asked {{when_asked}} by <a href="/users/{{owner_uid}}">{{owner_name}}</a></div>
+					</div>
+				</div>
+			{{/questions}}
+		</div>
+	</body>
+</html>

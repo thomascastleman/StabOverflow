@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>StabOverflow</title>
+
+		<!-- PageDown editor -->
+		<link rel="stylesheet" type="text/css" href="pagedown/pagedown.css" />
+		<script type="text/javascript" src="pagedown/Markdown.Converter.js"></script>
+        <script type="text/javascript" src="pagedown/Markdown.Sanitizer.js"></script>
+        <script type="text/javascript" src="pagedown/Markdown.Editor.js"></script>
+	</head>
+	<body>
+		<!-- PUT NAVBAR HERE -->
+
+		<h2>Ask a Question</h2>
+
+		<form method="POST" action="/newPost">
+			<input hidden name="type" value="1">
+			<center>Title <input name="title" type="text"></center>
+
+			<div class="wmd-panel">
+                <div id="wmd-button-bar"></div>
+                <textarea name="body" class="wmd-input" id="wmd-input"></textarea>
+            </div>
+
+            <div id="wmd-preview" class="wmd-panel wmd-preview"></div>
+
+			<center>
+				Tags <input type="text" name="tags"><br>
+
+				Category
+				<select name="category_uid">
+					<option value="0">None</option>
+					{{#categories}}
+						<option value="{{uid}}">{{name}}</option>
+					{{/categories}}
+				</select>
+				<br>
+
+				<button type="submit">Post Your Question</button>
+			</center>
+		</form>
+
+		<script type="text/javascript">
+            (function () {
+                var converter = Markdown.getSanitizingConverter();
+                var editor = new Markdown.Editor(converter);
+                editor.run();
+            })();
+        </script>
+	</body>
+</html>

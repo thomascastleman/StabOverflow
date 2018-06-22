@@ -21,18 +21,11 @@ CREATE TABLE categories (
 	PRIMARY KEY (uid)
 );
 
--- whether a post is a question or answer
-CREATE TABLE post_types (
-	uid INT NOT NULL AUTO_INCREMENT,
-	name VARCHAR(8),
-	PRIMARY KEY (uid)
-);
-
 -- all questions and answers
 CREATE TABLE posts (
 	uid INT NOT NULL AUTO_INCREMENT,
 	parent_question_uid INT,
-	type_uid INT,
+	type TINYINT(1),	-- currently implicitly "is question" (0 --> answer, 1 --> question)
 	category_uid INT,
 	owner_uid INT,
 	owner_name VARCHAR(32),
@@ -42,7 +35,6 @@ CREATE TABLE posts (
 	title TEXT,
 	body TEXT,
 	PRIMARY KEY (uid),
-	FOREIGN KEY (type_uid) REFERENCES post_types(uid),
 	FOREIGN KEY (category_uid) REFERENCES categories(uid),
 	FOREIGN KEY (owner_uid) REFERENCES users(uid)
 );
@@ -70,6 +62,3 @@ CREATE TABLE tags (
 	PRIMARY KEY (uid),
 	FOREIGN KEY (post_uid) REFERENCES posts(uid)
 );
-
--- establish types of posts
-INSERT INTO post_types (name) VALUES ("Question"), ("Answer");
