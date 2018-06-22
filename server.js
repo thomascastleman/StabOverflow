@@ -9,6 +9,7 @@ var session 			= require('cookie-session');
 var GoogleStrategy 		= require('passport-google-oauth2').Strategy;
 var passport 			= require('passport');
 var querystring			= require('querystring');
+var con					= require('./database.js').connection;
 var creds				= require('./credentials.js');
 
 app.use(cookieParser());
@@ -20,11 +21,18 @@ app.use(express.static(__dirname + '/public'));
 app.use(express.static(__dirname + '/views'));
 
 passport.serializeUser(function(user, done) {
+	console.log("serialize");
+
+
+
 	done(null, user);
 });
 
 passport.deserializeUser(function(user, done) {
 	user.variable = "this is a test";
+
+	console.log("this just ran");
+
 	done(null, user);
 });
 
