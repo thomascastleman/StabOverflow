@@ -88,34 +88,27 @@ function checkReturnTo(req, res, next) {
 	next();
 }
 
-// middleware to restrict pages to different levels of users
-function restrictTo(roles) {
-	if (roles === 'authenticated') {
-		return function (req, res, next) {
-			if (req.isAuthenticated()) return next();
-			else res.redirect('/auth/google?returnTo=' + querystring.escape(req.url));
-		};
-	} else if (roles === 'admin') {
-		return function(req, res, next) {
-			if (req.isAuthenticated()) {
-				if (req.user.isAdmin) {
-					return next();
-				} else {
-					res.redirect('/');
-				}
-			} else {
-				res.redirect('/auth/google?returnTo=' + querystring.escape(req.url));
-			}
-		};
+// middleware to restrict to authenticated users
+function restrictAuth(req, res, next) {
+	if (req.isAuthenticated()) return next();
+	else res.redirect('/auth/google?returnTo=' + querystring.escape(req.url));
+}
+
+// middleware to restrict to admin users
+function restrictAdmin(req, res, next) {
+	if (req.isAuthenticated()) {
+		if (req.user.isAdmin) {
+			return next();
+		} else {
+			res.redirect('/');
+		}
 	} else {
-		return function(req, res, next) {
-			next();
-		};
+		res.redirect('/auth/google?returnTo=' + querystring.escape(req.url));
 	}
 }
 
 // ask a question page, restricted
-app.get('/ask', restrictTo('authenticated'), function(req, res) {
+app.get('/ask', restrictAuth, function(req, res) {
 	con.query('SELECT * FROM categories;', function(err, rows) {
 		if (!err && rows !== undefined && rows.length > 0) {
 			res.render('ask.html', {
@@ -218,7 +211,7 @@ app.get('/', function(req, res) {
 	});
 });
 
-app.post('/newPost', restrictTo('authenticated'), function(req, res) {
+app.post('/newPost', restrictAuth, function(req, res) {
 	res.send(req.body);
 });
 
@@ -338,6 +331,6 @@ app.get('/questions/:id', function(req, res) {
 	});
 });
 
-app.post('/newComment', restrictTo('authenticated'), function(req, res) {
+app.post('/newComment', restrictAuth, function(req, res) {
 	res.send(req.body);
 });
