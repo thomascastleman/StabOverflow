@@ -31,3 +31,8 @@ INSERT INTO comments (parent_uid, parent_question_uid, owner_uid, owner_name, cr
 	(2, 1, 1, "User One", NOW(), "I also thought the answer was interesting"),
 	(1, 1, 3, "User Three", NOW(), "Could you clarify the question?"),
 	(6, 4, 5, "User Five", NOW(), "Thanks for the helpful answer.");
+
+INSERT INTO upvotes (post_uid, user_uid) VALUES
+	(1, 3),
+	(1, 4),
+	(3, 5);
