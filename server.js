@@ -22,26 +22,14 @@ app.use(express.static(__dirname + '/views'));
 
 passport.serializeUser(function(user, done) {
 	console.log("serialize");
-
-
-
 	done(null, user);
 });
 
 passport.deserializeUser(function(user, done) {
 	user.variable = "this is a test";
-
-	console.log("this just ran");
-
+	console.log("deserialize");
 	done(null, user);
 });
-
-// -----
-// this is a temp hack -- johnny you need to enable the Google+ API apparently
-GoogleStrategy.prototype.userProfile = function(token, done) {
-  done(null, {})
-}
-// -----
 
 passport.use(new GoogleStrategy({
 		clientID:		creds.GOOGLE_CLIENT_ID,
@@ -111,12 +99,78 @@ function restrictTo(roles) {
 	};
 }
 
+// ask a question page, restricted
+app.get('/ask', restrictTo('authenticated'), function(req, res) {
+	con.query('SELECT * FROM categories;', function(err, rows) {
+		console.log(err);
+		if (!err && rows !== undefined && rows.length > 0) {
+			res.render('ask.html', {
+				loggedIn: true,		// page restricted to auth'd users
+				categories: rows
+			});
+		} else {
+			res.send("Page could not be reached.");
+		}
+	});
+});
+
+// get user profile
+app.get('/users/:id', function(req, res) {
+	// get user corresponding to ID
+	con.query('SELECT * FROM users WHERE uid = ?;', [req.params.id], function(err, rows) {
+		if (!err && rows !== undefined && rows.length > 0) {
+			var render = rows[0];
+
+			// count questions and answers
+			con.query('SELECT SUM(CASE WHEN type = 1 THEN 1 ELSE 0 END) questionCount, SUM(CASE WHEN type = 0 THEN 1 ELSE 0 END) answerCount FROM posts WHERE owner_uid = ?;', [req.params.id], function(err, rows) {
+				if (!err && rows !== undefined && rows.length > 0) {
+					render.questions_asked = rows[0].questionCount;
+					render.answers_given = rows[0].answerCount;
+				} else {
+					render.questions_asked = "N/A";
+					render.answers_given = "N/A";
+				}
+				res.render('user.html', render);
+			});
+		} else {
+			res.send("Could not find user.");
+		}
+	});
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// ---------------------------------- TESTING -------------------------------------------------------------
+
+// -----
+// this is a temp hack -- johnny you need to enable the Google+ API apparently
+GoogleStrategy.prototype.userProfile = function(token, done) {
+  done(null, {})
+}
+// -----
+
 // debug oauth
 app.get('/testauth', function(req, res) {
 	res.send(JSON.stringify(req.user) || "");
 });
-
-
 
 // templates testing: ---------------------------------------------------------
 
@@ -146,17 +200,6 @@ app.get('/', function(req, res) {
 				category: "HSE",
 				when_asked: "46 min ago",
 			}
-		]
-	});
-});
-
-app.get('/ask', restrictTo('authenticated'), function(req, res) {
-	res.render('ask.html', {
-		loggedIn: req.isAuthenticated(),
-		categories: [
-			{ name: "CSP", uid: 1 },
-			{ name: "HDS", uid: 2 },
-			{ name: "HSE", uid: 3 }
 		]
 	});
 });
@@ -205,12 +248,3 @@ app.get('/search', function(req, res) {
 app.post('/search', function(req, res) {
 	res.send(req.body);
 })
-
-app.get('/users/:id', function(req, res) {
-	res.render('user.html', {
-		full_name: "Fake User",
-		bio: "I am a fake user who is not actually real.",
-		questions_asked: 36,
-		answers_given: 12
-	});
-});
