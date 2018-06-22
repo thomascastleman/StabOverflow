@@ -8,6 +8,7 @@ var moment 				= require('moment');
 var session 			= require('cookie-session');
 var GoogleStrategy 		= require('passport-google-oauth2').Strategy;
 var passport 			= require('passport');
+var querystring			= require('querystring');
 var creds				= require('./credentials.js');
 
 app.use(cookieParser());
@@ -57,7 +58,7 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
-app.get('/auth/google', passport.authenticate('google', { scope: [
+app.get('/auth/google', checkReturnTo, passport.authenticate('google', { scope: [
 		'https://www.googleapis.com/auth/userinfo.profile',
 		'https://www.googleapis.com/auth/userinfo.email'
 	]
@@ -65,7 +66,7 @@ app.get('/auth/google', passport.authenticate('google', { scope: [
 
 app.get('/auth/google/callback',
 	passport.authenticate('google', {
-		successRedirect: '/',
+		successReturnToOrRedirect: '/',
 		failureRedirect: '/failure'
 }));
 
@@ -82,9 +83,25 @@ var server = app.listen(8080, function() {
 	console.log("StabOverflow server listening on port %d", server.address().port);
 });
 
+function checkReturnTo(req, res, next) {
+	var returnTo = req.query['returnTo'];
+	if (returnTo) {
+		req.session = req.session || {};
+		req.session.returnTo = querystring.unescape(returnTo);
+	}
+	next();
+}
 
-
-
+// middleware to restrict page to authenticated users
+function restrictTo(roles) {
+	if (roles === 'authenticated') return function (req, res, next) {
+		if (req.isAuthenticated()) return next();
+		else res.redirect('/auth/google?returnTo=' + querystring.escape(req.url));
+	};
+	else return function(req, res, next) {
+		next();
+	};
+}
 
 // debug oauth
 app.get('/testauth', function(req, res) {
@@ -98,6 +115,8 @@ app.get('/testauth', function(req, res) {
 app.get('/', function(req, res) {
 	res.render('landingpage.html', {
 		loggedIn: req.isAuthenticated(),
+		username: "Bobby Joe",
+		user_uid: 31,
 		questions: [
 			{
 				uid: 1,
@@ -123,7 +142,7 @@ app.get('/', function(req, res) {
 	});
 });
 
-app.get('/ask', function(req, res) {
+app.get('/ask', restrictTo('authenticated'), function(req, res) {
 	res.render('ask.html', {
 		loggedIn: req.isAuthenticated(),
 		categories: [
