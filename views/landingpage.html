@@ -14,12 +14,12 @@
 			</form>
 			<a href="/search">Browse Questions</a>
 			{{#loggedIn}}
-				<a>Log Out</a>
+				<a href="/logout">Log Out</a>
 				<a>My Profile</a>
 			{{/loggedIn}}
 			{{^loggedIn}}
-				<a>Log In</a>
-				<a>Sign Up</a>
+				<a href="/auth/google">Log In</a>
+				<a href="/signup">Sign Up</a>
 			{{/loggedIn}}
 		</div>
 

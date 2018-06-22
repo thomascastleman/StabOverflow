@@ -28,7 +28,7 @@ passport.deserializeUser(function(user, done) {
 });
 
 // -----
-// I believe this is a hack -- johnny you need to enable the Google+ API apparently
+// this is a temp hack -- johnny you need to enable the Google+ API apparently
 GoogleStrategy.prototype.userProfile = function(token, done) {
   done(null, {})
 }
@@ -60,7 +60,7 @@ app.use(passport.session());
 app.get('/auth/google', passport.authenticate('google', { scope: [
 		'https://www.googleapis.com/auth/userinfo.profile',
 		'https://www.googleapis.com/auth/userinfo.email'
-	] 
+	]
 }));
 
 app.get('/auth/google/callback',
@@ -78,21 +78,26 @@ app.get('/logout', function(req, res){
 	res.redirect('/');
 });
 
-app.get('/testauth', function(req, res) {
-	res.send(JSON.stringify(req.user));
-});
-
 var server = app.listen(8080, function() {
 	console.log("StabOverflow server listening on port %d", server.address().port);
 });
 
 
 
-// templates testing:
+
+
+// debug oauth
+app.get('/testauth', function(req, res) {
+	res.send(JSON.stringify(req.user) || "");
+});
+
+
+
+// templates testing: ---------------------------------------------------------
 
 app.get('/', function(req, res) {
 	res.render('landingpage.html', {
-		loggedIn: false,
+		loggedIn: req.isAuthenticated(),
 		questions: [
 			{
 				uid: 1,
@@ -120,7 +125,7 @@ app.get('/', function(req, res) {
 
 app.get('/ask', function(req, res) {
 	res.render('ask.html', {
-		loggedIn: true,
+		loggedIn: req.isAuthenticated(),
 		categories: [
 			{ name: "CSP", uid: 1 },
 			{ name: "HDS", uid: 2 },
