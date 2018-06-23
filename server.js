@@ -9,8 +9,10 @@ var session 			= require('cookie-session');
 var GoogleStrategy 		= require('passport-google-oauth2').Strategy;
 var passport 			= require('passport');
 var querystring			= require('querystring');
+var pagedown			= require('pagedown');
 var con					= require('./database.js').connection;
 var creds				= require('./credentials.js');
+var mdConverter			= new pagedown.getSanitizingConverter();
 
 app.use(cookieParser());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -159,7 +161,7 @@ app.get('/ask', restrictAuth, function(req, res) {
 				categories: rows
 			});
 		} else {
-			res.render('ask.html' {
+			res.render('ask.html', {
 				loggedIn: true
 			});
 		}
@@ -192,7 +194,7 @@ app.get('/users/:id', function(req, res) {
 
 // get individual question page
 app.get('/questions/:id', function(req, res) {
-	var render = {}, ansIDtoIndex = {}, question_uid = req.params.id;
+	var render = {}, ansIDtoIndex = {}, ans, question_uid = req.params.id;
 
 	// check if post exists & get its data
 	con.query('SELECT posts.*, categories.name AS category FROM posts LEFT OUTER JOIN categories ON posts.category_uid = categories.uid WHERE posts.uid = ? AND type = 1 LIMIT 1;', [question_uid], function(err, rows) {
@@ -202,6 +204,10 @@ app.get('/questions/:id', function(req, res) {
 				question_uid: question_uid
 			}, rows[0]);
 
+			// convert MD to HTML
+			render.body = mdConverter.makeHtml(render.body);
+
+			// compensate for lack of category
 			if (render.category_uid == null) render.noCategory = true;
 
 			// get associated tags
@@ -216,18 +222,23 @@ app.get('/questions/:id', function(req, res) {
 						render.answers = rows;
 
 						for (var i = 0; i < render.answers.length; i++) {
-							ansIDtoIndex[render.answers[i].uid] = i;
-							render.answers[i].answer_uid = render.answers[i].uid;
+							ans = render.answers[i];
+
+							ans.body = mdConverter.makeHtml(ans.body);	// convert answers to HTML
+							ansIDtoIndex[ans.uid] = i;	// record answer ID to index
+							ans.answer_uid = ans.uid;	// put uid under name 'answer_uid'
 						}
 					}
 					// get associated comments
 					con.query('SELECT * FROM comments WHERE parent_question_uid = ?;', [question_uid], function(err, rows) {
 						if (!err && rows !== undefined && rows.length > 0) {
 							render.comments = [];
-							var ans;
 
 							// assign comments to their parent posts
 							for (var i = 0; i < rows.length; i++) {
+								rows[i].body = mdConverter.makeHtml(rows[i].body);	// convert comments to HTML
+
+								// attach comment to either question or parent answer
 								if (rows[i].parent_uid == question_uid) {
 									render.comments.push(rows[i]);
 								} else {
@@ -238,6 +249,7 @@ app.get('/questions/:id', function(req, res) {
 							}
 						}
 
+						// render full question page
 						res.render('question.html', render);
 					});
 
