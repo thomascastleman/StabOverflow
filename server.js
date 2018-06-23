@@ -133,6 +133,8 @@ app.get('/', function(req, res) {
 		username: req.user ? req.user.displayName : undefined,
 		user_uid: req.user ? (req.user.local ? req.user.local.uid : undefined) : undefined
 	};
+
+	// this pulls the 30 most recent questions
 	con.query('SELECT posts.*, categories.name AS category FROM posts LEFT OUTER JOIN categories ON posts.category_uid = categories.uid WHERE posts.type = 1 LIMIT 30;', function(err, rows) {
 		if (!err && rows !== undefined && rows.length > 0) {
 			// format time posted
@@ -157,7 +159,9 @@ app.get('/ask', restrictAuth, function(req, res) {
 				categories: rows
 			});
 		} else {
-			res.send("Page could not be reached.");
+			res.render('ask.html' {
+				loggedIn: true
+			});
 		}
 	});
 });
