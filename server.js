@@ -21,19 +21,30 @@ app.use(express.static(__dirname + '/public'));
 app.use(express.static(__dirname + '/views'));
 
 passport.serializeUser(function(user, done) {
-	console.log("serialize");
-
+	// lookup user in system
 	con.query('SELECT * FROM users WHERE email = ?;', [user.email], function(err, rows) {
 		if (!err && rows !== undefined && rows.length > 0) {
 			user.local = rows[0];
+			done(null, user);
+
+		// if email domain legitimate
+		} else if (/.+?@(students\.)?stab\.org/.test(user.email)) {
+			// create new user
+			con.query('INSERT INTO users (email, full_name, is_admin) VALUES (?, ?, 0);', [user.email, user.displayName], function(err, rows) {
+				con.query('SELECT * FROM users WHERE email = ?;', [user.email], function(err, rows) {
+					if (!err && rows !== undefined && rows.length > 0) {
+						user.local = rows[0];
+					}
+					done(null, user);
+				});
+			});
+		} else {
+			done("Your email cannot be used with this service. Please use a 'students.stab.org' or 'stab.org' email.", null);
 		}
-		done(null, user);
 	});
 });
 
 passport.deserializeUser(function(user, done) {
-	user.variable = "this is a test";
-	console.log("deserialize");
 	done(null, user);
 });
 
@@ -120,7 +131,7 @@ app.get('/', function(req, res) {
 
 		// get these from session
 		username: req.user ? req.user.displayName : undefined,
-		user_uid: req.user ? req.user.local.uid : undefined
+		user_uid: req.user ? (req.user.local ? req.user.local.uid : undefined) : undefined
 	};
 	con.query('SELECT posts.*, categories.name AS category FROM posts LEFT OUTER JOIN categories ON posts.category_uid = categories.uid WHERE posts.type = 1 LIMIT 30;', function(err, rows) {
 		if (!err && rows !== undefined && rows.length > 0) {
