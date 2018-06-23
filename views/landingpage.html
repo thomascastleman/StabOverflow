@@ -30,8 +30,8 @@
 			{{#questions}}
 				<div>
 					<!-- category, upvotes, answers -->
-					<div onclick="window.location.href='/questions/{{uid}}'">
-						<div>Category: {{category}}</div>
+					<div>
+						{{^noCategory}}<div>Category: {{category}}</div>{{/noCategory}}
 						<div>{{upvotes}} upvotes</div>
 						<div>{{answer_count}} answers</div>
 					</div>

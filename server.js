@@ -116,12 +116,13 @@ app.get('/', function(req, res) {
 		username: "",
 		user_uid: undefined
 	};
-	con.query('SELECT posts.*, categories.name AS category FROM posts JOIN categories ON posts.category_uid = categories.uid WHERE posts.type = 1 LIMIT 30;', function(err, rows) {
+	con.query('SELECT posts.*, categories.name AS category FROM posts LEFT OUTER JOIN categories ON posts.category_uid = categories.uid WHERE posts.type = 1 LIMIT 30;', function(err, rows) {
 		if (!err && rows !== undefined && rows.length > 0) {
 			// format time posted
 			for (var i = 0; i < rows.length; i++) {
 				rows[i].when_asked = moment(rows[i].creation_date).fromNow();
 				delete rows[i].creation_date;
+				if (rows[i].category_uid == null) rows[i].noCategory = true;
 			}
 			render.questions = rows;
 		}
@@ -167,6 +168,33 @@ app.get('/users/:id', function(req, res) {
 		}
 	});
 });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

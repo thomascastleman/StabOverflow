@@ -19,7 +19,9 @@ INSERT INTO posts (parent_question_uid, type, category_uid, owner_uid, owner_nam
 	(NULL, 1, 1, 5, "User Five", NOW(), "How do I ask a second question?", "I am having trouble asking a question.", 6, 3),
 	(4, 0, NULL, 1, "User One", NOW(), NULL, "This is how you answer your question", 10, NULL),
 	(4, 0, NULL, 3, "User Three", NOW(), NULL, "This is user 3 answering your question.", 0, NULL),
-	(4, 0, NULL, 4, "User Four", NOW(), NULL, "Here's a third answer to your question.", 0, NULL);
+	(4, 0, NULL, 4, "User Four", NOW(), NULL, "Here's a third answer to your question.", 0, NULL),
+
+	(NULL, 1, NULL, 1, "User One", NOW(), "Question?", "Here's another question.", 3, 0);
 
 INSERT INTO tags (tag, post_uid) VALUES
 	("test-question", 1),
