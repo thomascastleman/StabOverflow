@@ -218,16 +218,9 @@ app.get('/users/:id', function(req, res) {
 
 // ---------------------------------- TESTING -------------------------------------------------------------
 
-// // -----
-// // this is a temp hack -- johnny you need to enable the Google+ API apparently
-// GoogleStrategy.prototype.userProfile = function(token, done) {
-//   done(null, {})
-// }
-// // -----
-
 // debug oauth
 app.get('/testauth', function(req, res) {
-	res.send(JSON.stringify(req.user) || "");
+	res.send(req.user || "");
 });
 
 // templates testing: ---------------------------------------------------------
