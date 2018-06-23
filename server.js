@@ -169,8 +169,65 @@ app.get('/users/:id', function(req, res) {
 	});
 });
 
+// get individual question page
+app.get('/questions/:id', function(req, res) {
+	var render = {}, ansIDtoIndex = {}, question_uid = req.params.id;
 
+	// check if post exists & get its data
+	con.query('SELECT posts.*, categories.name AS category FROM posts LEFT OUTER JOIN categories ON posts.category_uid = categories.uid WHERE posts.uid = ? AND type = 1 LIMIT 1;', [question_uid], function(err, rows) {
+		if (!err && rows !== undefined && rows.length > 0) {
+			render = Object.assign({
+				loggedIn: req.isAuthenticated(),
+				question_uid: question_uid
+			}, rows[0]);
 
+			if (render.category_uid == null) render.noCategory = true;
+
+			// get associated tags
+			con.query('SELECT tag FROM tags WHERE post_uid = ?;', [question_uid], function(err, rows) {
+				if (!err && rows !== undefined && rows.length > 0) {
+					render.tags = rows;
+				}
+
+				// get associated answers
+				con.query('SELECT * FROM posts WHERE parent_question_uid = ? ORDER BY upvotes DESC;', [question_uid], function(err, rows) {
+					if (!err && rows !== undefined && rows.length > 0) {
+						render.answers = rows;
+
+						for (var i = 0; i < render.answers.length; i++) {
+							ansIDtoIndex[render.answers[i].uid] = i;
+							render.answers[i].answer_uid = render.answers[i].uid;
+						}
+					}
+					// get associated comments
+					con.query('SELECT * FROM comments WHERE parent_question_uid = ?;', [question_uid], function(err, rows) {
+						if (!err && rows !== undefined && rows.length > 0) {
+							render.comments = [];
+							var ans;
+
+							// assign comments to their parent posts
+							for (var i = 0; i < rows.length; i++) {
+								if (rows[i].parent_uid == question_uid) {
+									render.comments.push(rows[i]);
+								} else {
+									ans = render.answers[ansIDtoIndex[rows[i].parent_uid]];
+									if (!ans.answer_comments) ans.answer_comments = [];
+									ans.answer_comments.push(rows[i]);
+								}
+							}
+						}
+
+						res.render('question.html', render);
+					});
+
+				});
+			});
+		} else {
+			// question not found, send not found page
+			res.render('qnotfound.html');
+		}
+	});
+});
 
 
 
@@ -273,121 +330,6 @@ app.post('/search', function(req, res) {
 	res.send(req.body);
 });
 
-// app.get('/questions/:id', function(req, res) {
-// 	res.render('question.html', {
-// 		loggedIn: req.isAuthenticated(),
-
-// 		question_uid: 3,
-// 		title: "How do I ask a question?",
-// 		body: "<p>This is my <em>question.</em></p>",
-// 		category: "HDS",
-// 		category_uid: 2,
-// 		has_category: true,
-// 		owner_uid: 1,
-// 		owner_name: "User One",
-// 		creation_date: "6-22-18 10:43",
-// 		answer_count: 2,
-// 		upvotes: 14,
-// 		tags: [
-// 			{ tag: "test"},
-// 			{ tag: "question"}
-// 		],
-
-// 		comments: [
-// 			{
-// 				body: "<p>This is a comment on the question.</p>",
-// 				owner_uid: 4,
-// 				owner_name: "User Four",
-// 				creation_date: "6-22-18 12:01"
-// 			},
-// 			{
-// 				body: "<p>Here is a second comment on the original question</p>",
-// 				owner_uid: 3,
-// 				owner_name: "User Three",
-// 				creation_date: "6-22-18 14:53"
-// 			}
-// 		],
-
-// 		answers: [
-// 			{
-// 				body: "<h2>Your question has an answer.</h2><p>Here is my answer to your question</p>",
-// 				owner_uid: 5,
-// 				owner_name: "User 5",
-// 				creation_date: "6-24-18 09:13",
-// 				upvotes: 12,
-// 				answer_uid: 8,
-
-// 				comments: [
-// 					{
-// 						body: "<p>Here is a new comment on an answer</p>",
-// 						owner_uid: 3,
-// 						owner_name: "User Three",
-// 						creation_date: "6-22-18 14:53"
-// 					},
-// 					{
-// 						body: "<p>Here is a second comment on the answer</p>",
-// 						owner_uid: 3,
-// 						owner_name: "User Three",
-// 						creation_date: "6-22-18 14:53"
-// 					}
-// 				]
-// 			},
-// 			{
-// 				body: "<h2>Your question has ANOTHER answer.</h2><p>Here is my other answer to your question</p>",
-// 				owner_uid: 2,
-// 				owner_name: "User 2",
-// 				creation_date: "6-24-18 09:13",
-// 				upvotes: 18,
-
-// 				comments: [
-// 					{
-// 						body: "<p>what a great answer</p>",
-// 						owner_uid: 1,
-// 						owner_name: "User One",
-// 						creation_date: "6-22-18 14:53"
-// 					}
-// 				]
-// 			}
-// 		]
-// 	});
-// });
-
 app.post('/newComment', restrictAuth, function(req, res) {
 	res.send(req.body);
-});
-
-
-app.get('/questions/:id', function(req, res) {
-	var render = {}, question_uid = req.params.id;
-
-	// check if post exists & get its data
-	con.query('SELECT posts.*, categories.name AS category FROM posts LEFT OUTER JOIN categories ON posts.category_uid = categories.uid WHERE posts.uid = ? AND type = 1 LIMIT 1;', [question_uid], function(err, rows) {
-		if (!err && rows !== undefined && rows.length > 0) {
-			render = rows[0];
-			if (render.category_uid == null) render.noCategory = true;
-
-			// get associated tags
-			con.query('SELECT tag FROM tags WHERE post_uid = ?;', [question_uid], function(err, rows) {
-				if (!err && rows !== undefined && rows.length > 0) {
-					render.tags = rows;
-				}
-
-				// get associated answers
-				con.query('SELECT * FROM posts WHERE parent_question_uid = ? ORDER BY upvotes DESC;', [question_uid], function(err, rows) {
-					if (!err && rows !== undefined && rows.length > 0) {
-						render.answers = rows;
-					}
-
-					console.log(render);
-
-					con.query('SELECT * FROM comments WHERE parent_question_uid = ?;', [question_uid], function(err, rows) {
-						
-					});
-
-				});
-			});
-		} else {
-			res.redirect('/');
-		}
-	});
 });
