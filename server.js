@@ -107,6 +107,29 @@ function restrictAdmin(req, res, next) {
 	}
 }
 
+// get landing page
+app.get('/', function(req, res) {
+	var render = {
+		loggedIn: req.isAuthenticated(),
+
+		// get these from session
+		username: "",
+		user_uid: undefined
+	};
+	con.query('SELECT posts.*, categories.name AS category FROM posts JOIN categories ON posts.category_uid = categories.uid WHERE posts.type = 1 LIMIT 30;', function(err, rows) {
+		if (!err && rows !== undefined && rows.length > 0) {
+			// format time posted
+			for (var i = 0; i < rows.length; i++) {
+				rows[i].when_asked = moment(rows[i].creation_date).fromNow();
+				delete rows[i].creation_date;
+			}
+			render.questions = rows;
+		}
+
+		res.render('landingpage.html', render);
+	});
+});
+
 // ask a question page, restricted
 app.get('/ask', restrictAuth, function(req, res) {
 	con.query('SELECT * FROM categories;', function(err, rows) {
@@ -180,36 +203,6 @@ app.get('/testauth', function(req, res) {
 });
 
 // templates testing: ---------------------------------------------------------
-
-app.get('/', function(req, res) {
-	res.render('landingpage.html', {
-		loggedIn: req.isAuthenticated(),
-		username: "Bobby Joe",
-		user_uid: 31,
-		questions: [
-			{
-				uid: 1,
-				title: "Test question no. 1?",
-				upvotes: 24,
-				answer_count: 1,
-				owner_name: "Test Name",
-				owner_uid: 314,
-				category: "CSP",
-				when_asked: "20 min ago",
-			},
-			{
-				uid: 2,
-				title: "Another test question?",
-				upvotes: 16,
-				answer_count: 0,
-				owner_name: "User Number 2",
-				owner_uid: 287,
-				category: "HSE",
-				when_asked: "46 min ago",
-			}
-		]
-	});
-});
 
 app.post('/newPost', restrictAuth, function(req, res) {
 	res.send(req.body);
