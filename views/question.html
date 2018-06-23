@@ -17,12 +17,12 @@
 			<!-- question -->
 			<div>
 				<div>
-					{{#has_category}}
+					{{^noCategory}}
 						<form name="getCategory" method="POST" action="/search">
 							<input name="category" value="{{category_uid}}" hidden>
 							<div onclick="document.getCategory.submit()">Category: {{category}}</div>
 						</form>
-					{{/has_category}}
+					{{/noCategory}}
 					<div>
 						{{upvotes}} upvotes
 					</div>
