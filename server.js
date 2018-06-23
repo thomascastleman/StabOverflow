@@ -22,7 +22,13 @@ app.use(express.static(__dirname + '/views'));
 
 passport.serializeUser(function(user, done) {
 	console.log("serialize");
-	done(null, user);
+
+	con.query('SELECT * FROM users WHERE email = ?;', [user.email], function(err, rows) {
+		if (!err && rows !== undefined && rows.length > 0) {
+			user.local = rows[0];
+		}
+		done(null, user);
+	});
 });
 
 passport.deserializeUser(function(user, done) {
@@ -93,7 +99,7 @@ function restrictAuth(req, res, next) {
 // middleware to restrict to admin users
 function restrictAdmin(req, res, next) {
 	if (req.isAuthenticated()) {
-		if (req.user.isAdmin) {
+		if (req.user.local-is_admin) {
 			return next();
 		} else {
 			res.redirect('/');
@@ -113,8 +119,8 @@ app.get('/', function(req, res) {
 		loggedIn: req.isAuthenticated(),
 
 		// get these from session
-		username: "",
-		user_uid: undefined
+		username: req.user ? req.user.displayName : undefined,
+		user_uid: req.user ? req.user.local.uid : undefined
 	};
 	con.query('SELECT posts.*, categories.name AS category FROM posts LEFT OUTER JOIN categories ON posts.category_uid = categories.uid WHERE posts.type = 1 LIMIT 30;', function(err, rows) {
 		if (!err && rows !== undefined && rows.length > 0) {
