@@ -178,16 +178,13 @@ app.get('/users/:id', function(req, res) {
 			// count questions and answers
 			con.query('SELECT SUM(CASE WHEN type = 1 THEN 1 ELSE 0 END) questionCount, SUM(CASE WHEN type = 0 THEN 1 ELSE 0 END) answerCount FROM posts WHERE owner_uid = ?;', [req.params.id], function(err, rows) {
 				if (!err && rows !== undefined && rows.length > 0) {
-					render.questions_asked = rows[0].questionCount;
-					render.answers_given = rows[0].answerCount;
-				} else {
-					render.questions_asked = "N/A";
-					render.answers_given = "N/A";
+					render.questions_asked = rows[0].questionCount ? rows[0].questionCount : 0;
+					render.answers_given = rows[0].answerCount ? rows[0].answerCount : 0;
 				}
 				res.render('user.html', render);
 			});
 		} else {
-			res.send("Could not find user.");
+			res.render('usernotfound.html');
 		}
 	});
 });
@@ -315,10 +312,6 @@ app.get('/testauth', function(req, res) {
 
 // templates testing: ---------------------------------------------------------
 
-app.post('/newPost', restrictAuth, function(req, res) {
-	res.send(req.body);
-});
-
 app.get('/search', function(req, res) {
 	res.render('search.html', {
 		loggedIn: true,
@@ -357,5 +350,9 @@ app.post('/search', function(req, res) {
 });
 
 app.post('/newComment', restrictAuth, function(req, res) {
+	res.send(req.body);
+});
+
+app.post('/newPost', restrictAuth, function(req, res) {
 	res.send(req.body);
 });
