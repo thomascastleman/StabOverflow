@@ -84,7 +84,7 @@ app.get('/auth/google/callback',
 }));
 
 app.get('/failure', function(req, res) {
-	res.send("Failure :(");
+	res.send("Authentication Failure :(");
 });
 
 app.get('/logout', function(req, res){
