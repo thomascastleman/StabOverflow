@@ -75,10 +75,6 @@ app.get('/logout', function(req, res){
 	res.redirect('/');
 });
 
-var server = app.listen(8080, function() {
-	console.log("StabOverflow server listening on port %d", server.address().port);
-});
-
 function checkReturnTo(req, res, next) {
 	var returnTo = req.query['returnTo'];
 	if (returnTo) {
@@ -106,6 +102,10 @@ function restrictAdmin(req, res, next) {
 		res.redirect('/auth/google?returnTo=' + querystring.escape(req.url));
 	}
 }
+
+var server = app.listen(8080, function() {
+	console.log("StabOverflow server listening on port %d", server.address().port);
+});
 
 // get landing page
 app.get('/', function(req, res) {
