@@ -17,12 +17,12 @@
 			<!-- question -->
 			<div>
 				<div>
-					{{#has_category}}
+					{{^noCategory}}
 						<form name="getCategory" method="POST" action="/search">
 							<input name="category" value="{{category_uid}}" hidden>
 							<div onclick="document.getCategory.submit()">Category: {{category}}</div>
 						</form>
-					{{/has_category}}
+					{{/noCategory}}
 					<div>
 						{{upvotes}} upvotes
 					</div>
@@ -68,12 +68,12 @@
 
 						<!-- answer comments -->
 						<div>
-							{{#comments}}
+							{{#answer_comments}}
 								<div>
 									<div>{{{body}}}</div>
 									- <a href="/users/{{owner_uid}}">{{owner_name}}</a> at {{creation_date}}
 								</div>
-							{{/comments}}
+							{{/answer_comments}}
 						</div>
 
 						{{#loggedIn}}
