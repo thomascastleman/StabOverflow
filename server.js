@@ -103,13 +103,13 @@ function checkReturnTo(req, res, next) {
 	next();
 }
 
-// middleware to restrict to authenticated users
+// middleware to restrict pages to authenticated users
 function restrictAuth(req, res, next) {
 	if (req.isAuthenticated()) return next();
 	else res.redirect('/auth/google?returnTo=' + querystring.escape(req.url));
 }
 
-// middleware to restrict to admin users
+// middleware to restrict pages to admin users
 function restrictAdmin(req, res, next) {
 	if (req.isAuthenticated()) {
 		if (req.user.local-is_admin) {
@@ -125,6 +125,15 @@ function restrictAdmin(req, res, next) {
 // middleware (mainly for POST reqs) to check if auth'd
 function isAuthenticated(req, res, next) {
 	if (req.isAuthenticated()) {
+		return next();
+	} else {
+		res.redirect('/');
+	}
+}
+
+// middleware (POSTs) to check if requester is admin
+function isAdmin(req, res, next) {
+	if (req.isAuthenticated() && req.user.local.is_admin == 1) {
 		return next();
 	} else {
 		res.redirect('/');
@@ -272,6 +281,9 @@ app.get('/questions/:id', function(req, res) {
 	});
 });
 
+/*
+	THERE IS NO TAG PARSING GOING ON HERE ------------------------------------------------------------------->>
+*/
 // receive a new question or answer
 app.post('/newPost', isAuthenticated, function(req, res) {
 
@@ -411,9 +423,9 @@ app.post('/users/update', isAuthenticated, function(req, res) {
 });
 
 // request UI for editing user profile
-app.get('/users/edit/:id', function(req, res) {
+app.get('/users/edit/:id', restrictAuth, function(req, res) {
 	// ensure editing OWN profile
-	if (req.isAuthenticated() && req.user.local.uid == req.params.id) {
+	if (req.user.local.uid == req.params.id) {
 		// pull user data
 		con.query('SELECT * FROM users WHERE uid = ?;', [req.user.local.uid], function(err, rows) {
 			if (!err && rows !== undefined && rows.length > 0) {
@@ -430,6 +442,41 @@ app.get('/users/edit/:id', function(req, res) {
 		});
 	}
 });
+
+// admin add account to system manually
+app.post('/addAccount', isAdmin, function(req, res) {
+	// insert new user into table
+	con.query('INSERT INTO users (email, full_name, is_admin) VALUES (?, ?, 0);', [req.body.email, req.body.name], function(err, rows) {
+		if (!err) {
+			con.query('SELECT LAST_INSERT_ID() AS uid;', function(err, rows) {
+				// navigate to new user's page
+				if (!err && rows !== undefined && rows.length > 0) {
+					res.redirect('/users/' + rows[0].uid);
+				} else {
+					res.render('error.html', {
+						message: "There was an error getting the new user's page."
+					})
+				}
+			});
+		} else {
+			res.render('error.html', {
+				message: "There was a problem adding the new user."
+			})
+		}
+	});
+});
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
