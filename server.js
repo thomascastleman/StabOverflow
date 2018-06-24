@@ -141,7 +141,7 @@ app.get('/', function(req, res) {
 		loggedIn: req.isAuthenticated(),
 
 		// get these from session
-		username: req.user ? req.user.displayName : undefined,
+		username: req.user ? (req.user.local ? req.user.local.full_name : undefined) : undefined,
 		user_uid: req.user ? (req.user.local ? req.user.local.uid : undefined) : undefined
 	};
 
@@ -382,23 +382,54 @@ app.post('/upvote', isAuthenticated, function(req, res) {
 	}
 });
 
+// apply updates to a user's profile
+app.post('/users/update', isAuthenticated, function(req, res) {
+	var uid = req.body.uid, name = req.body.full_name, bio = req.body.bio;
 
+	if (!isNaN(parseInt(uid, 10))) {
+		// if user is authorized to make edits
+		if (uid == req.user.local.uid) {
+			con.query('UPDATE users SET full_name = ?, bio = ? WHERE uid = ?;', [name, bio, req.user.local.uid], function(err, rows) {
+				if (!err) {
+					// update session info
+					req.user.local.full_name = name;
+					req.user.local.bio = bio;
 
+					con.query('UPDATE posts, comments SET posts.owner_name = ?, comments.owner_name = ? WHERE posts.owner_uid = ? AND comments.owner_uid = ?;', [name, name, uid, uid], function(err, rows) {
+						res.redirect('/users/' + req.user.local.uid);
+					});
+				} else {
+					res.render('error.html');
+				}
+			});
+		} else {
+			res.redirect('/users/' + uid);
+		}
+	} else {
+		res.redirect('/');
+	}
+});
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+// request UI for editing user profile
+app.get('/users/edit/:id', function(req, res) {
+	// ensure editing OWN profile
+	if (req.isAuthenticated() && req.user.local.uid == req.params.id) {
+		// pull user data
+		con.query('SELECT * FROM users WHERE uid = ?;', [req.user.local.uid], function(err, rows) {
+			if (!err && rows !== undefined && rows.length > 0) {
+				res.render('editprofile.html', rows[0]);
+			} else {
+				res.render('error.html', {
+					message: "There was a problem accessing user information."
+				});
+			}
+		});
+	} else {
+		res.render('error.html', {
+			message: "You do not have authorization to edit this profile."
+		});
+	}
+});
 
 
 
@@ -463,13 +494,4 @@ app.get('/search', function(req, res) {
 
 app.post('/search', function(req, res) {
 	res.send(req.body);
-});
-
-app.get('/editProfile/:id', function(req, res) {
-	// ensure editing OWN profile
-	if (req.isAuthenticated() && req.user.local.uid == req.params.id) {
-		res.send("You can edit your profile");
-	} else {
-		res.redirect('/');
-	}
 });
