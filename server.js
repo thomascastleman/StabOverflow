@@ -443,32 +443,57 @@ app.get('/users/edit/:id', restrictAuth, function(req, res) {
 	}
 });
 
-// admin add account to system manually
+// admin: add account to system manually
 app.post('/addAccount', isAdmin, function(req, res) {
-	// insert new user into table
-	con.query('INSERT INTO users (email, full_name, is_admin) VALUES (?, ?, 0);', [req.body.email, req.body.name], function(err, rows) {
+	con.query('SELECT COUNT(*) AS count FROM users WHERE email = ?;', [req.body.email], function(err, rows) {
+		if (!err && rows !== undefined && rows.length > 0) {
+			if (rows[0].count == 0) {
+				// insert new user into table
+				con.query('INSERT INTO users (email, full_name, is_admin) VALUES (?, ?, 0);', [req.body.email, req.body.name], function(err, rows) {
+					if (!err) {
+						res.send('Success');
+					} else {
+						res.render('error.html', {
+							message: "There was a problem adding the new user."
+						});
+					}
+				});
+			} else {
+				res.render('error.html', {
+					message: "Conflict with existing email."
+				});
+			}
+		} else {
+			res.render('error.html');
+		}
+	});
+});
+
+// admin: make user admin by posting email
+app.post('/makeAdmin', isAdmin, function(req, res) {
+	con.query('UPDATE users SET is_admin = 1 WHERE email = ?;', [req.body.email], function(err, rows) {
 		if (!err) {
-			con.query('SELECT LAST_INSERT_ID() AS uid;', function(err, rows) {
-				// navigate to new user's page
-				if (!err && rows !== undefined && rows.length > 0) {
-					res.redirect('/users/' + rows[0].uid);
-				} else {
-					res.render('error.html', {
-						message: "There was an error getting the new user's page."
-					})
-				}
-			});
+			res.send('Success');
 		} else {
 			res.render('error.html', {
-				message: "There was a problem adding the new user."
+				message: "Failed to make '" + req.body.email + "' an admin."
 			})
 		}
 	});
 });
 
-
-
-
+// admin: remove user's admin privileges
+app.post('/removeAdmin', isAdmin, function(req, res) {
+	con.query('UPDATE users SET is_admin = 0 WHERE email = ?;', [req.body.email], function(err, rows) {
+		if (!err) {
+			res.send('Success');
+		} else {
+			res.render('error.html', {
+				message: "Failed to remove admin privileges from '" + req.body.email + "'"
+			})
+		}
+	});
+});
 
 
 
