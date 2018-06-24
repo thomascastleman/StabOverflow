@@ -287,13 +287,15 @@ app.post('/newPost', isAuthenticated, function(req, res) {
 				if (isNaN(req.body.category_uid)) req.body.category_uid = null;
 			}
 
-			// insert post into table
+			// insert question into posts
 			con.query('INSERT INTO posts (type, category_uid, owner_uid, owner_name, creation_date, answer_count, upvotes, title, body) VALUES (1, ?, ?, ?, NOW(), 0, 0, ?, ?);', 
 				[req.body.category_uid, req.user.local.uid, req.user.local.full_name, req.body.title, req.body.body], function(err, rows) {
 
 				if (!err) {
-					con.query('SELECT LAST_INSERT_ID() as uid;', function(err, rows) {
+					// get uid of this new question
+					con.query('SELECT LAST_INSERT_ID() AS uid;', function(err, rows) {
 						if (!err && rows !== undefined && rows.length > 0) {
+							// redirect to new question
 							res.redirect('/questions/' + rows[0].uid);
 						} else {
 							res.redirect('/');
@@ -308,7 +310,7 @@ app.post('/newPost', isAuthenticated, function(req, res) {
 		} else if (req.body.type == 0) {
 			// if legitimate parent question id
 			if (req.body.parent_question != undefined && !isNaN(parseInt(req.body.parent_question, 10))) {
-				
+				// insert answer into posts
 				con.query('INSERT INTO posts (type, parent_question_uid, owner_uid, owner_name, creation_date, upvotes, body) VALUES (0, ?, ?, ?, NOW(), 0, ?);',
 					[req.body.parent_question, req.user.local.uid, req.user.local.full_name, req.body.body], function(err, rows) {
 					if (!err) {
@@ -329,6 +331,7 @@ app.post('/newPost', isAuthenticated, function(req, res) {
 	}
 });
 
+// receive a new comment
 app.post('/newComment', isAuthenticated, function(req, res) {
 	// check if request is legitimate
 	if (req.body.body != '' && !isNaN(parseInt(req.body.parent_question, 10)) && !isNaN(parseInt(req.body.parent_uid, 10))) {
@@ -348,7 +351,36 @@ app.post('/newComment', isAuthenticated, function(req, res) {
 	}
 });
 
-
+// handle upvoting
+app.post('/upvote', isAuthenticated, function(req, res) {
+	if (req.body.uid && !isNaN(parseInt(req.body.uid))) {
+		// check for previous upvote to same post
+		con.query('SELECT COUNT(*) AS count FROM upvotes WHERE user_uid = ? AND post_uid = ?;', [req.user.local.uid, req.body.uid], function(err, rows) {
+			if (!err && rows !== undefined && rows.length > 0) {
+				// if no upvote already made
+				if (rows[0].count == 0) {
+					// increment upvotes
+					con.query('UPDATE posts SET upvotes = upvotes + 1 WHERE uid = ?;', [req.body.uid], function(err, rows) {
+						if (!err) {
+							// add record of upvote
+							con.query('INSERT INTO upvotes (user_uid, post_uid) VALUES (?, ?);', [req.user.local.uid, req.body.uid], function(err, rows) {
+								res.end();
+							});
+						} else {
+							res.end();
+						}
+					});
+				} else {
+					res.end();
+				}
+			} else {
+				res.end();
+			}
+		});
+	} else {
+		res.end();
+	}
+});
 
 
 
