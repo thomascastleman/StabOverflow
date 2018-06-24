@@ -122,6 +122,15 @@ function restrictAdmin(req, res, next) {
 	}
 }
 
+// middleware (mainly for POST reqs) to check if auth'd
+function isAuthenticated(req, res, next) {
+	if (req.isAuthenticated()) {
+		return next();
+	} else {
+		res.redirect('/');
+	}
+}
+
 var server = app.listen(8080, function() {
 	console.log("StabOverflow server listening on port %d", server.address().port);
 });
@@ -137,7 +146,7 @@ app.get('/', function(req, res) {
 	};
 
 	// this pulls the 30 most recent questions
-	con.query('SELECT posts.*, categories.name AS category FROM posts LEFT OUTER JOIN categories ON posts.category_uid = categories.uid WHERE posts.type = 1 LIMIT 30;', function(err, rows) {
+	con.query('SELECT posts.*, categories.name AS category FROM posts LEFT OUTER JOIN categories ON posts.category_uid = categories.uid WHERE posts.type = 1 ORDER BY uid DESC LIMIT 30;', function(err, rows) {
 		if (!err && rows !== undefined && rows.length > 0) {
 			// format time posted
 			for (var i = 0; i < rows.length; i++) {
@@ -272,6 +281,60 @@ app.get('/editProfile/:id', function(req, res) {
 	}
 });
 
+// receive a new question or answer
+app.post('/newPost', isAuthenticated, function(req, res) {
+
+	// check for empty request
+	if (req.body.body != '' && (req.body.title != '' || req.body.type == 0)) {
+		// if question
+		if (req.body.type == 1) {
+			// check uncategorized
+			if (!req.body.category_uid || req.body.category_uid == 0) {
+				req.body.category_uid = null;
+			} else {
+				req.body.category_uid = parseInt(req.body.category_uid, 10);
+				if (isNaN(req.body.category_uid)) req.body.category_uid = null;
+			}
+
+			// insert post into table
+			con.query('INSERT INTO posts (type, category_uid, owner_uid, owner_name, creation_date, answer_count, upvotes, title, body) VALUES (1, ?, ?, ?, NOW(), 0, 0, ?, ?);', 
+				[req.body.category_uid, req.user.local.uid, req.user.local.full_name, req.body.title, req.body.body], function(err, rows) {
+
+				if (!err) {
+					con.query('SELECT LAST_INSERT_ID() as uid;', function(err, rows) {
+						if (!err && rows !== undefined && rows.length > 0) {
+							res.redirect('/questions/' + rows[0].uid);
+						} else {
+							res.redirect('/');
+						}
+					});
+				} else {
+					res.redirect('/');
+				}
+			});
+
+		// if answer
+		} else if (req.body.type == 0) {
+			// if legitimate parent question id
+			if (req.body.parent_question != undefined && !isNaN(parseInt(req.body.parent_question))) {
+				
+				con.query('INSERT INTO posts (type, parent_question_uid, owner_uid, owner_name, creation_date, upvotes, body) VALUES (0, ?, ?, ?, NOW(), 0, ?);',
+					[req.body.parent_question, req.user.local.uid, req.user.local.full_name, req.body.body], function(err, rows) {
+
+					if (!err) {
+						res.redirect('/questions/' + req.body.parent_question);
+					} else {
+						res.redirect('/');
+					}
+				});
+			} else {
+				res.redirect('/');
+			}
+		}
+	} else {
+		res.redirect('/');
+	}
+});
 
 
 
@@ -318,7 +381,7 @@ app.get('/editProfile/:id', function(req, res) {
 
 // debug oauth
 app.get('/testauth', function(req, res) {
-	res.send(req.user || "");
+	res.send(req.user || "You are not authenticated.");
 });
 
 // templates testing: ---------------------------------------------------------
@@ -357,13 +420,5 @@ app.get('/search', function(req, res) {
 });
 
 app.post('/search', function(req, res) {
-	res.send(req.body);
-});
-
-app.post('/newComment', restrictAuth, function(req, res) {
-	res.send(req.body);
-});
-
-app.post('/newPost', restrictAuth, function(req, res) {
 	res.send(req.body);
 });

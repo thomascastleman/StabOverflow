@@ -170,12 +170,6 @@ TABLE users
 	email
 	isAdmin
 
-// used to verify first-logins (maybe not)
-TABLE pending_accounts
-	uid
-	code	// unique code sent in confirmation email
-	email	// "students.stab.org" email that attempted to log in
-
 --------------- Searching ---------------
 
 	- search functionality can utilize the tags attached to a question to determine its relevance to free text queries
@@ -183,18 +177,13 @@ TABLE pending_accounts
 		- filter by categories by checking a post's category_uid
 		- check if unanswered by accessing answer_count
 
+	- I want to use the titles to drive the search as well
+
 --------------- Authentication ---------------
 
 	- Valid emails: "students.stab.org" or "stab.org"
 
 Sign up procedure:
-	CONFIRMATION EMAIL IDEA:
-		- if email is a (previously unseen) "students.stab.org" account, email and a unique code are stored in pending_accounts table, send confirmation email to that address
-		- confirmation email POSTs code and user's email to "/confirmation"
-		- at the "/confirmation" endpoint, check if there exists a row with that same unique code and same email, 
-		- if so, delete that entry in pending_accounts, add new entry to users table, entering their email and setting isAdmin to false, redirect to "/login"
-
-	MUCH SIMPLER IDEA:
 		- when "/signup" is gotted, we ask them to authenticate with "some" google email, which, once it has been proved real, we check to see if it is "students.stab.org", and if so, we enter them into the users table
 			- maybe they entered their full name earlier so we can just add that into their user entry
-				- actually could we pull full name from Google?
+				- actually could we pull full name from Google? yes we can
