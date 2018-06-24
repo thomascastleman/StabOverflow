@@ -311,9 +311,11 @@ app.post('/newPost', isAuthenticated, function(req, res) {
 				
 				con.query('INSERT INTO posts (type, parent_question_uid, owner_uid, owner_name, creation_date, upvotes, body) VALUES (0, ?, ?, ?, NOW(), 0, ?);',
 					[req.body.parent_question, req.user.local.uid, req.user.local.full_name, req.body.body], function(err, rows) {
-
 					if (!err) {
-						res.redirect('/questions/' + req.body.parent_question);
+						// increment answer count on corresponding question
+						con.query('UPDATE posts SET answer_count = answer_count + 1 WHERE uid = ?;', [req.body.parent_question], function(err, rows) {
+							res.redirect('/questions/' + req.body.parent_question);
+						});
 					} else {
 						res.redirect('/');
 					}
