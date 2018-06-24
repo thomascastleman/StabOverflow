@@ -13,5 +13,9 @@
 
 		<span>Questions asked: {{questions_asked}}</span><br>
 		<span>Answers given: {{answers_given}}</span>
+
+		{{#ownProfile}}
+			<a href="/editProfile/{{uid}}">Edit my profile</a>
+		{{/ownProfile}}
 	</body>
 </html>

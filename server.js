@@ -181,6 +181,10 @@ app.get('/users/:id', function(req, res) {
 					render.questions_asked = rows[0].questionCount ? rows[0].questionCount : 0;
 					render.answers_given = rows[0].answerCount ? rows[0].answerCount : 0;
 				}
+
+				// check if user is visiting their own user page
+				render.ownProfile = req.isAuthenticated() && req.user.local.uid == req.params.id;
+
 				res.render('user.html', render);
 			});
 		} else {
@@ -259,7 +263,14 @@ app.get('/questions/:id', function(req, res) {
 	});
 });
 
-
+app.get('/editProfile/:id', function(req, res) {
+	// ensure editing OWN profile
+	if (req.isAuthenticated() && req.user.local.uid == req.params.id) {
+		res.send("You can edit your profile");
+	} else {
+		res.redirect('/');
+	}
+});
 
 
 
