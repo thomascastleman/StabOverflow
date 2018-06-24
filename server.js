@@ -272,15 +272,6 @@ app.get('/questions/:id', function(req, res) {
 	});
 });
 
-app.get('/editProfile/:id', function(req, res) {
-	// ensure editing OWN profile
-	if (req.isAuthenticated() && req.user.local.uid == req.params.id) {
-		res.send("You can edit your profile");
-	} else {
-		res.redirect('/');
-	}
-});
-
 // receive a new question or answer
 app.post('/newPost', isAuthenticated, function(req, res) {
 
@@ -316,7 +307,7 @@ app.post('/newPost', isAuthenticated, function(req, res) {
 		// if answer
 		} else if (req.body.type == 0) {
 			// if legitimate parent question id
-			if (req.body.parent_question != undefined && !isNaN(parseInt(req.body.parent_question))) {
+			if (req.body.parent_question != undefined && !isNaN(parseInt(req.body.parent_question, 10))) {
 				
 				con.query('INSERT INTO posts (type, parent_question_uid, owner_uid, owner_name, creation_date, upvotes, body) VALUES (0, ?, ?, ?, NOW(), 0, ?);',
 					[req.body.parent_question, req.user.local.uid, req.user.local.full_name, req.body.body], function(err, rows) {
@@ -336,7 +327,24 @@ app.post('/newPost', isAuthenticated, function(req, res) {
 	}
 });
 
+app.post('/newComment', isAuthenticated, function(req, res) {
+	// check if request is legitimate
+	if (req.body.body != '' && !isNaN(parseInt(req.body.parent_question, 10)) && !isNaN(parseInt(req.body.parent_uid, 10))) {
+		// insert new comment
+		con.query('INSERT INTO comments (parent_uid, parent_question_uid, body, owner_uid, owner_name, creation_date) VALUES (?, ?, ?, ?, ?, NOW());',
+			[req.body.parent_uid, req.body.parent_question, req.body.body, req.user.local.uid, req.user.local.full_name], function(err, rows) {
 
+			// direct to relevant question page
+			if (!err) {
+				res.redirect('/questions/' + req.body.parent_question);
+			} else {
+				res.redirect('/');
+			}
+		});
+	} else {
+		res.redirect('/');
+	}
+});
 
 
 
@@ -421,4 +429,13 @@ app.get('/search', function(req, res) {
 
 app.post('/search', function(req, res) {
 	res.send(req.body);
+});
+
+app.get('/editProfile/:id', function(req, res) {
+	// ensure editing OWN profile
+	if (req.isAuthenticated() && req.user.local.uid == req.params.id) {
+		res.send("You can edit your profile");
+	} else {
+		res.redirect('/');
+	}
 });
