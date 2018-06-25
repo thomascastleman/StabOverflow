@@ -291,7 +291,7 @@ app.post('/newPost', isAuthenticated, function(req, res) {
 	if (req.body.body != '' && (req.body.title != '' || req.body.type == 0)) {
 		// if question
 		if (req.body.type == 1) {
-			// check uncategorized
+			// check uncategorized (id == 0)
 			if (!req.body.category_uid || req.body.category_uid == 0) {
 				req.body.category_uid = null;
 			} else {
@@ -431,15 +431,11 @@ app.get('/users/edit/:id', restrictAuth, function(req, res) {
 			if (!err && rows !== undefined && rows.length > 0) {
 				res.render('editprofile.html', rows[0]);
 			} else {
-				res.render('error.html', {
-					message: "There was a problem accessing user information."
-				});
+				res.render('error.html', { message: "There was a problem accessing user information." });
 			}
 		});
 	} else {
-		res.render('error.html', {
-			message: "You do not have authorization to edit this profile."
-		});
+		res.render('error.html', { message: "You do not have authorization to edit this profile." });
 	}
 });
 
@@ -453,15 +449,11 @@ app.post('/addAccount', isAdmin, function(req, res) {
 					if (!err) {
 						res.send('Success');
 					} else {
-						res.render('error.html', {
-							message: "There was a problem adding the new user."
-						});
+						res.render('error.html', { message: "There was a problem adding the new user." });
 					}
 				});
 			} else {
-				res.render('error.html', {
-					message: "Conflict with existing email."
-				});
+				res.render('error.html', { message: "Conflict with existing email." });
 			}
 		} else {
 			res.render('error.html');
@@ -475,9 +467,7 @@ app.post('/makeAdmin', isAdmin, function(req, res) {
 		if (!err) {
 			res.send('Success');
 		} else {
-			res.render('error.html', {
-				message: "Failed to make '" + req.body.email + "' an admin."
-			})
+			res.render('error.html', { message: "Failed to make '" + req.body.email + "' an admin." });
 		}
 	});
 });
@@ -488,12 +478,48 @@ app.post('/removeAdmin', isAdmin, function(req, res) {
 		if (!err) {
 			res.send('Success');
 		} else {
-			res.render('error.html', {
-				message: "Failed to remove admin privileges from '" + req.body.email + "'"
-			})
+			res.render('error.html', { message: "Failed to remove admin privileges from '" + req.body.email + "'" });
 		}
 	});
 });
+
+// admin: create a new category
+app.post('/newCategory', isAdmin, function(req, res) {
+	con.query('INSERT INTO categories (name) VALUES (?);', [req.body.category], function(err, rows) {
+		if (!err) {
+			res.send('Success');
+		} else {
+			res.render('error.html', { message: "Failed to add category." });
+		}
+	});
+});
+
+// admin: remove an existing category by uid
+app.post('/removeCategory', isAdmin, function(req, res) {
+	con.query('DELETE FROM categories WHERE uid = ?;', [req.body.uid], function(err, rows) {
+		if (!err) {
+			con.query('UPDATE posts SET category_uid = NULL WHERE category_uid = ?;', [req.body.uid], function(err, rows) {
+				if (!err) {
+					res.send('Success');
+				} else {
+					res.render('error.html', { message: "Failed to uncategorize posts." });
+				}
+			});
+		} else {
+			res.render('error.html', { message: "Failed to remove category." });
+		}
+	});
+});
+
+
+
+
+
+
+
+
+
+
 
 
 
