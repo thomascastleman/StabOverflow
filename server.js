@@ -32,7 +32,7 @@ passport.serializeUser(function(user, done) {
 		// if email domain legitimate
 		} else if (/.+?@(students\.)?stab\.org/.test(user.email)) {
 			// create new user
-			con.query('INSERT INTO users (email, full_name, is_admin) VALUES (?, ?, 0);', [user.email, user.displayName], function(err, rows) {
+			con.query('INSERT INTO users (email, full_name) VALUES (?, ?);', [user.email, user.displayName], function(err, rows) {
 				con.query('SELECT * FROM users WHERE email = ?;', [user.email], function(err, rows) {
 					if (!err && rows !== undefined && rows.length > 0) {
 						user.local = rows[0];
@@ -298,7 +298,7 @@ app.post('/newPost', isAuthenticated, function(req, res) {
 			}
 
 			// insert question into posts
-			con.query('INSERT INTO posts (type, category_uid, owner_uid, owner_name, creation_date, answer_count, upvotes, title, body) VALUES (1, ?, ?, ?, NOW(), 0, 0, ?, ?);', 
+			con.query('INSERT INTO posts (type, category_uid, owner_uid, owner_name, title, body) VALUES (1, ?, ?, ?, ?, ?);', 
 				[req.body.category_uid, req.user.local.uid, req.user.local.full_name, req.body.title, req.body.body], function(err, rows) {
 
 				if (!err) {
@@ -321,7 +321,7 @@ app.post('/newPost', isAuthenticated, function(req, res) {
 			// if legitimate parent question id
 			if (req.body.parent_question != undefined && !isNaN(parseInt(req.body.parent_question, 10))) {
 				// insert answer into posts
-				con.query('INSERT INTO posts (type, parent_question_uid, owner_uid, owner_name, creation_date, upvotes, body) VALUES (0, ?, ?, ?, NOW(), 0, ?);',
+				con.query('INSERT INTO posts (type, parent_question_uid, owner_uid, owner_name, body) VALUES (0, ?, ?, ?, ?);',
 					[req.body.parent_question, req.user.local.uid, req.user.local.full_name, req.body.body], function(err, rows) {
 					if (!err) {
 						// increment answer count on corresponding question
@@ -346,7 +346,7 @@ app.post('/newComment', isAuthenticated, function(req, res) {
 	// check if request is legitimate
 	if (req.body.body != '' && !isNaN(parseInt(req.body.parent_question, 10)) && !isNaN(parseInt(req.body.parent_uid, 10))) {
 		// insert new comment
-		con.query('INSERT INTO comments (parent_uid, parent_question_uid, body, owner_uid, owner_name, creation_date) VALUES (?, ?, ?, ?, ?, NOW());',
+		con.query('INSERT INTO comments (parent_uid, parent_question_uid, body, owner_uid, owner_name) VALUES (?, ?, ?, ?, ?);',
 			[req.body.parent_uid, req.body.parent_question, req.body.body, req.user.local.uid, req.user.local.full_name], function(err, rows) {
 
 			// direct to relevant question page
@@ -443,7 +443,7 @@ app.post('/addAccount', isAdmin, function(req, res) {
 		if (!err && rows !== undefined && rows.length > 0) {
 			if (rows[0].count == 0) {
 				// insert new user into table
-				con.query('INSERT INTO users (email, full_name, is_admin) VALUES (?, ?, 0);', [req.body.email, req.body.name], function(err, rows) {
+				con.query('INSERT INTO users (email, full_name) VALUES (?, ?);', [req.body.email, req.body.name], function(err, rows) {
 					if (!err) {
 						res.send('Success');
 					} else {
@@ -494,19 +494,51 @@ app.post('/newCategory', isAdmin, function(req, res) {
 
 // admin: remove an existing category by uid
 app.post('/removeCategory', isAdmin, function(req, res) {
-	con.query('DELETE FROM categories WHERE uid = ?;', [req.body.uid], function(err, rows) {
-		if (!err) {
-			con.query('UPDATE posts SET category_uid = NULL WHERE category_uid = ?;', [req.body.uid], function(err, rows) {
-				if (!err) {
-					res.send('Success');
+	if (req.body.uid) {
+		// check if category used
+		con.query('SELECT COUNT(*) AS count FROM posts WHERE category_uid = ?;', [req.body.uid], function(err, rows) {
+			if (!err && rows !== undefined && rows.length > 0) {
+				if (rows[0].count > 0) {
+					// archive category
+					con.query('UPDATE categories SET is_archived = 1 WHERE uid = ?;', [req.body.uid], function(err, rows) {
+						if (!err) {
+							res.send('Success');
+						} else {
+							res.render('error.html', { message: "Failed to remove category." });
+						}
+					});
 				} else {
-					res.render('error.html', { message: "Failed to uncategorize posts." });
+					// full delete category if never used
+					con.query('DELETE FROM categories WHERE uid = ?;', [req.body.uid], function(err, rows) {
+						if (!err) {
+							res.send('Success');
+						} else {
+							res.render('error.html', { message: "Unable to remove category" });
+						}
+					});
 				}
-			});
-		} else {
-			res.render('error.html', { message: "Failed to remove category." });
-		}
-	});
+			} else {
+				res.render('error.html', { message: "There was an error attempting to remove category" });
+			}
+		});
+	} else {
+		res.redirect('/');
+	}
+
+
+	// con.query('DELETE FROM categories WHERE uid = ?;', [req.body.uid], function(err, rows) {
+	// 	if (!err) {
+	// 		con.query('UPDATE posts SET category_uid = NULL WHERE category_uid = ?;', [req.body.uid], function(err, rows) {
+	// 			if (!err) {
+	// 				res.send('Success');
+	// 			} else {
+	// 				res.render('error.html', { message: "Failed to uncategorize posts." });
+	// 			}
+	// 		});
+	// 	} else {
+	// 		res.render('error.html', { message: "Failed to remove category." });
+	// 	}
+	// });
 });
 
 // admin: remove a post

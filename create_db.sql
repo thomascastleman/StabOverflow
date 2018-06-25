@@ -10,7 +10,7 @@ CREATE TABLE users (
 	email VARCHAR(32),
 	full_name VARCHAR(32),
 	bio VARCHAR(140),
-	is_admin TINYINT(1),
+	is_admin TINYINT(1) DEFAULT 0,
 	PRIMARY KEY (uid)
 );
 
@@ -18,6 +18,7 @@ CREATE TABLE users (
 CREATE TABLE categories (
 	uid INT NOT NULL AUTO_INCREMENT,
 	name VARCHAR(16),
+	is_archived TINYINT(1) DEFAULT 0,
 	PRIMARY KEY (uid)
 );
 
@@ -29,9 +30,9 @@ CREATE TABLE posts (
 	category_uid INT,
 	owner_uid INT,
 	owner_name VARCHAR(32),
-	creation_date DATETIME,
-	answer_count INT,
-	upvotes INT,
+	creation_date DATETIME DEFAULT NOW(),
+	answer_count INT DEFAULT 0,
+	upvotes INT DEFAULT 0,
 	title TEXT,
 	body TEXT,
 	PRIMARY KEY (uid),
@@ -46,7 +47,7 @@ CREATE TABLE comments (
 	parent_question_uid INT,
 	owner_uid INT,
 	owner_name VARCHAR(32),
-	creation_date DATETIME,
+	creation_date DATETIME DEFAULT NOW(),
 	body TEXT,
 	PRIMARY KEY (uid),
 	FOREIGN KEY (parent_uid) REFERENCES posts(uid) ON DELETE CASCADE,
