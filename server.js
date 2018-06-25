@@ -509,21 +509,19 @@ app.post('/removeCategory', isAdmin, function(req, res) {
 	});
 });
 
-// // admin: remove a post
-// app.post('/deletePost', isAdmin, function(req, res) {
-// 	var uid = req.body.uid;
-
-// 	// delete post from posts
-// 	// delete all comments with parent_uid of this post
-// 	// delete all tags where post_uid is this post
-// 	// delete all upvotes where post_uid is this post
-
-// 	// if question, delete all answer posts where parent_question_uid = uid
-// });
+// admin: remove a post
+app.post('/deletePost', isAdmin, function(req, res) {
+	con.query('DELETE FROM posts WHERE uid = ?;', [req.body.uid], function(err, rows) {
+		if (!err) {
+			res.send('Success');
+		} else {
+			res.render('error.html', { message: "Failed to remove post." });
+		}
+	});
+});
 
 // admin: remove a comment
 app.post('/deleteComment', isAdmin, function(req, res) {
-	// remove comment in db
 	con.query('DELETE FROM comments WHERE uid = ?;', [req.body.uid], function(err, rows) {
 		if (!err) {
 			res.send('Success');

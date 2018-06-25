@@ -49,8 +49,8 @@ CREATE TABLE comments (
 	creation_date DATETIME,
 	body TEXT,
 	PRIMARY KEY (uid),
-	FOREIGN KEY (parent_uid) REFERENCES posts(uid),
-	FOREIGN KEY (parent_question_uid) REFERENCES posts(uid),
+	FOREIGN KEY (parent_uid) REFERENCES posts(uid) ON DELETE CASCADE,
+	FOREIGN KEY (parent_question_uid) REFERENCES posts(uid) ON DELETE CASCADE,
 	FOREIGN KEY (owner_uid) REFERENCES users(uid)
 );
 
@@ -60,7 +60,7 @@ CREATE TABLE tags (
 	tag VARCHAR(16),
 	post_uid INT,
 	PRIMARY KEY (uid),
-	FOREIGN KEY (post_uid) REFERENCES posts(uid)
+	FOREIGN KEY (post_uid) REFERENCES posts(uid) ON DELETE CASCADE
 );
 
 -- which users have upvoted which posts
@@ -69,6 +69,6 @@ CREATE TABLE upvotes (
 	post_uid INT,
 	user_uid INT,
 	PRIMARY KEY (uid),
-	FOREIGN KEY (post_uid) REFERENCES posts(uid),
+	FOREIGN KEY (post_uid) REFERENCES posts(uid) ON DELETE CASCADE,
 	FOREIGN KEY (user_uid) REFERENCES users(uid)
 );
