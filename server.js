@@ -172,7 +172,8 @@ app.get('/', function(req, res) {
 
 // ask a question page, restricted
 app.get('/ask', restrictAuth, function(req, res) {
-	con.query('SELECT * FROM categories;', function(err, rows) {
+	// get all un-archived categories
+	con.query('SELECT * FROM categories WHERE is_archived = 0;', function(err, rows) {
 		if (!err && rows !== undefined && rows.length > 0) {
 			res.render('ask.html', {
 				loggedIn: true,		// page restricted to auth'd users
@@ -524,21 +525,6 @@ app.post('/removeCategory', isAdmin, function(req, res) {
 	} else {
 		res.redirect('/');
 	}
-
-
-	// con.query('DELETE FROM categories WHERE uid = ?;', [req.body.uid], function(err, rows) {
-	// 	if (!err) {
-	// 		con.query('UPDATE posts SET category_uid = NULL WHERE category_uid = ?;', [req.body.uid], function(err, rows) {
-	// 			if (!err) {
-	// 				res.send('Success');
-	// 			} else {
-	// 				res.render('error.html', { message: "Failed to uncategorize posts." });
-	// 			}
-	// 		});
-	// 	} else {
-	// 		res.render('error.html', { message: "Failed to remove category." });
-	// 	}
-	// });
 });
 
 // admin: remove a post
