@@ -362,7 +362,7 @@ app.post('/newComment', isAuthenticated, function(req, res) {
 	}
 });
 
-// handle upvoting
+// receive request to upvote a post, send back delta to change post's count by in UI
 app.post('/upvote', isAuthenticated, function(req, res) {
 	if (req.body.uid && !isNaN(parseInt(req.body.uid))) {
 		// check for previous upvote to same post
@@ -374,22 +374,21 @@ app.post('/upvote', isAuthenticated, function(req, res) {
 					con.query('UPDATE posts SET upvotes = upvotes + 1 WHERE uid = ?;', [req.body.uid], function(err, rows) {
 						if (!err) {
 							// add record of upvote
-							con.query('INSERT INTO upvotes (user_uid, post_uid) VALUES (?, ?);', [req.user.local.uid, req.body.uid], function(err, rows) {
-								res.end();
-							});
+							con.query('INSERT INTO upvotes (user_uid, post_uid) VALUES (?, ?);', [req.user.local.uid, req.body.uid], function(err, rows) {});
+							res.send({ delta: 1 });
 						} else {
-							res.end();
+							res.send({ delta: 0 });
 						}
 					});
 				} else {
-					res.end();
+					res.send({ delta: 0 });
 				}
 			} else {
-				res.end();
+				res.send({ delta: 0 });
 			}
 		});
 	} else {
-		res.end();
+		res.send({ delta: 0 });
 	}
 });
 

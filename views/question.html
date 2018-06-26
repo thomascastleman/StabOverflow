@@ -4,6 +4,21 @@
 		<meta charset="UTF-8">
 		<title>StabOverflow</title>
 
+		<!-- jQuery -->
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
+
+		<script>
+			// script to apply upvoting changes in UI
+			function upvote(uid) {
+				$.post('/upvote', { uid: uid })
+					.done(function(data) {
+						var $p = $('#' + uid);
+						var n = parseInt($p.text(), 10) + data.delta;
+						$p.text(n);
+					});
+			}
+		</script>
+
 		<!-- PageDown editor -->
 		<link rel="stylesheet" type="text/css" href="../pagedown/pagedown.css" />
 		<script type="text/javascript" src="../pagedown/Markdown.Converter.js"></script>
@@ -24,7 +39,8 @@
 						</form>
 					{{/noCategory}}
 					<div>
-						{{upvotes}} upvotes
+						<span id="{{question_uid}}">{{upvotes}}</span> upvotes<br>
+						<div onclick="upvote({{question_uid}});">Upvote</div>
 					</div>
 				</div>
 				<h1>{{title}}</h1>
@@ -62,7 +78,8 @@
 				<h2>{{answer_count}} Answers</h2>
 				{{#answers}}
 					<div>
-						<div>{{upvotes}} upvotes</div>
+						<div><span id="{{answer_uid}}">{{upvotes}}</span> upvotes</div>
+						<div onclick="upvote({{answer_uid}});">Upvote</div>
 						<div>{{{body}}}</div>
 						answered {{creation_date}} by <a href="/users/{{owner_uid}}">{{owner_name}}</a>
 
