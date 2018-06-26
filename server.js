@@ -210,6 +210,23 @@ app.get('/users/:id', function(req, res) {
 	});
 });
 
+// request UI for editing user profile
+app.get('/users/edit/:id', restrictAuth, function(req, res) {
+	// ensure editing OWN profile
+	if (req.user.local.uid == req.params.id) {
+		// pull user data
+		con.query('SELECT * FROM users WHERE uid = ?;', [req.user.local.uid], function(err, rows) {
+			if (!err && rows !== undefined && rows.length > 0) {
+				res.render('editprofile.html', rows[0]);
+			} else {
+				res.render('error.html', { message: "There was a problem accessing user information." });
+			}
+		});
+	} else {
+		res.render('error.html', { message: "You do not have authorization to edit this profile." });
+	}
+});
+
 // get individual question page
 app.get('/questions/:id', function(req, res) {
 	var render = {}, ansIDtoIndex = {}, ans, question_uid = req.params.id;
@@ -428,23 +445,6 @@ app.post('/users/update', isAuthenticated, function(req, res) {
 		}
 	} else {
 		res.redirect('/');
-	}
-});
-
-// request UI for editing user profile
-app.get('/users/edit/:id', restrictAuth, function(req, res) {
-	// ensure editing OWN profile
-	if (req.user.local.uid == req.params.id) {
-		// pull user data
-		con.query('SELECT * FROM users WHERE uid = ?;', [req.user.local.uid], function(err, rows) {
-			if (!err && rows !== undefined && rows.length > 0) {
-				res.render('editprofile.html', rows[0]);
-			} else {
-				res.render('error.html', { message: "There was a problem accessing user information." });
-			}
-		});
-	} else {
-		res.render('error.html', { message: "You do not have authorization to edit this profile." });
 	}
 });
 
