@@ -16,6 +16,43 @@
 
 		{{#ownProfile}}
 			<a href="/users/edit/{{uid}}">Edit my profile</a>
+
+			{{#is_admin}}
+				<br><br>
+				<form method="POST" action="/addAccount">
+					Authorize a new account:<br>
+					<input name="name" type="text" placeholder="Full name"><br>
+					<input name="email" type="text" placeholder="Email"><br>
+					<button type="submit">Authorize</button>
+				</form>
+
+				<form method="POST" action="/makeAdmin">
+					Grant admin privileges:<br>
+					<input name="email" type="text" placeholder="Email (existing account)"><br>
+					<button type="submit">Grant privileges</button>
+				</form>
+
+				<form method="POST" action="/removeAdmin">
+					Revoke admin privileges:<br>
+					<input name="email" type="text" placeholder="Email (existing account)"><br>
+					<button type="submit">Revoke privileges</button>
+				</form>
+			{{/is_admin}}
 		{{/ownProfile}}
 	</body>
 </html>
+
+
+
+
+<!-- 
+
+ADMIN FUNCTIONALITY:
+
+	add new account
+	make account admin
+	remove account admin
+	add new category
+	remove category
+
+ -->
