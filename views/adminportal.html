@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>StabOverflow</title>
+	</head>
+	<body>
+		<!-- PUT NAVBAR HERE -->
+
+		<h1>Admin Portal</h1>
+
+		<form method="POST" action="/addAccount">
+			Authorize a new account:<br>
+			<input name="name" type="text" placeholder="Full name"><br>
+			<input name="email" type="text" placeholder="Email"><br>
+			<button type="submit">Authorize</button>
+		</form>
+		<br>
+		<form method="POST" action="/makeAdmin">
+			Grant admin privileges:<br>
+			<input name="email" type="text" placeholder="Email (existing account)"><br>
+			<button type="submit">Grant privileges</button>
+		</form>
+		<br>
+		<form method="POST" action="/removeAdmin">
+			Revoke admin privileges:<br>
+			<input name="email" type="text" placeholder="Email (existing account)"><br>
+			<button type="submit">Revoke privileges</button>
+		</form>
+		<br>
+		<form method="POST" action="/newCategory">
+			Create a new category:<br>
+			<input name="category" type="text" placeholder="Category name"><br>
+			<button type="submit">Create Category</button>
+		</form>
+		{{^categoryFail}}
+		<br>
+		<form method="POST" action="/removeCategory">
+			Archive an existing category:<br>
+			<select name="uid">
+				{{#categories}}
+				<option value="{{uid}}">{{name}}</option>
+				{{/categories}}
+			</select>
+			<br>
+			<button type="submit">Archive Category</button>
+		</form>
+		{{/categoryFail}}
+	</body>
+</html>

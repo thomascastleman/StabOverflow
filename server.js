@@ -112,7 +112,7 @@ function restrictAuth(req, res, next) {
 // middleware to restrict pages to admin users
 function restrictAdmin(req, res, next) {
 	if (req.isAuthenticated()) {
-		if (req.user.local-is_admin) {
+		if (req.user.local.is_admin) {
 			return next();
 		} else {
 			res.redirect('/');
@@ -276,6 +276,17 @@ app.get('/questions/:id', function(req, res) {
 		} else {
 			// question not found, send not found page
 			res.render('qnotfound.html');
+		}
+	});
+});
+
+// allow admin to make special changes
+app.get('/adminPortal', restrictAdmin, function(req, res) {
+	con.query('SELECT * FROM categories WHERE is_archived = 0;', function(err, rows) {
+		if (!err && rows !== undefined && rows.length > 0) {
+			res.render('adminportal.html', { categories: rows });
+		} else {
+			res.render('adminportal.html', { categoryFail: true });
 		}
 	});
 });
@@ -472,13 +483,18 @@ app.post('/makeAdmin', isAdmin, function(req, res) {
 
 // admin: remove user's admin privileges
 app.post('/removeAdmin', isAdmin, function(req, res) {
-	con.query('UPDATE users SET is_admin = 0 WHERE email = ?;', [req.body.email], function(err, rows) {
-		if (!err) {
-			res.send('Success');
-		} else {
-			res.render('error.html', { message: "Failed to remove admin privileges from '" + req.body.email + "'" });
-		}
-	});
+	// safety: prevent admin from removing themself
+	if (req.body.email != req.user.local.email) {
+		con.query('UPDATE users SET is_admin = 0 WHERE email = ?;', [req.body.email], function(err, rows) {
+			if (!err) {
+				res.send('Success');
+			} else {
+				res.render('error.html', { message: "Failed to remove admin privileges from '" + req.body.email + "'" });
+			}
+		});
+	} else {
+		res.render('error.html', { message: "You are unable to deauthorize yourself." });
+	}
 });
 
 // admin: create a new category
