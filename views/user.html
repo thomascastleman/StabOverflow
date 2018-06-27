@@ -21,5 +21,15 @@
 				<a href="/adminPortal">Admin Portal</a>
 			{{/is_admin}}
 		{{/ownProfile}}
+
+		<h3>Recent Posts:</h3>
+		<div>
+			{{#posts}}
+				<div>
+					{{#parent_question_uid}}A: <a href="/questions/{{parent_question_uid}}">{{title}}</a>{{/parent_question_uid}}
+					{{^parent_question_uid}}Q: <a href="/questions/{{uid}}">{{title}}</a>{{/parent_question_uid}}
+				</div>
+			{{/posts}}
+		</div>
 	</body>
 </html>

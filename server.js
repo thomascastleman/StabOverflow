@@ -192,6 +192,9 @@ app.get('/users/:id', function(req, res) {
 		if (!err && rows !== undefined && rows.length > 0) {
 			var render = rows[0];
 
+			// check if user is visiting their own user page
+			render.ownProfile = req.isAuthenticated() && req.user.local.uid == req.params.id;
+
 			// count questions and answers
 			con.query('SELECT SUM(CASE WHEN type = 1 THEN 1 ELSE 0 END) questionCount, SUM(CASE WHEN type = 0 THEN 1 ELSE 0 END) answerCount FROM posts WHERE owner_uid = ?;', [req.params.id], function(err, rows) {
 				if (!err && rows !== undefined && rows.length > 0) {
@@ -199,10 +202,18 @@ app.get('/users/:id', function(req, res) {
 					render.answers_given = rows[0].answerCount ? rows[0].answerCount : 0;
 				}
 
-				// check if user is visiting their own user page
-				render.ownProfile = req.isAuthenticated() && req.user.local.uid == req.params.id;
+				con.query('SELECT p.uid, q.parent_question_uid, p.title FROM posts p INNER JOIN posts q ON q.parent_question_uid = p.uid WHERE q.owner_uid = ? ORDER BY p.uid DESC;', [req.params.id], function(err, rows) {
+					if (!err && rows !== undefined && rows.length > 0) {
 
-				res.render('user.html', render);
+
+						// eek
+						console.log(rows);
+
+						render.posts = rows;
+					}
+
+					res.render('user.html', render);
+				});
 			});
 		} else {
 			res.render('usernotfound.html');
