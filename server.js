@@ -322,6 +322,22 @@ app.get('/adminPortal', restrictAdmin, function(req, res) {
 	});
 });
 
+// request UI for editing existing post
+app.get('/editPost/:id', restrictAuth, function(req, res) {
+	// ensure editing own post
+	con.query('SELECT title, body FROM posts WHERE uid = ? AND owner_uid = ?;', [req.params.id, req.user.local.uid], function(err, rows) {
+		if (!err && rows !== undefined && rows.length > 0) {
+			res.render('editpost.html', {
+				uid: req.params.id,
+				title: rows[0].title,
+				body: mdConverter.makeHtml(rows[0].body)
+			});
+		} else {
+			res.render('error.html', { message: "Unable to edit post" });
+		}
+	});
+});
+
 /*
 	THERE IS NO TAG PARSING GOING ON HERE ------------------------------------------------------------------->>
 */
@@ -409,8 +425,11 @@ app.post('/updatePost', isAuthenticated, function(req, res) {
 	// ensure editing own post
 	con.query('SELECT type, parent_question_uid FROM posts WHERE uid = ? AND owner_uid = ?;', [req.body.uid, req.user.local.uid], function(err, rows) {
 		if (!err && rows !== undefined && rows.length > 0) {
+
+			var editMessage = '\n\n*Edited on ' + moment().format('M/DD/YYYY') + ':*\n\n';
+
 			// apply edits
-			con.query('UPDATE posts SET body = concat(body, ?) WHERE uid = ?;', ['\n\n' + req.body.appendage, req.body.uid], function(err, rows2) {
+			con.query('UPDATE posts SET body = concat(body, ?) WHERE uid = ?;', [editMessage + req.body.appendage, req.body.uid], function(err, rows2) {
 				if (!err) {
 					var redirect_uid = rows[0].type == 1 ? req.body.uid : rows[0].parent_question_uid
 					// redirect to edited post
