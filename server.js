@@ -202,12 +202,12 @@ app.get('/users/:id', function(req, res) {
 					render.answers_given = rows[0].answerCount ? rows[0].answerCount : 0;
 				}
 
-				con.query('SELECT p.uid, q.parent_question_uid, p.title FROM posts p INNER JOIN posts q ON q.parent_question_uid = p.uid WHERE q.owner_uid = ? ORDER BY p.uid DESC;', [req.params.id], function(err, rows) {
+				con.query('SELECT IFNULL(p.parent_question_uid, p.uid) AS redirect_uid, IFNULL(q.title, p.title) AS title, p.type AS isQuestion, DATE_FORMAT(CASE WHEN p.type = 1 THEN p.creation_date ELSE q.creation_date END, "%M %D, %Y") date FROM posts p LEFT JOIN posts q ON p.parent_question_uid = q.uid WHERE p.owner_uid = ? ORDER BY p.uid DESC LIMIT 20;', [req.params.id], function(err, rows) {
 					if (!err && rows !== undefined && rows.length > 0) {
 
-
-						// eek
-						console.log(rows);
+						for (var i = 0; i < rows.length; i++) {
+							rows[i].isQuestion = !!rows[i].isQuestion;
+						}
 
 						render.posts = rows;
 					}
