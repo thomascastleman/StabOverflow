@@ -86,7 +86,7 @@ app.get('/auth/google/callback',
 }));
 
 app.get('/failure', function(req, res) {
-	res.send("Authentication Failure :(");
+	res.render('error.html', { message: "Unable to authenticate." });
 });
 
 app.get('/logout', function(req, res){
@@ -562,10 +562,11 @@ app.post('/deletePost', isAdmin, function(req, res) {
 		if (!err) {
 			res.send('Success');
 
-			// update answer count if answer
 			if (req.body.parent_question_uid) {
+				// update answer count if answer
 				con.query('UPDATE posts SET answer_count = CASE WHEN answer_count > 0 THEN answer_count - 1 ELSE 0 END WHERE uid = ?;', [req.body.parent_question_uid], function(err, rows) {});
 			} else {
+				// delete child answer posts
 				con.query('DELETE FROM posts WHERE parent_question_uid = ?;', [req.body.uid], function(err, rows) {});
 			}
 		} else {
