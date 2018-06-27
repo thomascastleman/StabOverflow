@@ -404,6 +404,27 @@ app.post('/newComment', isAuthenticated, function(req, res) {
 	}
 });
 
+// append to an existing post
+app.post('/updatePost', isAuthenticated, function(req, res) {
+	// ensure editing own post
+	con.query('SELECT type, parent_question_uid FROM posts WHERE uid = ? AND owner_uid = ?;', [req.body.uid, req.user.local.uid], function(err, rows) {
+		if (!err && rows !== undefined && rows.length > 0) {
+			// apply edits
+			con.query('UPDATE posts SET body = concat(body, ?) WHERE uid = ?;', ['\n\n' + req.body.appendage, req.body.uid], function(err, rows2) {
+				if (!err) {
+					var redirect_uid = rows[0].type == 1 ? req.body.uid : rows[0].parent_question_uid
+					// redirect to edited post
+					res.redirect(redirect_uid ? '/questions/' + redirect_uid : '/');
+				} else {
+					res.render('error.html', { message: "Failed to apply edits to post" });
+				}
+			});
+		} else {
+			res.render('error.html', { message: "You are unable to edit this post." });
+		}
+	});
+});
+
 // receive request to upvote a post, send back delta to change post's count by in UI
 app.post('/upvote', isAuthenticated, function(req, res) {
 	if (req.body.uid && !isNaN(parseInt(req.body.uid))) {
