@@ -17,6 +17,24 @@
 						$p.text(n);
 					});
 			}
+
+			{{#isAdmin}}
+			// delete question / answer
+			function deletePost(uid, p_uid) {
+				$.post('/deletePost', { uid: uid, parent_question_uid: p_uid })
+					.done(function(data) {
+						window.location.href = uid == {{question_uid}} ? '/' : '/questions/' + {{question_uid}};
+					});
+			}
+
+			// delete comment
+			function deleteComment(uid) {
+				$.post('/deleteComment', { uid: uid })
+					.done(function(data) {
+						window.location.href = '/questions/' + {{question_uid}};
+					});
+			}
+			{{/isAdmin}}
 		</script>
 
 		<!-- PageDown editor -->
@@ -33,16 +51,17 @@
 			<div>
 				<div>
 					{{^noCategory}}
-						<form name="getCategory" method="POST" action="/search">
-							<input name="category" value="{{category_uid}}" hidden>
-							<div onclick="document.getCategory.submit()">Category: {{category}}</div>
-						</form>
+					<form name="getCategory" method="POST" action="/search">
+						<input name="category" value="{{category_uid}}" hidden>
+						<div onclick="document.getCategory.submit()">Category: {{category}}</div>
+					</form>
 					{{/noCategory}}
 					<div>
 						<span id="{{question_uid}}">{{upvotes}}</span> upvotes<br>
 						<div onclick="upvote({{question_uid}});">Upvote</div>
 					</div>
 				</div>
+
 				<h1>{{title}}</h1>
 				<div>{{{body}}}</div>
 				<div>asked {{creation_date}} by <a href="/users/{{owner_uid}}">{{owner_name}}</a></div>
@@ -52,24 +71,27 @@
 					{{/tags}}
 				</div>
 
+				{{#isAdmin}}<div onclick="deletePost({{question_uid}}, undefined);">Delete question</div>{{/isAdmin}}
+
 				<!-- question comments -->
 				<div>
 					{{#comments}}
-						<div>
-							<div>{{{body}}}</div>
-							- <a href="/users/{{owner_uid}}">{{owner_name}}</a> at {{creation_date}}
-						</div>
+					<div>
+						<div>{{{body}}}</div>
+						- <a href="/users/{{owner_uid}}">{{owner_name}}</a> at {{creation_date}}
+					</div>
+					{{#isAdmin}}<div onclick="deleteComment({{uid}});">Delete comment</div>{{/isAdmin}}
 					{{/comments}}
 				</div>
 
 				{{#loggedIn}}
-					<!-- make question comment -->
-					<form method="POST" action="/newComment">
-						<input name="parent_question" value="{{question_uid}}" hidden>
-						<input name="parent_uid" value="{{question_uid}}" hidden>
-						<textarea name="body"></textarea>
-						<button type="submit">Post Comment</button>
-					</form>
+				<!-- make question comment -->
+				<form method="POST" action="/newComment">
+					<input name="parent_question" value="{{question_uid}}" hidden>
+					<input name="parent_uid" value="{{question_uid}}" hidden>
+					<textarea name="body"></textarea>
+					<button type="submit">Post Comment</button>
+				</form>
 				{{/loggedIn}}
 			</div>
 
@@ -82,25 +104,27 @@
 						<div onclick="upvote({{answer_uid}});">Upvote</div>
 						<div>{{{body}}}</div>
 						answered {{creation_date}} by <a href="/users/{{owner_uid}}">{{owner_name}}</a>
+						{{#isAdmin}}<div onclick="deletePost({{answer_uid}}, {{parent_question_uid}});">Delete answer</div>{{/isAdmin}}
 
 						<!-- answer comments -->
 						<div>
 							{{#answer_comments}}
-								<div>
-									<div>{{{body}}}</div>
-									- <a href="/users/{{owner_uid}}">{{owner_name}}</a> at {{creation_date}}
-								</div>
+							<div>
+								<div>{{{body}}}</div>
+								- <a href="/users/{{owner_uid}}">{{owner_name}}</a> at {{creation_date}}
+							</div>
+							{{#isAdmin}}<div onclick="deleteComment({{uid}});">Delete comment</div>{{/isAdmin}}
 							{{/answer_comments}}
 						</div>
 
 						{{#loggedIn}}
-							<!-- make answer comment -->
-							<form method="POST" action="/newComment">
-								<input name="parent_question" value="{{question_uid}}" hidden>
-								<input name="parent_uid" value="{{answer_uid}}" hidden>
-								<textarea name="body"></textarea>
-								<button type="submit">Post Comment</button>
-							</form>
+						<!-- make answer comment -->
+						<form method="POST" action="/newComment">
+							<input name="parent_question" value="{{question_uid}}" hidden>
+							<input name="parent_uid" value="{{answer_uid}}" hidden>
+							<textarea name="body"></textarea>
+							<button type="submit">Post Comment</button>
+						</form>
 						{{/loggedIn}}
 
 					</div>
@@ -108,27 +132,27 @@
 			</div>
 
 			{{#loggedIn}}
-				<!-- write an answer form -->
-				<h2>Your Answer</h2>
-				<form method="POST" action="/newPost">
-					<input hidden name="type" value="0">
-					<input hidden name="parent_question" value="{{question_uid}}">
-					<div class="wmd-panel">
-						<div id="wmd-button-bar"></div>
-						<textarea name="body" class="wmd-input" id="wmd-input"></textarea>
-					</div>
+			<!-- write an answer form -->
+			<h2>Your Answer</h2>
+			<form method="POST" action="/newPost">
+				<input hidden name="type" value="0">
+				<input hidden name="parent_question" value="{{question_uid}}">
+				<div class="wmd-panel">
+					<div id="wmd-button-bar"></div>
+					<textarea name="body" class="wmd-input" id="wmd-input"></textarea>
+				</div>
 
-					<div id="wmd-preview" class="wmd-panel wmd-preview"></div>
-					<button type="submit">Post Your Answer</button>
-				</form>
+				<div id="wmd-preview" class="wmd-panel wmd-preview"></div>
+				<button type="submit">Post Your Answer</button>
+			</form>
 
-				<script type="text/javascript">
-		            (function () {
-		                var converter = Markdown.getSanitizingConverter();
-		                var editor = new Markdown.Editor(converter);
-		                editor.run();
-		            })();
-		        </script>
+			<script type="text/javascript">
+				(function () {
+					var converter = Markdown.getSanitizingConverter();
+					var editor = new Markdown.Editor(converter);
+					editor.run();
+				})();
+	        </script>
 	        {{/loggedIn}}
 		</div>
 

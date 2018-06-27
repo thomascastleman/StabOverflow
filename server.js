@@ -250,6 +250,9 @@ app.get('/questions/:id', function(req, res) {
 				question_uid: question_uid
 			}, rows[0]);
 
+			// check if admin
+			render.isAdmin = render.loggedIn ? req.user.local.is_admin : false;
+
 			// convert MD to HTML
 			render.body = mdConverter.makeHtml(render.body);
 
@@ -558,6 +561,13 @@ app.post('/deletePost', isAdmin, function(req, res) {
 	con.query('DELETE FROM posts WHERE uid = ?;', [req.body.uid], function(err, rows) {
 		if (!err) {
 			res.send('Success');
+
+			// update answer count if answer
+			if (req.body.parent_question_uid) {
+				con.query('UPDATE posts SET answer_count = CASE WHEN answer_count > 0 THEN answer_count - 1 ELSE 0 END WHERE uid = ?;', [req.body.parent_question_uid], function(err, rows) {});
+			} else {
+				con.query('DELETE FROM posts WHERE parent_question_uid = ?;', [req.body.uid], function(err, rows) {});
+			}
 		} else {
 			res.render('error.html', { message: "Failed to remove post." });
 		}
