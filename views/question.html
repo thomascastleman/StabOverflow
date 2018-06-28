@@ -71,6 +71,8 @@
 				<h1>{{title}}</h1>
 				<div>{{{body}}}</div>
 				<div>asked {{creation_date}} by <a href="/users/{{owner_uid}}">{{owner_name}}</a></div>
+				{{#isQuestionOwner}}<a href="/editPost/{{question_uid}}">Edit this question</a>{{/isQuestionOwner}}
+
 				<div>
 					{{#tags}}
 						<span>{{tag}}</span>
@@ -110,6 +112,7 @@
 						<div onclick="upvote({{answer_uid}});">Upvote</div>
 						<div>{{{body}}}</div>
 						answered {{creation_date}} by <a href="/users/{{owner_uid}}">{{owner_name}}</a>
+						{{#isOwner}}<br><a href="/editPost/{{answer_uid}}">Edit this answer</a>{{/isOwner}}
 						{{#isAdmin}}<div onclick="deletePost({{answer_uid}}, {{parent_question_uid}});"><strong>Delete answer</strong></div>{{/isAdmin}}
 
 						<!-- answer comments -->

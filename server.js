@@ -250,8 +250,9 @@ app.get('/questions/:id', function(req, res) {
 				question_uid: question_uid
 			}, rows[0]);
 
-			// check if admin
+			// check if admin, if owns question
 			render.isAdmin = render.loggedIn ? req.user.local.is_admin : false;
+			if (render.loggedIn) render.isQuestionOwner = render.owner_uid == req.user.local.uid;
 
 			// convert MD to HTML
 			render.body = mdConverter.makeHtml(render.body);
@@ -276,6 +277,8 @@ app.get('/questions/:id', function(req, res) {
 							ans.body = mdConverter.makeHtml(ans.body);	// convert answers to HTML
 							ansIDtoIndex[ans.uid] = i;	// record answer ID to index
 							ans.answer_uid = ans.uid;	// put uid under name 'answer_uid'
+
+							if (render.loggedIn) ans.isOwner = ans.owner_uid == req.user.local.uid;
 						}
 					}
 					// get associated comments
@@ -426,7 +429,7 @@ app.post('/updatePost', isAuthenticated, function(req, res) {
 	con.query('SELECT type, parent_question_uid FROM posts WHERE uid = ? AND owner_uid = ?;', [req.body.uid, req.user.local.uid], function(err, rows) {
 		if (!err && rows !== undefined && rows.length > 0) {
 
-			var editMessage = '\n\n*Edited on ' + moment().format('M/DD/YYYY') + ':*\n\n';
+			var editMessage = '\n\n*Edited ' + moment().format('h:mm A M/D/YYYY') + ':*\n\n';
 
 			// apply edits
 			con.query('UPDATE posts SET body = concat(body, ?) WHERE uid = ?;', [editMessage + req.body.appendage, req.body.uid], function(err, rows2) {
