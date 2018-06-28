@@ -73,7 +73,6 @@ BEGIN
 	SELECT * FROM users WHERE uid = LAST_INSERT_ID();
 END;
 @@;
-DELIMITER ;
 
 -- create new question and get its uid
 DELIMITER @@;
@@ -83,7 +82,6 @@ BEGIN
 	SELECT LAST_INSERT_ID() AS redirect_uid;
 END;
 @@;
-DELIMITER ;
 
 -- create new answer update answer_count of parent
 DELIMITER @@;
