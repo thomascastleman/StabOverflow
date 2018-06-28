@@ -33,3 +33,18 @@ INSERT INTO upvotes (post_uid, user_uid) VALUES
 	(1, 3),
 	(1, 4),
 	(3, 5);
+
+INSERT INTO stems (stem) VALUES
+	("word"),
+	("another"),
+	("test"),
+	("this"),
+	("interesting"),
+	("query");
+
+INSERT INTO scores (stem_uid, post_uid, score) VALUES
+	(1, 2, 300),
+	(2, 3, 120),
+	(3, 2, 220),
+	(3, 1, 10),
+	(4, 2, 100);

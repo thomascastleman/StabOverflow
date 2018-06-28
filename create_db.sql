@@ -65,6 +65,24 @@ CREATE TABLE upvotes (
 	FOREIGN KEY (user_uid) REFERENCES users(uid)
 );
 
+-- word stems from posts
+CREATE TABLE stems (
+	uid INT NOT NULL AUTO_INCREMENT,
+	stem VARCHAR(16),
+	PRIMARY KEY (uid)
+);
+
+-- stem scoring with posts
+CREATE TABLE scores (
+	uid INT NOT NULL AUTO_INCREMENT,
+	stem_uid INT,
+	post_uid INT,
+	score FLOAT,
+	PRIMARY KEY (uid),
+	FOREIGN KEY (stem_uid) REFERENCES stems(uid),
+	FOREIGN KEY (post_uid) REFERENCES posts(uid) ON DELETE CASCADE
+);
+
 -- add new user and get their information
 DELIMITER @@;
 CREATE PROCEDURE create_user (IN user_email VARCHAR(32), IN user_name VARCHAR(32))
@@ -92,3 +110,11 @@ BEGIN
 END;
 @@;
 DELIMITER ;
+
+
+
+
+---------------------------------------------
+
+
+SELECT redirect_uid, group_uid, SUM(score) AS score, title, type, owner_uid, owner_name, creation_date FROM (SELECT scores.score, IFNULL(posts.parent_question_uid, posts.uid) AS redirect_uid, posts.uid AS group_uid, posts.title, posts.type, posts.owner_uid, posts.owner_name, posts.creation_date FROM stems JOIN scores ON stems.uid = scores.stem_uid JOIN posts ON scores.post_uid = posts.uid WHERE stems.stem IN ("word", "test", "this", "interesting")) AS results GROUP BY group_uid ORDER BY score DESC;
