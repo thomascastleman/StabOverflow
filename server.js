@@ -22,6 +22,11 @@ app.set('views', __dirname + '/views');
 app.use(express.static(__dirname + '/public'));
 app.use(express.static(__dirname + '/views'));
 
+var constants = {
+	numQuestionsOnLanding: 30,		// number of recent questions shown on the landing page
+	numPostsOnUserPage: 20			// number of posts shown on user page
+}
+
 passport.serializeUser(function(user, done) {
 	// lookup user in system
 	con.query('SELECT * FROM users WHERE email = ?;', [user.email], function(err, rows) {
@@ -32,13 +37,11 @@ passport.serializeUser(function(user, done) {
 		// if email domain legitimate
 		} else if (/.+?@(students\.)?stab\.org/.test(user.email)) {
 			// create new user
-			con.query('INSERT INTO users (email, full_name) VALUES (?, ?);', [user.email, user.displayName], function(err, rows) {
-				con.query('SELECT * FROM users WHERE email = ?;', [user.email], function(err, rows) {
-					if (!err && rows !== undefined && rows.length > 0) {
-						user.local = rows[0];
-					}
-					done(null, user);
-				});
+			con.query('CALL create_user(?, ?);', [user.email, user.displayName], function(err, rows) {
+				if (!err && rows !== undefined && rows.length > 0 && rows[0].length > 0) {
+					user.local = rows[0][0];
+				}
+				done(null, user);
 			});
 		} else {
 			done("Your email cannot be used with this service. Please use a 'students.stab.org' or 'stab.org' email.", null);
@@ -154,8 +157,8 @@ app.get('/', function(req, res) {
 		user_uid: req.user ? (req.user.local ? req.user.local.uid : undefined) : undefined
 	};
 
-	// this pulls the 30 most recent questions
-	con.query('SELECT posts.*, categories.name AS category FROM posts LEFT OUTER JOIN categories ON posts.category_uid = categories.uid WHERE posts.type = 1 ORDER BY uid DESC LIMIT 30;', function(err, rows) {
+	// this pulls most recent questions
+	con.query('SELECT posts.*, categories.name AS category FROM posts LEFT OUTER JOIN categories ON posts.category_uid = categories.uid WHERE posts.type = 1 ORDER BY posts.uid DESC LIMIT ?;', [constants.numQuestionsOnLanding], function(err, rows) {
 		if (!err && rows !== undefined && rows.length > 0) {
 			// format time posted
 			for (var i = 0; i < rows.length; i++) {
@@ -202,9 +205,10 @@ app.get('/users/:id', function(req, res) {
 					render.answers_given = rows[0].answerCount ? rows[0].answerCount : 0;
 				}
 
-				con.query('SELECT IFNULL(p.parent_question_uid, p.uid) AS redirect_uid, IFNULL(q.title, p.title) AS title, p.type AS isQuestion, DATE_FORMAT(CASE WHEN p.type = 1 THEN p.creation_date ELSE q.creation_date END, "%M %D, %Y") date FROM posts p LEFT JOIN posts q ON p.parent_question_uid = q.uid WHERE p.owner_uid = ? ORDER BY p.uid DESC LIMIT 20;', [req.params.id], function(err, rows) {
+				// get recent questions and answers by this user
+				con.query('SELECT IFNULL(p.parent_question_uid, p.uid) AS redirect_uid, IFNULL(q.title, p.title) AS title, p.type AS isQuestion, DATE_FORMAT(CASE WHEN p.type = 1 THEN p.creation_date ELSE q.creation_date END, "%M %D, %Y") date FROM posts p LEFT JOIN posts q ON p.parent_question_uid = q.uid WHERE p.owner_uid = ? ORDER BY p.uid DESC LIMIT ?;', [req.params.id, constants.numPostsOnUserPage], function(err, rows) {
 					if (!err && rows !== undefined && rows.length > 0) {
-
+						// convert to boolean
 						for (var i = 0; i < rows.length; i++) {
 							rows[i].isQuestion = !!rows[i].isQuestion;
 						}
@@ -333,9 +337,6 @@ app.get('/editPost/:id', restrictAuth, function(req, res) {
 	});
 });
 
-/*
-	THERE IS NO TAG PARSING GOING ON HERE ------------------------------------------------------------------->>
-*/
 // receive a new question or answer
 app.post('/newPost', isAuthenticated, function(req, res) {
 
@@ -352,21 +353,11 @@ app.post('/newPost', isAuthenticated, function(req, res) {
 			}
 
 			// insert question into posts
-			con.query('INSERT INTO posts (type, category_uid, owner_uid, owner_name, title, body) VALUES (1, ?, ?, ?, ?, ?);', 
-				[req.body.category_uid, req.user.local.uid, req.user.local.full_name, req.body.title, req.body.body], function(err, rows) {
-
-				if (!err) {
-					// get uid of this new question
-					con.query('SELECT LAST_INSERT_ID() AS uid;', function(err, rows) {
-						if (!err && rows !== undefined && rows.length > 0) {
-							// redirect to new question
-							res.redirect('/questions/' + rows[0].uid);
-						} else {
-							res.redirect('/');
-						}
-					});
+			con.query('CALL create_question(?, ?, ?, ?, ?);', [req.body.category_uid, req.user.local.uid, req.user.local.full_name, req.body.title, req.body.body], function(err, rows) {
+				if (!err && rows !== undefined && rows.length > 0 && rows[0].length > 0) {
+					res.redirect('/questions/' + rows[0][0].redirect_uid);
 				} else {
-					res.redirect('/');
+					res.render('error.html', { message: "Failed to post question." });
 				}
 			});
 
@@ -417,26 +408,31 @@ app.post('/newComment', isAuthenticated, function(req, res) {
 
 // append to an existing post
 app.post('/updatePost', isAuthenticated, function(req, res) {
-	// ensure editing own post
-	con.query('SELECT type, parent_question_uid FROM posts WHERE uid = ? AND owner_uid = ?;', [req.body.uid, req.user.local.uid], function(err, rows) {
-		if (!err && rows !== undefined && rows.length > 0) {
+	// avoid empty appendage
+	if (req.body.appendage != '') {
+		// ensure editing own post
+		con.query('SELECT type, parent_question_uid FROM posts WHERE uid = ? AND owner_uid = ?;', [req.body.uid, req.user.local.uid], function(err, rows) {
+			if (!err && rows !== undefined && rows.length > 0) {
 
-			var editMessage = '\n\n*Edited ' + moment().format('h:mm A M/D/YYYY') + ':*\n\n';
+				var editMessage = '\n\n*Edited ' + moment().format('h:mm A M/D/YYYY') + ':*\n\n';
 
-			// apply edits
-			con.query('UPDATE posts SET body = concat(body, ?) WHERE uid = ?;', [editMessage + req.body.appendage, req.body.uid], function(err, rows2) {
-				if (!err) {
-					var redirect_uid = rows[0].type == 1 ? req.body.uid : rows[0].parent_question_uid
-					// redirect to edited post
-					res.redirect(redirect_uid ? '/questions/' + redirect_uid : '/');
-				} else {
-					res.render('error.html', { message: "Failed to apply edits to post" });
-				}
-			});
-		} else {
-			res.render('error.html', { message: "You are unable to edit this post." });
-		}
-	});
+				// apply edits
+				con.query('UPDATE posts SET body = concat(body, ?) WHERE uid = ?;', [editMessage + req.body.appendage, req.body.uid], function(err, rows2) {
+					if (!err) {
+						var redirect_uid = rows[0].type == 1 ? req.body.uid : rows[0].parent_question_uid
+						// redirect to edited post
+						res.redirect(redirect_uid ? '/questions/' + redirect_uid : '/');
+					} else {
+						res.render('error.html', { message: "Failed to apply edits to post" });
+					}
+				});
+			} else {
+				res.render('error.html', { message: "You are unable to edit this post." });
+			}
+		});
+	} else {
+		res.render('error.html', { message: "Failed to make edits (empty appendage)" });
+	}
 });
 
 // receive request to upvote a post, send back delta to change post's count by in UI

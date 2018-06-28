@@ -64,3 +64,23 @@ CREATE TABLE upvotes (
 	FOREIGN KEY (post_uid) REFERENCES posts(uid) ON DELETE CASCADE,
 	FOREIGN KEY (user_uid) REFERENCES users(uid)
 );
+
+-- add new user and get their information
+DELIMITER @@;
+CREATE PROCEDURE create_user (IN user_email VARCHAR(32), IN user_name VARCHAR(32))
+BEGIN
+	INSERT INTO users (email, full_name) VALUES (user_email, user_name);
+	SELECT * FROM users WHERE uid = LAST_INSERT_ID();
+END;
+@@;
+DELIMITER ;
+
+-- create new question and get its uid
+DELIMITER @@;
+CREATE PROCEDURE create_question (IN category_uid INT, IN owner_uid INT, IN owner_name VARCHAR(32), IN title TEXT, IN body TEXT)
+BEGIN
+	INSERT INTO posts (type, category_uid, owner_uid, owner_name, title, body) VALUES (1, category_uid, owner_uid, owner_name, title, body);
+	SELECT LAST_INSERT_ID() AS redirect_uid;
+END;
+@@;
+DELIMITER ;
