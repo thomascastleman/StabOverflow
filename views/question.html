@@ -18,6 +18,12 @@
 					});
 			}
 
+			{{#loggedIn}}
+			function showCommentBox(id) {
+				$('#commentBox' + id).toggle();
+			}
+			{{/loggedIn}}
+
 			{{#isAdmin}}
 			// delete question / answer
 			function deletePost(uid, p_uid) {
@@ -85,8 +91,9 @@
 				</div>
 
 				{{#loggedIn}}
+				<a onclick="showCommentBox({{question_uid}});">Add a comment</a><br>
 				<!-- make question comment -->
-				<form id="commentBox{{question_uid}}" method="POST" action="/newComment">
+				<form hidden id="commentBox{{question_uid}}" method="POST" action="/newComment">
 					<input name="parent_question" value="{{question_uid}}" hidden>
 					<input name="parent_uid" value="{{question_uid}}" hidden>
 					<textarea name="body"></textarea>
@@ -119,16 +126,18 @@
 						</div>
 
 						{{#loggedIn}}
+						<a onclick="showCommentBox({{answer_uid}});">Add a comment</a><br>
 						<!-- make answer comment -->
-						<form id="commentBox{{answer_uid}}" method="POST" action="/newComment">
+						<form hidden id="commentBox{{answer_uid}}" method="POST" action="/newComment">
 							<input name="parent_question" value="{{question_uid}}" hidden>
 							<input name="parent_uid" value="{{answer_uid}}" hidden>
 							<textarea name="body"></textarea>
 							<button type="submit">Post Comment</button>
 						</form>
 						{{/loggedIn}}
-
 					</div>
+
+					<hr />
 				{{/answers}}
 			</div>
 
