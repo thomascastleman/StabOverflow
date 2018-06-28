@@ -40,8 +40,10 @@ passport.serializeUser(function(user, done) {
 			con.query('CALL create_user(?, ?);', [user.email, user.displayName], function(err, rows) {
 				if (!err && rows !== undefined && rows.length > 0 && rows[0].length > 0) {
 					user.local = rows[0][0];
+					done(null, user);
+				} else {
+					done("There was an error creating your profile.", null);
 				}
-				done(null, user);
 			});
 		} else {
 			done("Your email cannot be used with this service. Please use a 'students.stab.org' or 'stab.org' email.", null);
@@ -339,7 +341,6 @@ app.get('/editPost/:id', restrictAuth, function(req, res) {
 
 // receive a new question or answer
 app.post('/newPost', isAuthenticated, function(req, res) {
-
 	// check for empty request
 	if (req.body.body != '' && (req.body.title != '' || req.body.type == 0)) {
 		// if question
@@ -394,7 +395,7 @@ app.post('/newComment', isAuthenticated, function(req, res) {
 			if (!err) {
 				res.redirect('/questions/' + req.body.parent_question);
 			} else {
-				res.redirect('/');
+				res.render('error.html', { message: "Failed to post comment." });
 			}
 		});
 	} else {
@@ -415,8 +416,8 @@ app.post('/updatePost', isAuthenticated, function(req, res) {
 				// apply edits
 				con.query('UPDATE posts SET body = concat(body, ?) WHERE uid = ?;', [editMessage + req.body.appendage, req.body.uid], function(err, rows2) {
 					if (!err) {
-						var redirect_uid = rows[0].type == 1 ? req.body.uid : rows[0].parent_question_uid
 						// redirect to edited post
+						var redirect_uid = rows[0].type == 1 ? req.body.uid : rows[0].parent_question_uid
 						res.redirect(redirect_uid ? '/questions/' + redirect_uid : '/');
 					} else {
 						res.render('error.html', { message: "Failed to apply edits to post" });
@@ -474,11 +475,13 @@ app.post('/users/update', isAuthenticated, function(req, res) {
 					req.user.local.full_name = name;
 					req.user.local.bio = bio;
 
-					con.query('UPDATE posts, comments SET posts.owner_name = ?, comments.owner_name = ? WHERE posts.owner_uid = ? AND comments.owner_uid = ?;', [name, name, uid, uid], function(err, rows) {
-						res.redirect('/users/' + req.user.local.uid);
-					});
+					// update posts that stored this info
+					con.query('UPDATE posts, comments SET posts.owner_name = ?, comments.owner_name = ? WHERE posts.owner_uid = ? AND comments.owner_uid = ?;', [name, name, uid, uid], function(err, rows) {});
+					
+					// send back to updated user page
+					res.redirect('/users/' + req.user.local.uid);
 				} else {
-					res.render('error.html');
+					res.render('error.html', { message: "Failed to change user information." });
 				}
 			});
 		} else {
