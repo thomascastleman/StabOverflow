@@ -84,3 +84,13 @@ BEGIN
 END;
 @@;
 DELIMITER ;
+
+-- create new answer update answer_count of parent
+DELIMITER @@;
+CREATE PROCEDURE create_answer (IN parent_question_uid INT, IN owner_uid INT, IN owner_name VARCHAR(32), IN body TEXT)
+BEGIN
+	INSERT INTO posts (type, parent_question_uid, owner_uid, owner_name, body) VALUES (0, parent_question_uid, owner_uid, owner_name, body);
+	UPDATE posts SET answer_count = answer_count + 1 WHERE uid = parent_question_uid;
+END;
+@@;
+DELIMITER ;

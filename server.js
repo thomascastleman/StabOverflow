@@ -366,15 +366,11 @@ app.post('/newPost', isAuthenticated, function(req, res) {
 			// if legitimate parent question id
 			if (req.body.parent_question != undefined && !isNaN(parseInt(req.body.parent_question, 10))) {
 				// insert answer into posts
-				con.query('INSERT INTO posts (type, parent_question_uid, owner_uid, owner_name, body) VALUES (0, ?, ?, ?, ?);',
-					[req.body.parent_question, req.user.local.uid, req.user.local.full_name, req.body.body], function(err, rows) {
+				con.query('CALL create_answer(?, ?, ?, ?);', [req.body.parent_question, req.user.local.uid, req.user.local.full_name, req.body.body], function(err, rows) {
 					if (!err) {
-						// increment answer count on corresponding question
-						con.query('UPDATE posts SET answer_count = answer_count + 1 WHERE uid = ?;', [req.body.parent_question], function(err, rows) {
-							res.redirect('/questions/' + req.body.parent_question);
-						});
+						res.redirect('/questions/' + req.body.parent_question);
 					} else {
-						res.redirect('/');
+						res.render('error.html', { message: "Failed to post answer." });
 					}
 				});
 			} else {
