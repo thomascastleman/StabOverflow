@@ -72,13 +72,6 @@
 				<div>{{{body}}}</div>
 				<div>asked {{creation_date}} by <a href="/users/{{owner_uid}}">{{owner_name}}</a></div>
 				{{#isQuestionOwner}}<a href="/editPost/{{question_uid}}">Edit this question</a>{{/isQuestionOwner}}
-
-				<div>
-					{{#tags}}
-						<span>{{tag}}</span>
-					{{/tags}}
-				</div>
-
 				{{#isAdmin}}<div onclick="deletePost({{question_uid}}, undefined);"><strong>Delete question</strong></div>{{/isAdmin}}
 
 				<!-- question comments -->

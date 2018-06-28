@@ -23,11 +23,6 @@ INSERT INTO posts (parent_question_uid, type, category_uid, owner_uid, owner_nam
 
 	(NULL, 1, NULL, 1, "User One", NOW(), "Question?", "Here's another question.", 3, 0);
 
-INSERT INTO tags (tag, post_uid) VALUES
-	("test-question", 1),
-	("new-post", 1),
-	("testing", 1);
-
 INSERT INTO comments (parent_uid, parent_question_uid, owner_uid, owner_name, creation_date, body) VALUES
 	(2, 1, 2, "User Two", NOW(), "I think this is an interesting answer to the question"),
 	(2, 1, 1, "User One", NOW(), "I also thought the answer was interesting"),

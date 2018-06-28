@@ -216,7 +216,7 @@ app.get('/users/:id', function(req, res) {
 				});
 			});
 		} else {
-			res.render('usernotfound.html');
+			res.render('error.html', { message: "User not found." });
 		}
 	});
 });
@@ -260,56 +260,48 @@ app.get('/questions/:id', function(req, res) {
 			// compensate for lack of category
 			if (render.category_uid == null) render.noCategory = true;
 
-			// get associated tags
-			con.query('SELECT tag FROM tags WHERE post_uid = ?;', [question_uid], function(err, rows) {
+			// get associated answers, highest upvotes first
+			con.query('SELECT * FROM posts WHERE parent_question_uid = ? ORDER BY upvotes DESC;', [question_uid], function(err, rows) {
 				if (!err && rows !== undefined && rows.length > 0) {
-					render.tags = rows;
-				}
+					render.answers = rows;
 
-				// get associated answers, highest upvotes first
-				con.query('SELECT * FROM posts WHERE parent_question_uid = ? ORDER BY upvotes DESC;', [question_uid], function(err, rows) {
-					if (!err && rows !== undefined && rows.length > 0) {
-						render.answers = rows;
+					for (var i = 0; i < render.answers.length; i++) {
+						ans = render.answers[i];
 
-						for (var i = 0; i < render.answers.length; i++) {
-							ans = render.answers[i];
+						ans.body = mdConverter.makeHtml(ans.body);	// convert answers to HTML
+						ansIDtoIndex[ans.uid] = i;	// record answer ID to index
+						ans.answer_uid = ans.uid;	// put uid under name 'answer_uid'
 
-							ans.body = mdConverter.makeHtml(ans.body);	// convert answers to HTML
-							ansIDtoIndex[ans.uid] = i;	// record answer ID to index
-							ans.answer_uid = ans.uid;	// put uid under name 'answer_uid'
-
-							if (render.loggedIn) ans.isOwner = ans.owner_uid == req.user.local.uid;
-						}
+						if (render.loggedIn) ans.isOwner = ans.owner_uid == req.user.local.uid;
 					}
-					// get associated comments
-					con.query('SELECT * FROM comments WHERE parent_question_uid = ?;', [question_uid], function(err, rows) {
-						if (!err && rows !== undefined && rows.length > 0) {
-							render.comments = [];
+				}
+				// get associated comments
+				con.query('SELECT * FROM comments WHERE parent_question_uid = ?;', [question_uid], function(err, rows) {
+					if (!err && rows !== undefined && rows.length > 0) {
+						render.comments = [];
 
-							// assign comments to their parent posts
-							for (var i = 0; i < rows.length; i++) {
-								rows[i].body = mdConverter.makeHtml(rows[i].body);	// convert comments to HTML
+						// assign comments to their parent posts
+						for (var i = 0; i < rows.length; i++) {
+							rows[i].body = mdConverter.makeHtml(rows[i].body);	// convert comments to HTML
 
-								// attach comment to either question or parent answer
-								if (rows[i].parent_uid == question_uid) {
-									render.comments.push(rows[i]);
-								} else {
-									ans = render.answers[ansIDtoIndex[rows[i].parent_uid]];
-									if (!ans.answer_comments) ans.answer_comments = [];
-									ans.answer_comments.push(rows[i]);
-								}
+							// attach comment to either question or parent answer
+							if (rows[i].parent_uid == question_uid) {
+								render.comments.push(rows[i]);
+							} else {
+								ans = render.answers[ansIDtoIndex[rows[i].parent_uid]];
+								if (!ans.answer_comments) ans.answer_comments = [];
+								ans.answer_comments.push(rows[i]);
 							}
 						}
+					}
 
-						// render full question page
-						res.render('question.html', render);
-					});
-
+					// render full question page
+					res.render('question.html', render);
 				});
 			});
 		} else {
 			// question not found, send not found page
-			res.render('qnotfound.html');
+			res.render('error.html', { message: "Question not found." });
 		}
 	});
 });

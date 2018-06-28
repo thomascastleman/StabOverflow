@@ -55,15 +55,6 @@ CREATE TABLE comments (
 	FOREIGN KEY (owner_uid) REFERENCES users(uid)
 );
 
--- user-defined question tags
-CREATE TABLE tags (
-	uid INT NOT NULL AUTO_INCREMENT,
-	tag VARCHAR(16),
-	post_uid INT,
-	PRIMARY KEY (uid),
-	FOREIGN KEY (post_uid) REFERENCES posts(uid) ON DELETE CASCADE
-);
-
 -- which users have upvoted which posts
 CREATE TABLE upvotes (
 	uid INT NOT NULL AUTO_INCREMENT,
