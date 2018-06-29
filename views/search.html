@@ -13,7 +13,7 @@
 
 			Filter by Category
 			<select name="category">
-				<option value="All">All</option>
+				<option value="0">All</option>
 				{{#categories}}
 					<option value="{{uid}}">{{name}}</option>
 				{{/categories}}
@@ -35,17 +35,21 @@
 				<div>
 					<!-- category, upvotes, answers -->
 					<div>
-						{{^noCategory}}<div>Category: {{category}}</div>{{/noCategory}}
+						{{#category}}<div>Category: {{category}}</div>{{/category}}
 						<div>{{upvotes}} upvotes</div>
 						<div>{{answer_count}} answers</div>
 					</div>
 
 					<!-- title, owner, time -->
 					<div>
-						<div><a href='/questions/{{uid}}'>{{title}}</a></div>
-						<div>asked {{when_asked}} by <a href="/users/{{owner_uid}}">{{owner_name}}</a></div>
+						<div><a href='/questions/{{redirect_uid}}'>{{title}}</a></div>
+						<div>asked {{creation_date}} by <a href="/users/{{owner_uid}}">{{owner_name}}</a></div>
 					</div>
 				</div>
+				<br>
+			{{/results}}
+			{{^results}}
+			No results found!
 			{{/results}}
 		</div>
 

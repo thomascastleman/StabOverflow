@@ -616,21 +616,77 @@ app.post('/deleteComment', isAdmin, function(req, res) {
 	});
 });
 
+// post search query, render results
+app.post('/search', function(req, res) {
+	var catFilter = categoryFilter(req.body.category);
+	var ansFilter = answerFilter(req.body.answeredStatus);
+	var render = {};
 
+	// pull question categories
+	con.query('SELECT * FROM categories WHERE is_archived = 0;', function(err, categories) {
+		if (!err && categories !== undefined && categories.length > 0) {
+			render.categories = categories;
+		}
 
+		// search by query if possible
+		if (req.body.query) {
+			var query = parseQuery(req.body.query);
 
+			// get relevant posts
+			con.query('CALL query(?, ?, ?);', [query, catFilter, ansFilter], function(err, rows) {
+				if (!err && rows !== undefined && rows.length > 0 && rows[0].length > 0) {
+					console.log(rows);
+					render.results = rows[0];
+				}
 
+				res.render('search.html', render);
+			});
 
+		// search only by constraints if they exist
+		} else if (req.body.category && req.body.answeredStatus) {
+			
+			// get posts meeting constraints
+			con.query('CALL noquery(?, ?);', [catFilter, ansFilter], function(err, rows) {
+				if (!err && rows !== undefined && rows.length > 0 && rows[0].length > 0) {
+					console.log(rows);
+					render.results = rows[0];
+				}
 
+				res.render('search.html', render);	
+			});
+		// fallback
+		} else {
+			res.redirect('/search');
+		}
+	});
+});
 
+// given free text query, strip of stop words, etc, and format for SQL query
+function parseQuery(q) {
+	return "'word', 'another'";
+}
 
+// generated SQL to apply answer status constraint
+function answerFilter(status) {
+	if (status == "Unanswered") {
+		return " AND q.answer_count = 0";
+	} else if (status == "Answered") {
+		return " AND q.answer_count > 0";
+	} else {
+		return "";
+	}
+}
 
+// generate SQL to apply category constraint
+function categoryFilter(uid) {
+	uid = parseInt(uid, 10);
 
-
-
-
-
-
+	if (!uid || uid == 0) {
+		return "";
+	} else {
+		return " AND q.category_uid = " + uid;
+	}
+}
 
 
 
@@ -655,8 +711,6 @@ app.post('/deleteComment', isAdmin, function(req, res) {
 app.get('/testauth', function(req, res) {
 	res.send(req.user || "You are not authenticated.");
 });
-
-// templates testing: ---------------------------------------------------------
 
 app.get('/search', function(req, res) {
 	res.render('search.html', {
@@ -689,8 +743,4 @@ app.get('/search', function(req, res) {
 			}
 		]
 	});
-});
-
-app.post('/search', function(req, res) {
-	res.send(req.body);
 });

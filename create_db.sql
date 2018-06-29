@@ -115,7 +115,7 @@ DELIMITER //
 CREATE PROCEDURE query(IN q VARCHAR(65535), IN category_filter VARCHAR(65535), IN answer_filter VARCHAR(65535))
 BEGIN
     SET @query = CONCAT ("
-    	SELECT redirect_uid, SUM(score) AS score, title, owner_uid, owner_name, creation_date, answer_count, upvotes FROM (
+    	SELECT redirect_uid, SUM(score) AS score, title, owner_uid, owner_name, creation_date, answer_count, upvotes, category FROM (
 			SELECT 
 					scores.score,
 					q.uid AS redirect_uid,
@@ -124,11 +124,13 @@ BEGIN
 					q.owner_name,
 					q.creation_date,
 					q.answer_count,
-					q.upvotes FROM
-
+					q.upvotes,
+					c.name AS category
+			FROM
 				stems JOIN scores ON stems.uid = scores.stem_uid
 				JOIN posts p ON scores.post_uid = p.uid
-				JOIN posts q ON p.parent_question_uid = q.uid OR (p.type = 1 AND p.uid = q.uid)
+				JOIN posts q ON p.parent_question_uid = q.uid OR (p.type = 1 AND p.uid = q.uid) 
+				LEFT JOIN categories c ON q.category_uid = c.uid
 				WHERE 
 					stems.stem IN (", q, ")", category_filter, answer_filter, ") AS results 
 		GROUP BY redirect_uid 
@@ -136,5 +138,18 @@ BEGIN
 	PREPARE stmt FROM @query;
     EXECUTE stmt;
     DEALLOCATE PREPARE stmt;
+END //
+
+
+-- search posts without query; only filter by category and/or answered status
+DELIMITER //
+CREATE PROCEDURE noquery(IN category_filter VARCHAR(65535), IN answer_filter VARCHAR(65535))
+BEGIN
+	SET @query = CONCAT("SELECT q.uid AS redirect_uid, q.title, q.owner_uid, q.owner_name, q.creation_date, q.upvotes, q.answer_count, c.name AS category FROM 
+		posts q LEFT JOIN categories c ON q.category_uid = c.uid 
+		WHERE q.type = 1", category_filter, answer_filter, " ORDER BY q.uid DESC;");
+	PREPARE stmt FROM @query;
+	EXECUTE stmt;
+	DEALLOCATE PREPARE stmt;
 END //
 DELIMITER ;
