@@ -84,37 +84,57 @@ CREATE TABLE scores (
 );
 
 -- add new user and get their information
-DELIMITER @@;
+DELIMITER //;
 CREATE PROCEDURE create_user (IN user_email VARCHAR(32), IN user_name VARCHAR(32))
 BEGIN
 	INSERT INTO users (email, full_name) VALUES (user_email, user_name);
 	SELECT * FROM users WHERE uid = LAST_INSERT_ID();
 END;
-@@;
+//;
 
 -- create new question and get its uid
-DELIMITER @@;
+DELIMITER //;
 CREATE PROCEDURE create_question (IN category_uid INT, IN owner_uid INT, IN owner_name VARCHAR(32), IN title TEXT, IN body TEXT)
 BEGIN
 	INSERT INTO posts (type, category_uid, owner_uid, owner_name, title, body) VALUES (1, category_uid, owner_uid, owner_name, title, body);
 	SELECT LAST_INSERT_ID() AS redirect_uid;
 END;
-@@;
+//;
 
 -- create new answer update answer_count of parent
-DELIMITER @@;
+DELIMITER //;
 CREATE PROCEDURE create_answer (IN parent_question_uid INT, IN owner_uid INT, IN owner_name VARCHAR(32), IN body TEXT)
 BEGIN
 	INSERT INTO posts (type, parent_question_uid, owner_uid, owner_name, body) VALUES (0, parent_question_uid, owner_uid, owner_name, body);
 	UPDATE posts SET answer_count = answer_count + 1 WHERE uid = parent_question_uid;
 END;
-@@;
+//;
+
+-- get posts relevant to query ordered by score
+DELIMITER //
+CREATE PROCEDURE query(IN q VARCHAR(65535), IN category_filter VARCHAR(65535), IN answer_filter VARCHAR(65535))
+BEGIN
+    SET @query = CONCAT ("
+    	SELECT redirect_uid, SUM(score) AS score, title, owner_uid, owner_name, creation_date, answer_count, upvotes FROM (
+			SELECT 
+					scores.score,
+					q.uid AS redirect_uid,
+					q.title,
+					q.owner_uid,
+					q.owner_name,
+					q.creation_date,
+					q.answer_count,
+					q.upvotes FROM
+
+				stems JOIN scores ON stems.uid = scores.stem_uid
+				JOIN posts p ON scores.post_uid = p.uid
+				JOIN posts q ON p.parent_question_uid = q.uid OR (p.type = 1 AND p.uid = q.uid)
+				WHERE 
+					stems.stem IN (", q, ")", category_filter, answer_filter, ") AS results 
+		GROUP BY redirect_uid 
+		ORDER BY score DESC;");
+	PREPARE stmt FROM @query;
+    EXECUTE stmt;
+    DEALLOCATE PREPARE stmt;
+END //
 DELIMITER ;
-
-
-
-
----------------------------------------------
-
-
-SELECT redirect_uid, group_uid, SUM(score) AS score, title, type, owner_uid, owner_name, creation_date FROM (SELECT scores.score, IFNULL(posts.parent_question_uid, posts.uid) AS redirect_uid, posts.uid AS group_uid, posts.title, posts.type, posts.owner_uid, posts.owner_name, posts.creation_date FROM stems JOIN scores ON stems.uid = scores.stem_uid JOIN posts ON scores.post_uid = posts.uid WHERE stems.stem IN ("word", "test", "this", "interesting")) AS results GROUP BY group_uid ORDER BY score DESC;
