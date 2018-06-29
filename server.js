@@ -620,12 +620,32 @@ app.post('/deleteComment', isAdmin, function(req, res) {
 app.post('/search', function(req, res) {
 	var catFilter = categoryFilter(req.body.category);
 	var ansFilter = answerFilter(req.body.answeredStatus);
-	var render = {};
+	var render = {
+		query: req.body.query
+	};
 
 	// pull question categories
 	con.query('SELECT * FROM categories WHERE is_archived = 0;', function(err, categories) {
 		if (!err && categories !== undefined && categories.length > 0) {
 			render.categories = categories;
+
+			// register which category was filtered
+			for (var i = 0; i < categories.length; i++) {
+				if (categories[i].uid == req.body.category) {
+					categories[i].isSelected = true;
+					break;
+				}
+			}
+		}
+
+		// register which filter was used
+		switch (req.body.answeredStatus) {
+			case "All":
+				render.All = true; break;
+			case "Unanswered":
+				render.Unanswered = true; break;
+			case "Answered":
+				render.Answered = true; break;
 		}
 
 		// search by query if possible

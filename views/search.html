@@ -8,23 +8,23 @@
 		<!-- PUT NAVBAR HERE -->
 
 		<form name="secondary" method="POST" action="/search">
-			<input name="query" type="text">
+			<input name="query" type="text" value="{{query}}">
 			<input type="submit" value="Search"><br>
 
 			Filter by Category
 			<select name="category">
 				<option value="0">All</option>
 				{{#categories}}
-					<option value="{{uid}}">{{name}}</option>
+					<option {{#isSelected}}selected="selected" {{/isSelected}}value="{{uid}}">{{name}}</option>
 				{{/categories}}
 			</select>
 			<br>
 
 			Filter by answers
 			<select name="answeredStatus">
-				<option value="All">All</option>
-				<option value="Unanswered">Unanswered</option>
-				<option value="Answered">Answered</option>
+				<option {{#All}}selected="selected" {{/All}}value="All">All</option>
+				<option {{#Unanswered}}selected="selected" {{/Unanswered}}value="Unanswered">Unanswered</option>
+				<option {{#Answered}}selected="selected" {{/Answered}}value="Answered">Answered</option>
 			</select>
 		</form>
 
