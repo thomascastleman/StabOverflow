@@ -708,7 +708,26 @@ function categoryFilter(uid) {
 	}
 }
 
+// render search page with recent questions
+app.get('/search', function(req, res) {
+	var render = {};
 
+	// get categories for filters
+	con.query('SELECT * FROM categories WHERE is_archived = 0;', function(err, categories) {
+		if (!err && categories !== undefined && categories.length > 0) {
+			render.categories = categories;
+		}
+
+		// get recent posts
+		con.query('CALL noquery("", "");', function(err, rows) {
+			if (!err && rows !== undefined && rows.length > 0 && rows[0].length > 0) {
+				render.results = rows[0];
+			}
+
+			res.render('search.html', render);
+		});
+	});
+});
 
 
 
@@ -730,37 +749,4 @@ function categoryFilter(uid) {
 // debug oauth
 app.get('/testauth', function(req, res) {
 	res.send(req.user || "You are not authenticated.");
-});
-
-app.get('/search', function(req, res) {
-	res.render('search.html', {
-		loggedIn: true,
-		categories: [
-			{ name: "CSP", uid: 1 },
-			{ name: "HDS", uid: 2 },
-			{ name: "HSE", uid: 3 }
-		],
-		results: [
-			{
-				uid: 1,
-				title: "How do I do this?",
-				upvotes: 24,
-				answer_count: 1,
-				owner_name: "Test Name",
-				owner_uid: 314,
-				category: "CSP",
-				when_asked: "20 min ago",
-			},
-			{
-				uid: 2,
-				title: "What is the best way to ask a question?",
-				upvotes: 16,
-				answer_count: 0,
-				owner_name: "User Number 2",
-				owner_uid: 287,
-				category: "HSE",
-				when_asked: "46 min ago",
-			}
-		]
-	});
 });
