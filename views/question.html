@@ -64,6 +64,7 @@
 					{{^noCategory}}
 					<form name="getCategory" method="POST" action="/search">
 						<input name="category" value="{{category_uid}}" hidden>
+						<input name="answeredStatus" value="All" hidden>
 						<div onclick="document.getCategory.submit()">Category: {{category}}</div>
 					</form>
 					{{/noCategory}}
