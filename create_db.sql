@@ -68,7 +68,7 @@ CREATE TABLE upvotes (
 -- word stems from posts
 CREATE TABLE stems (
 	uid INT NOT NULL AUTO_INCREMENT,
-	stem VARCHAR(16),
+	stem VARCHAR(16) UNIQUE,
 	PRIMARY KEY (uid)
 );
 

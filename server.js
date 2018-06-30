@@ -10,6 +10,7 @@ var GoogleStrategy 		= require('passport-google-oauth2').Strategy;
 var passport 			= require('passport');
 var querystring			= require('querystring');
 var pagedown			= require('pagedown');
+var chunk				= require('lodash.chunk');
 var con					= require('./database.js').connection;
 var creds				= require('./credentials.js');
 var porterStemmer		= require('./porterstemmer.js');
@@ -712,7 +713,7 @@ function categoryFilter(uid) {
 // determine if word is irrelevant
 // (from https://gist.github.com/sebleier/554280)
 function isStopWord(w) {
-	return ["i", "me", "my", "myself", "we", "our", "ours", "ourselves", "you", "your", "yours", "yourself", "yourselves", "he", "him", "his", "himself", "she", "her", "hers", "herself", "it", "its", "itself", "they", "them", "their", "theirs", "themselves", "what", "which", "who", "whom", "this", "that", "these", "those", "am", "is", "are", "was", "were", "be", "been", "being", "have", "has", "had", "having", "do", "does", "did", "doing", "a", "an", "the", "and", "but", "if", "or", "because", "as", "until", "while", "of", "at", "by", "for", "with", "about", "against", "between", "into", "through", "during", "before", "after", "above", "below", "to", "from", "up", "down", "in", "out", "on", "off", "over", "under", "again", "further", "then", "once", "here", "there", "when", "where", "why", "how", "all", "any", "both", "each", "few", "more", "most", "other", "some", "such", "no", "nor", "not", "only", "own", "same", "so", "than", "too", "very", "s", "t", "can", "will", "just", "don", "should", "now"].indexOf(w) != -1;
+	return ["", "i", "me", "my", "myself", "we", "our", "ours", "ourselves", "you", "your", "yours", "yourself", "yourselves", "he", "him", "his", "himself", "she", "her", "hers", "herself", "it", "its", "itself", "they", "them", "their", "theirs", "themselves", "what", "which", "who", "whom", "this", "that", "these", "those", "am", "is", "are", "was", "were", "be", "been", "being", "have", "has", "had", "having", "do", "does", "did", "doing", "a", "an", "the", "and", "but", "if", "or", "because", "as", "until", "while", "of", "at", "by", "for", "with", "about", "against", "between", "into", "through", "during", "before", "after", "above", "below", "to", "from", "up", "down", "in", "out", "on", "off", "over", "under", "again", "further", "then", "once", "here", "there", "when", "where", "why", "how", "all", "any", "both", "each", "few", "more", "most", "other", "some", "such", "no", "nor", "not", "only", "own", "same", "so", "than", "too", "very", "s", "t", "can", "will", "just", "don", "should", "now"].indexOf(w) != -1;
 }
 
 // render search page with recent questions
@@ -736,10 +737,69 @@ app.get('/search', function(req, res) {
 	});
 });
 
-// make post accessible by search engine
+// make post accessible to search engine
 function indexPost(uid, title, body) {
-	console.log("indexing post with uid " + uid);
+
+	var re = new RegExp(/[^a-zA-Z ]/, 'g');
+	var words = (title + '\n' + body).toLowerCase().split(/\s/);
+	var stems = [], scores = {}, max;
+
+	// for each term in post
+	for (var i = 0; i < words.length; i++) {
+		words[i] = words[i].replace(re, '');	// strip punctuation
+
+		// if relevant, add stem
+		if (!isStopWord(words[i])) {
+			var stem = porterStemmer.stem(words[i]);
+			stems.push(stem);
+
+			// update frequency
+			if (!scores[stem]) scores[stem] = 0;
+			scores[stem]++;
+
+			// update maximum frequency
+			if (!max || scores[stem] > max) {
+				max = scores[stem];
+			}
+		}
+	}
+
+	// record stems in db
+	con.query('INSERT IGNORE INTO stems (stem) VALUES ?;', [chunk(stems, 1)], function(err, rows) {
+		if (!err) {
+			// get uid's
+			con.query('SELECT uid, stem FROM stems WHERE FIND_IN_SET(stem, ?);', [stems.join(',')], function(err, rows) {
+				if (!err && rows !== undefined && rows.length > 0) {
+					// finalize scores
+					var insertScores = [];
+					for (var i = 0; i < rows.length; i++) {
+						insertScores.push([rows[i].uid, uid, scores[rows[i].stem] / max]);
+					}
+
+					// insert scores
+					con.query('INSERT INTO scores (stem_uid, post_uid, score) VALUES ?;', [insertScores], function(err, rows) {});
+				}
+			});
+		}
+	});
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
