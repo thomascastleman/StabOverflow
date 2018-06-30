@@ -12,9 +12,11 @@
 			function upvote(uid) {
 				$.post('/upvote', { uid: uid })
 					.done(function(data) {
-						var $p = $('#' + uid);
-						var n = parseInt($p.text(), 10) + data.delta;
-						$p.text(n);
+						if (!isNaN(parseInt(data.delta, 10))) {
+							var $p = $('#' + uid);
+							var n = parseInt($p.text(), 10) + data.delta;
+							$p.text(n);
+						}
 					});
 			}
 
