@@ -12,6 +12,7 @@ var querystring			= require('querystring');
 var pagedown			= require('pagedown');
 var con					= require('./database.js').connection;
 var creds				= require('./credentials.js');
+var porterStemmer		= require('./porterstemmer.js');
 var mdConverter			= new pagedown.getSanitizingConverter();
 
 app.use(cookieParser());
@@ -620,9 +621,7 @@ app.post('/deleteComment', isAdmin, function(req, res) {
 app.post('/search', function(req, res) {
 	var catFilter = categoryFilter(req.body.category);
 	var ansFilter = answerFilter(req.body.answeredStatus);
-	var render = {
-		query: req.body.query
-	};
+	var render = { query: req.body.query };
 
 	// pull question categories
 	con.query('SELECT * FROM categories WHERE is_archived = 0;', function(err, categories) {
@@ -655,7 +654,6 @@ app.post('/search', function(req, res) {
 			// get relevant posts
 			con.query('CALL query(?, ?, ?);', [query, catFilter, ansFilter], function(err, rows) {
 				if (!err && rows !== undefined && rows.length > 0 && rows[0].length > 0) {
-					console.log(rows);
 					render.results = rows[0];
 				}
 
@@ -668,7 +666,6 @@ app.post('/search', function(req, res) {
 			// get posts meeting constraints
 			con.query('CALL noquery(?, ?);', [catFilter, ansFilter], function(err, rows) {
 				if (!err && rows !== undefined && rows.length > 0 && rows[0].length > 0) {
-					console.log(rows);
 					render.results = rows[0];
 				}
 
@@ -683,10 +680,22 @@ app.post('/search', function(req, res) {
 
 // given free text query, strip of stop words, etc, and format for SQL query
 function parseQuery(q) {
-	return "'word', 'another'";
+	// query preprocessing
+	var re = new RegExp(/[^a-zA-Z ]/, 'g'), query = [];
+	var words = q.replace(re, '');
+	words = words.toLowerCase().split(" ");
+
+	// filter out stop words, stem query terms
+	for (var i = 0; i < words.length; i++) {
+		if (!isStopWord(words[i])) {
+			query.push('"' + porterStemmer.stem(words[i]) + '"');
+		}
+	}
+
+	return query.join(',');
 }
 
-// generated SQL to apply answer status constraint
+// generate SQL to apply answer status constraint
 function answerFilter(status) {
 	if (status == "Unanswered") {
 		return " AND q.answer_count = 0";
@@ -706,6 +715,12 @@ function categoryFilter(uid) {
 	} else {
 		return " AND q.category_uid = " + uid;
 	}
+}
+
+// determine if word is irrelevant
+// (from https://gist.github.com/sebleier/554280)
+function isStopWord(w) {
+	return ["i", "me", "my", "myself", "we", "our", "ours", "ourselves", "you", "your", "yours", "yourself", "yourselves", "he", "him", "his", "himself", "she", "her", "hers", "herself", "it", "its", "itself", "they", "them", "their", "theirs", "themselves", "what", "which", "who", "whom", "this", "that", "these", "those", "am", "is", "are", "was", "were", "be", "been", "being", "have", "has", "had", "having", "do", "does", "did", "doing", "a", "an", "the", "and", "but", "if", "or", "because", "as", "until", "while", "of", "at", "by", "for", "with", "about", "against", "between", "into", "through", "during", "before", "after", "above", "below", "to", "from", "up", "down", "in", "out", "on", "off", "over", "under", "again", "further", "then", "once", "here", "there", "when", "where", "why", "how", "all", "any", "both", "each", "few", "more", "most", "other", "some", "such", "no", "nor", "not", "only", "own", "same", "so", "than", "too", "very", "s", "t", "can", "will", "just", "don", "should", "now"].indexOf(w) != -1;
 }
 
 // render search page with recent questions
@@ -728,13 +743,6 @@ app.get('/search', function(req, res) {
 		});
 	});
 });
-
-
-
-
-
-
-
 
 
 
