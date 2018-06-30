@@ -408,7 +408,7 @@ app.post('/newComment', isAuthenticated, function(req, res) {
 // append to an existing post
 app.post('/updatePost', isAuthenticated, function(req, res) {
 	// avoid empty appendage
-	if (req.body.appendage != '') {
+	if (req.body.appendage != '' && !isNaN(parseInt(req.body.uid, 10))) {
 		// ensure editing own post
 		con.query('SELECT type, parent_question_uid FROM posts WHERE uid = ? AND owner_uid = ?;', [req.body.uid, req.user.local.uid], function(err, rows) {
 			if (!err && rows !== undefined && rows.length > 0) {
@@ -421,6 +421,9 @@ app.post('/updatePost', isAuthenticated, function(req, res) {
 						// redirect to edited post
 						var redirect_uid = rows[0].type == 1 ? req.body.uid : rows[0].parent_question_uid
 						res.redirect(redirect_uid ? '/questions/' + redirect_uid : '/');
+
+						// index new appendage
+						indexPost(req.body.uid, "", req.body.appendage);
 					} else {
 						res.render('error.html', { message: "Failed to apply edits to post" });
 					}
