@@ -76,7 +76,7 @@
 
 				<h1>{{title}}</h1>
 				<div>{{{body}}}</div>
-				<div>asked {{creation_date}} by <a href="/users/{{owner_uid}}">{{owner_name}}</a></div>
+				<div>asked at {{creation_date}} by <a href="/users/{{owner_uid}}">{{owner_name}}</a></div>
 				{{#isQuestionOwner}}<a href="/editPost/{{question_uid}}">Edit this question</a>{{/isQuestionOwner}}
 				{{#isAdmin}}<div onclick="deletePost({{question_uid}}, undefined);"><strong>Delete question</strong></div>{{/isAdmin}}
 
@@ -111,7 +111,7 @@
 						<div><span id="{{answer_uid}}">{{upvotes}}</span> upvotes</div>
 						<a onclick="upvote({{answer_uid}});" title="Upvote if you found this answer helpful">Upvote</a>
 						<div>{{{body}}}</div>
-						answered {{creation_date}} by <a href="/users/{{owner_uid}}">{{owner_name}}</a>
+						answered at {{creation_date}} by <a href="/users/{{owner_uid}}">{{owner_name}}</a>
 						{{#isOwner}}<br><a href="/editPost/{{answer_uid}}">Edit this answer</a>{{/isOwner}}
 						{{#isAdmin}}<div onclick="deletePost({{answer_uid}}, {{parent_question_uid}});"><strong>Delete answer</strong></div>{{/isAdmin}}
 
@@ -120,7 +120,7 @@
 							{{#answer_comments}}
 							<div>
 								<div>{{{body}}}</div>
-								- <a href="/users/{{owner_uid}}">{{owner_name}}</a> at {{creation_date}}
+								- <a href="/users/{{owner_uid}}">{{owner_name}}</a> {{creation_date}}
 							</div>
 							{{#isAdmin}}<div onclick="deleteComment({{uid}});"><strong>Delete comment</strong></div>{{/isAdmin}}
 							{{/answer_comments}}

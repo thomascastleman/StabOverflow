@@ -123,7 +123,7 @@ BEGIN
 					q.title,
 					q.owner_uid,
 					q.owner_name,
-					q.creation_date,
+					DATE_FORMAT(q.creation_date, '%l:%i %p, %b %D, %Y') AS creation_date,
 					q.answer_count,
 					q.upvotes,
 					c.name AS category
@@ -146,9 +146,18 @@ END //
 DELIMITER //
 CREATE PROCEDURE noquery(IN category_filter VARCHAR(65535), IN answer_filter VARCHAR(65535))
 BEGIN
-	SET @query = CONCAT("SELECT q.uid AS redirect_uid, q.title, q.owner_uid, q.owner_name, q.creation_date, q.upvotes, q.answer_count, c.name AS category FROM 
-		posts q LEFT JOIN categories c ON q.category_uid = c.uid 
-		WHERE q.type = 1", category_filter, answer_filter, " ORDER BY q.uid DESC;");
+	SET @query = CONCAT("SELECT 
+			q.uid AS redirect_uid, 
+			q.title, 
+			q.owner_uid, 
+			q.owner_name, 
+			DATE_FORMAT(q.creation_date, '%l:%i %p, %b %D, %Y') AS creation_date,
+			q.upvotes, 
+			q.answer_count, 
+			c.name AS category 
+		FROM 
+			posts q LEFT JOIN categories c ON q.category_uid = c.uid 
+			WHERE q.type = 1", category_filter, answer_filter, " ORDER BY q.uid DESC;");
 	PREPARE stmt FROM @query;
 	EXECUTE stmt;
 	DEALLOCATE PREPARE stmt;

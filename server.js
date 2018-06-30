@@ -25,7 +25,7 @@ app.use(express.static(__dirname + '/public'));
 app.use(express.static(__dirname + '/views'));
 
 var settings = {
-	numQuestionsOnLanding: 30,		// number of recent questions shown on the landing page
+	numQuestionsOnLanding: 50,		// number of recent questions shown on the landing page
 	numPostsOnUserPage: 20			// number of posts shown on user page
 }
 
@@ -258,6 +258,8 @@ app.get('/questions/:id', function(req, res) {
 				question_uid: question_uid
 			}, rows[0]);
 
+			render.creation_date = moment(render.creation_date).format('h:mm A, MMM Do, YYYY');
+
 			// check if admin, if owns question
 			render.isAdmin = render.loggedIn ? req.user.local.is_admin : false;
 			if (render.loggedIn) render.isQuestionOwner = render.owner_uid == req.user.local.uid;
@@ -281,6 +283,8 @@ app.get('/questions/:id', function(req, res) {
 						ans.answer_uid = ans.uid;	// put uid under name 'answer_uid'
 
 						if (render.loggedIn) ans.isOwner = ans.owner_uid == req.user.local.uid;
+
+						ans.creation_date = moment(ans.creation_date).format('h:mm A, MMM Do, YYYY');
 					}
 				}
 				// get associated comments
@@ -290,7 +294,7 @@ app.get('/questions/:id', function(req, res) {
 
 						// assign comments to their parent posts
 						for (var i = 0; i < rows.length; i++) {
-							rows[i].body = mdConverter.makeHtml(rows[i].body);	// convert comments to HTML
+							rows[i].creation_date = moment(rows[i].creation_date).format('h:mm A, MMM Do');
 
 							// attach comment to either question or parent answer
 							if (rows[i].parent_uid == question_uid) {
