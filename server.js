@@ -347,17 +347,14 @@ app.post('/newPost', isAuthenticated, function(req, res) {
 		// if question
 		if (req.body.type == 1) {
 			// check uncategorized (id == 0)
-			if (!req.body.category_uid || req.body.category_uid == 0) {
-				req.body.category_uid = null;
-			} else {
-				req.body.category_uid = parseInt(req.body.category_uid, 10);
-				if (isNaN(req.body.category_uid)) req.body.category_uid = null;
-			}
+			req.body.category_uid = parseInt(req.body.category_uid, 10);
+			if (isNaN(req.body.category_uid)) req.body.category_uid = null;
 
 			// insert question into posts
 			con.query('CALL create_question(?, ?, ?, ?, ?);', [req.body.category_uid, req.user.local.uid, req.user.local.full_name, req.body.title, req.body.body], function(err, rows) {
 				if (!err && rows !== undefined && rows.length > 0 && rows[0].length > 0) {
-					res.redirect('/questions/' + rows[0][0].redirect_uid);
+					indexPost(rows[0][0].redirect_uid, req.body.title, req.body.body);	// index the new question
+					res.redirect('/questions/' + rows[0][0].redirect_uid);	// redirect to this question's page
 				} else {
 					res.render('error.html', { message: "Failed to post question." });
 				}
@@ -369,8 +366,9 @@ app.post('/newPost', isAuthenticated, function(req, res) {
 			if (req.body.parent_question != undefined && !isNaN(parseInt(req.body.parent_question, 10))) {
 				// insert answer into posts
 				con.query('CALL create_answer(?, ?, ?, ?);', [req.body.parent_question, req.user.local.uid, req.user.local.full_name, req.body.body], function(err, rows) {
-					if (!err) {
-						res.redirect('/questions/' + req.body.parent_question);
+					if (!err && rows !== undefined && rows.length > 0 && rows[0].length > 0) {
+						indexPost(rows[0][0].answer_uid, req.body.title, req.body.body);	// index the new answer
+						res.redirect('/questions/' + req.body.parent_question);	// redirect to parent question's page
 					} else {
 						res.render('error.html', { message: "Failed to post answer." });
 					}
@@ -378,6 +376,8 @@ app.post('/newPost', isAuthenticated, function(req, res) {
 			} else {
 				res.redirect('/');
 			}
+		} else {
+			res.redirect('/');
 		}
 	} else {
 		res.redirect('/');
@@ -637,15 +637,7 @@ app.post('/search', function(req, res) {
 			}
 		}
 
-		// register which filter was used
-		switch (req.body.answeredStatus) {
-			case "All":
-				render.All = true; break;
-			case "Unanswered":
-				render.Unanswered = true; break;
-			case "Answered":
-				render.Answered = true; break;
-		}
+		render[req.body.answeredStatus] = true;	// register which answer filter used
 
 		// search by query if possible
 		if (req.body.query) {
@@ -744,9 +736,10 @@ app.get('/search', function(req, res) {
 	});
 });
 
-
-
-
+// make post accessible by search engine
+function indexPost(uid, title, body) {
+	console.log("indexing post with uid " + uid);
+}
 
 
 

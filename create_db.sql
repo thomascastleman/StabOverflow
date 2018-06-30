@@ -107,6 +107,7 @@ CREATE PROCEDURE create_answer (IN parent_question_uid INT, IN owner_uid INT, IN
 BEGIN
 	INSERT INTO posts (type, parent_question_uid, owner_uid, owner_name, body) VALUES (0, parent_question_uid, owner_uid, owner_name, body);
 	UPDATE posts SET answer_count = answer_count + 1 WHERE uid = parent_question_uid;
+	SELECT LAST_INSERT_ID() AS answer_uid;
 END;
 //;
 
