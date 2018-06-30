@@ -791,6 +791,11 @@ function indexPost(uid, title, body) {
 	});
 }
 
+// fallback redirection to landing page
+app.get('*', function(req, res) {
+	res.redirect('/');
+});
+
 
 
 
