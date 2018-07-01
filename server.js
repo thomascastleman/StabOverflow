@@ -509,7 +509,7 @@ app.post('/addAccount', isAdmin, function(req, res) {
 				// insert new user into table
 				con.query('INSERT INTO users (email, full_name) VALUES (?, ?);', [req.body.email, req.body.name], function(err, rows) {
 					if (!err) {
-						res.send('Success');
+						res.redirect('/adminPortal');
 					} else {
 						res.render('error.html', { message: "There was a problem adding the new user." });
 					}
@@ -527,7 +527,7 @@ app.post('/addAccount', isAdmin, function(req, res) {
 app.post('/makeAdmin', isAdmin, function(req, res) {
 	con.query('UPDATE users SET is_admin = 1 WHERE email = ?;', [req.body.email], function(err, rows) {
 		if (!err) {
-			res.send('Success');
+			res.redirect('/adminPortal');
 		} else {
 			res.render('error.html', { message: "Failed to make '" + req.body.email + "' an admin." });
 		}
@@ -540,7 +540,7 @@ app.post('/removeAdmin', isAdmin, function(req, res) {
 	if (req.body.email != req.user.local.email) {
 		con.query('UPDATE users SET is_admin = 0 WHERE email = ?;', [req.body.email], function(err, rows) {
 			if (!err) {
-				res.send('Success');
+				res.redirect('/adminPortal');
 			} else {
 				res.render('error.html', { message: "Failed to remove admin privileges from '" + req.body.email + "'" });
 			}
@@ -554,7 +554,7 @@ app.post('/removeAdmin', isAdmin, function(req, res) {
 app.post('/newCategory', isAdmin, function(req, res) {
 	con.query('INSERT INTO categories (name) VALUES (?);', [req.body.category], function(err, rows) {
 		if (!err) {
-			res.send('Success');
+			res.redirect('/adminPortal');
 		} else {
 			res.render('error.html', { message: "Failed to add category." });
 		}
@@ -571,7 +571,7 @@ app.post('/removeCategory', isAdmin, function(req, res) {
 					// archive category
 					con.query('UPDATE categories SET is_archived = 1 WHERE uid = ?;', [req.body.uid], function(err, rows) {
 						if (!err) {
-							res.send('Success');
+							res.redirect('/adminPortal');
 						} else {
 							res.render('error.html', { message: "Failed to remove category." });
 						}
@@ -580,7 +580,7 @@ app.post('/removeCategory', isAdmin, function(req, res) {
 					// full delete category if never used
 					con.query('DELETE FROM categories WHERE uid = ?;', [req.body.uid], function(err, rows) {
 						if (!err) {
-							res.send('Success');
+							res.redirect('/adminPortal');
 						} else {
 							res.render('error.html', { message: "Unable to remove category" });
 						}
@@ -599,7 +599,7 @@ app.post('/removeCategory', isAdmin, function(req, res) {
 app.post('/deletePost', isAdmin, function(req, res) {
 	con.query('DELETE FROM posts WHERE uid = ?;', [req.body.uid], function(err, rows) {
 		if (!err) {
-			res.send('Success');
+			res.redirect('/adminPortal');
 
 			if (req.body.parent_question_uid) {
 				// update answer count if answer
@@ -618,7 +618,7 @@ app.post('/deletePost', isAdmin, function(req, res) {
 app.post('/deleteComment', isAdmin, function(req, res) {
 	con.query('DELETE FROM comments WHERE uid = ?;', [req.body.uid], function(err, rows) {
 		if (!err) {
-			res.send('Success');
+			res.redirect('/adminPortal');
 		} else {
 			res.render('error.html', { message: "Failed to delete comment." });
 		}
@@ -632,7 +632,7 @@ app.post('/search', function(req, res) {
 	var render = { query: req.body.query };
 
 	// pull question categories
-	con.query('SELECT * FROM categories WHERE is_archived = 0;', function(err, categories) {
+	con.query('SELECT * FROM categories;', function(err, categories) {
 		if (!err && categories !== undefined && categories.length > 0) {
 			render.categories = categories;
 
@@ -728,7 +728,7 @@ app.get('/search', function(req, res) {
 	var render = {};
 
 	// get categories for filters
-	con.query('SELECT * FROM categories WHERE is_archived = 0;', function(err, categories) {
+	con.query('SELECT * FROM categories;', function(err, categories) {
 		if (!err && categories !== undefined && categories.length > 0) {
 			render.categories = categories;
 		}

@@ -9,6 +9,16 @@
 		<script type="text/javascript" src="../pagedown/Markdown.Converter.js"></script>
         <script type="text/javascript" src="../pagedown/Markdown.Sanitizer.js"></script>
         <script type="text/javascript" src="../pagedown/Markdown.Editor.js"></script>
+        <script>
+			// confirm leaving page if data entered
+			window.onbeforeunload = function() {
+				if (document.questionForm.appendage.value == '') {
+					return;
+				} else {
+					return "Are you sure you want to leave the page? Data entered will not be saved.";
+				}
+			}
+		</script>
 	</head>
 	<body>
 		<!-- NAVBAR HERE -->
@@ -16,7 +26,7 @@
 		<h1>{{title}}</h1>
 		<div>{{{body}}}</div>
 
-		<form method="POST" action="/updatePost">
+		<form method="POST" action="/updatePost" name="questionForm">
 			<input name="uid" value="{{uid}}" hidden>
 
 			<center><h3>Type below to <em>add</em> to your original post.</h3></center>
@@ -27,7 +37,7 @@
 
             <div id="wmd-preview" class="wmd-panel wmd-preview"></div>
 
-			<center><button type="submit">Post Your Question</button></center>
+			<center><button type="submit" onclick="window.onbeforeunload = undefined;">Post Your Question</button></center>
 		</form>
 
 		<script type="text/javascript">

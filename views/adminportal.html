@@ -3,41 +3,42 @@
 	<head>
 		<meta charset="UTF-8">
 		<title>Stab Overflow</title>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
 	</head>
 	<body>
 		<!-- PUT NAVBAR HERE -->
 
 		<h1>Admin Portal</h1>
 
-		<form method="POST" action="/addAccount">
+		<form method="POST" action="/addAccount" name="account" onsubmit="return confirm('Are you sure you want to add ' + document.account.email.value + '?');">
 			Authorize a new account:<br>
 			<input name="name" type="text" placeholder="Full name"><br>
 			<input name="email" type="text" placeholder="Email"><br>
 			<button type="submit">Authorize</button>
 		</form>
 		<br>
-		<form method="POST" action="/makeAdmin">
+		<form method="POST" action="/makeAdmin" name="makeAdmin" onsubmit="return confirm('Are you sure you want to make ' + document.makeAdmin.email.value + ' an administrator?');">
 			Grant admin privileges:<br>
 			<input name="email" type="text" placeholder="Email (existing account)"><br>
 			<button type="submit">Grant privileges</button>
 		</form>
 		<br>
-		<form method="POST" action="/removeAdmin">
+		<form method="POST" action="/removeAdmin" name="removeAdmin" onsubmit="return confirm('Are you sure you want to revoke the privileges of ' + document.removeAdmin.email.value + '?');">
 			Revoke admin privileges:<br>
 			<input name="email" type="text" placeholder="Email (existing account)"><br>
 			<button type="submit">Revoke privileges</button>
 		</form>
 		<br>
-		<form method="POST" action="/newCategory">
+		<form method="POST" action="/newCategory" name="newCat" onsubmit="return confirm('Are you sure you want to create the category ' + document.newCat.category.value + '?');">
 			Create a new category:<br>
 			<input name="category" type="text" placeholder="Category name"><br>
 			<button type="submit">Create Category</button>
 		</form>
 		{{^categoryFail}}
 		<br>
-		<form method="POST" action="/removeCategory">
+		<form method="POST" action="/removeCategory" name="removeCat" onsubmit="return confirm('Are you sure you want to archive the category ' + $('#removeCat option:selected').text() + '? (Users will no longer be able to make posts under this category)');">
 			Archive an existing category:<br>
-			<select name="uid">
+			<select id="removeCat" name="uid">
 				{{#categories}}
 				<option value="{{uid}}">{{name}}</option>
 				{{/categories}}

@@ -9,13 +9,23 @@
 		<script type="text/javascript" src="pagedown/Markdown.Converter.js"></script>
         <script type="text/javascript" src="pagedown/Markdown.Sanitizer.js"></script>
         <script type="text/javascript" src="pagedown/Markdown.Editor.js"></script>
+		<script>
+			// confirm leaving page if data entered
+			window.onbeforeunload = function() {
+				if (document.questionForm.body.value == '' && document.questionForm.title.value == '') {
+					return;
+				} else {
+					return "Are you sure you want to leave the page? Data entered will not be saved.";
+				}
+			}
+		</script>
 	</head>
 	<body>
 		<!-- PUT NAVBAR HERE -->
 
 		<h2>Ask a Question</h2>
 
-		<form method="POST" action="/newPost">
+		<form method="POST" action="/newPost" name="questionForm">
 			<input hidden name="type" value="1">
 			<center>Title <input name="title" type="text"></center>
 
@@ -36,7 +46,7 @@
 				</select>
 				<br>
 
-				<button type="submit">Post Your Question</button>
+				<button type="submit" onclick="window.onbeforeunload = undefined;">Post Your Question</button>
 			</center>
 		</form>
 
