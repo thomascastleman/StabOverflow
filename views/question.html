@@ -58,7 +58,24 @@
         <script type="text/javascript" src="../pagedown/Markdown.Editor.js"></script>
 	</head>
 	<body>
-		<!-- PUT NAVBAR HERE -->
+		<div id="navbar">
+			<!-- put StabOverflow image here -->
+			<form name="search" method="POST" action="/search">
+				<input name="category" value="None" hidden>
+				<input name="answeredStatus" value="All" hidden>
+				<input name="query" type="text" placeholder="Search StabOverflow" onchange="document.search.submit()">
+			</form>
+			<a href="/search">Browse Questions</a>
+			{{#loggedIn}}
+				<a href="/logout">Log Out</a>
+				<a href="/users/{{user_uid}}">My Profile ({{username}})</a>
+			{{/loggedIn}}
+			{{^loggedIn}}
+				<a href="/auth/google">Log In</a>
+				<a href="/auth/google">Sign Up</a>
+			{{/loggedIn}}
+		</div>
+		
 		<div>
 			<!-- question -->
 			<div>

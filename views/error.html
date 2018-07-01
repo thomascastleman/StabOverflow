@@ -5,6 +5,24 @@
 		<title>Stab Overflow</title>
 	</head>
 	<body>
+		<div id="navbar">
+			<!-- put StabOverflow image here -->
+			<form name="search" method="POST" action="/search">
+				<input name="category" value="None" hidden>
+				<input name="answeredStatus" value="All" hidden>
+				<input name="query" type="text" placeholder="Search StabOverflow" onchange="document.search.submit()">
+			</form>
+			<a href="/search">Browse Questions</a>
+			{{#loggedIn}}
+				<a href="/logout">Log Out</a>
+				<a href="/users/{{user_uid}}">My Profile ({{username}})</a>
+			{{/loggedIn}}
+			{{^loggedIn}}
+				<a href="/auth/google">Log In</a>
+				<a href="/auth/google">Sign Up</a>
+			{{/loggedIn}}
+		</div>
+		
 		<h1>An error occured.</h1>
 		{{#message}}<p>{{message}}</p>{{/message}}
 	</body>

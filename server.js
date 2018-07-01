@@ -179,28 +179,36 @@ app.get('/', function(req, res) {
 
 // ask a question page, restricted
 app.get('/ask', restrictAuth, function(req, res) {
+	var render = {
+		loggedIn: req.isAuthenticated(),
+		username: req.user ? (req.user.local ? req.user.local.full_name : undefined) : undefined,
+		user_uid: req.user ? (req.user.local ? req.user.local.uid : undefined) : undefined
+	};
+
 	// get all un-archived categories
 	con.query('SELECT * FROM categories WHERE is_archived = 0;', function(err, rows) {
 		if (!err && rows !== undefined && rows.length > 0) {
-			res.render('ask.html', {
-				loggedIn: true,		// page restricted to auth'd users
-				categories: rows
-			});
-		} else {
-			res.render('ask.html', { loggedIn: true });
+			render.categories = rows;
 		}
+		res.render('ask.html', render);
 	});
 });
 
 // get user profile
 app.get('/users/:id', function(req, res) {
+	var render = {
+		loggedIn: req.isAuthenticated(),
+		username: req.user ? (req.user.local ? req.user.local.full_name : undefined) : undefined,
+		user_uid: req.user ? (req.user.local ? req.user.local.uid : undefined) : undefined
+	};
+
 	// get user corresponding to ID
 	con.query('SELECT * FROM users WHERE uid = ?;', [req.params.id], function(err, rows) {
 		if (!err && rows !== undefined && rows.length > 0) {
-			var render = rows[0];
-
+			render = Object.assign(rows[0], render);
+			
 			// check if user is visiting their own user page
-			render.ownProfile = req.isAuthenticated() && req.user.local.uid == req.params.id;
+			render.ownProfile = render.loggedIn && req.user.local.uid == req.params.id;
 
 			// count questions and answers
 			con.query('SELECT SUM(CASE WHEN type = 1 THEN 1 ELSE 0 END) questionCount, SUM(CASE WHEN type = 0 THEN 1 ELSE 0 END) answerCount FROM posts WHERE owner_uid = ?;', [req.params.id], function(err, rows) {
@@ -231,12 +239,19 @@ app.get('/users/:id', function(req, res) {
 
 // request UI for editing user profile
 app.get('/users/edit/:id', restrictAuth, function(req, res) {
+	var render = {
+		loggedIn: req.isAuthenticated(),
+		username: req.user ? (req.user.local ? req.user.local.full_name : undefined) : undefined,
+		user_uid: req.user ? (req.user.local ? req.user.local.uid : undefined) : undefined
+	};
+
 	// ensure editing OWN profile
 	if (req.user.local.uid == req.params.id) {
 		// pull user data
 		con.query('SELECT * FROM users WHERE uid = ?;', [req.user.local.uid], function(err, rows) {
 			if (!err && rows !== undefined && rows.length > 0) {
-				res.render('editprofile.html', rows[0]);
+				render = Object.assign(rows[0], render);
+				res.render('editprofile.html', render);
 			} else {
 				res.render('error.html', { message: "There was a problem accessing user information." });
 			}
@@ -248,16 +263,20 @@ app.get('/users/edit/:id', restrictAuth, function(req, res) {
 
 // get individual question page
 app.get('/questions/:id', function(req, res) {
-	var render = {}, ansIDtoIndex = {}, ans, question_uid = req.params.id;
+	var ansIDtoIndex = {}, ans, question_uid = req.params.id;
+	var render = {
+		loggedIn: req.isAuthenticated(),
+		username: req.user ? (req.user.local ? req.user.local.full_name : undefined) : undefined,
+		user_uid: req.user ? (req.user.local ? req.user.local.uid : undefined) : undefined,
+		question_uid: question_uid
+	};
 
 	// check if post exists & get its data
 	con.query('SELECT posts.*, categories.name AS category FROM posts LEFT OUTER JOIN categories ON posts.category_uid = categories.uid WHERE posts.uid = ? AND type = 1 LIMIT 1;', [question_uid], function(err, rows) {
 		if (!err && rows !== undefined && rows.length > 0) {
-			render = Object.assign({
-				loggedIn: req.isAuthenticated(),
-				question_uid: question_uid
-			}, rows[0]);
+			render = Object.assign(rows[0], render);
 
+			// format creation date
 			render.creation_date = moment(render.creation_date).format('h:mm A, MMM Do, YYYY');
 
 			// check if admin, if owns question
@@ -320,9 +339,14 @@ app.get('/questions/:id', function(req, res) {
 
 // allow admin to make special changes
 app.get('/adminPortal', restrictAdmin, function(req, res) {
+	var render = {
+		loggedIn: req.isAuthenticated(),
+		username: req.user ? (req.user.local ? req.user.local.full_name : undefined) : undefined,
+		user_uid: req.user ? (req.user.local ? req.user.local.uid : undefined) : undefined
+	};
 	con.query('SELECT * FROM categories WHERE is_archived = 0;', function(err, rows) {
 		if (!err && rows !== undefined && rows.length > 0) {
-			res.render('adminportal.html', { categories: rows });
+			res.render('adminportal.html', Object.assign({ categories: rows }, render));
 		} else {
 			res.render('adminportal.html', { categoryFail: true });
 		}
@@ -331,14 +355,20 @@ app.get('/adminPortal', restrictAdmin, function(req, res) {
 
 // request UI for editing existing post
 app.get('/editPost/:id', restrictAuth, function(req, res) {
+	var render = {
+		loggedIn: req.isAuthenticated(),
+		username: req.user ? (req.user.local ? req.user.local.full_name : undefined) : undefined,
+		user_uid: req.user ? (req.user.local ? req.user.local.uid : undefined) : undefined
+	};
+
 	// ensure editing own post
 	con.query('SELECT title, body FROM posts WHERE uid = ? AND owner_uid = ?;', [req.params.id, req.user.local.uid], function(err, rows) {
 		if (!err && rows !== undefined && rows.length > 0) {
-			res.render('editpost.html', {
+			res.render('editpost.html', Object.assign({
 				uid: req.params.id,
 				title: rows[0].title,
 				body: mdConverter.makeHtml(rows[0].body)
-			});
+			}, render));
 		} else {
 			res.render('error.html', { message: "Unable to edit post" });
 		}
@@ -629,7 +659,12 @@ app.post('/deleteComment', isAdmin, function(req, res) {
 app.post('/search', function(req, res) {
 	var catFilter = categoryFilter(req.body.category);
 	var ansFilter = answerFilter(req.body.answeredStatus);
-	var render = { query: req.body.query };
+	var render = {
+		loggedIn: req.isAuthenticated(),
+		username: req.user ? (req.user.local ? req.user.local.full_name : undefined) : undefined,
+		user_uid: req.user ? (req.user.local ? req.user.local.uid : undefined) : undefined,
+		query: req.body.query
+	};
 
 	// pull question categories
 	con.query('SELECT * FROM categories;', function(err, categories) {
@@ -725,7 +760,11 @@ function isStopWord(w) {
 
 // render search page with recent questions
 app.get('/search', function(req, res) {
-	var render = {};
+		var render = {
+		loggedIn: req.isAuthenticated(),
+		username: req.user ? (req.user.local ? req.user.local.full_name : undefined) : undefined,
+		user_uid: req.user ? (req.user.local ? req.user.local.uid : undefined) : undefined
+	};
 
 	// get categories for filters
 	con.query('SELECT * FROM categories;', function(err, categories) {
