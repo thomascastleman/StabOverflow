@@ -112,13 +112,13 @@ function checkReturnTo(req, res, next) {
 
 // middleware to restrict pages to authenticated users
 function restrictAuth(req, res, next) {
-	if (req.isAuthenticated()) return next();
+	if (req.isAuthenticated() && req.user.local) return next();
 	else res.redirect('/auth/google?returnTo=' + querystring.escape(req.url));
 }
 
 // middleware to restrict pages to admin users
 function restrictAdmin(req, res, next) {
-	if (req.isAuthenticated()) {
+	if (req.isAuthenticated() && req.user.local) {
 		if (req.user.local.is_admin) {
 			return next();
 		} else {
@@ -131,7 +131,7 @@ function restrictAdmin(req, res, next) {
 
 // middleware (mainly for POST reqs) to check if auth'd
 function isAuthenticated(req, res, next) {
-	if (req.isAuthenticated()) {
+	if (req.isAuthenticated() && req.user.local) {
 		return next();
 	} else {
 		res.redirect('/');
@@ -140,7 +140,7 @@ function isAuthenticated(req, res, next) {
 
 // middleware (POSTs) to check if requester is admin
 function isAdmin(req, res, next) {
-	if (req.isAuthenticated() && req.user.local.is_admin == 1) {
+	if (req.isAuthenticated() && req.user.local && req.user.local.is_admin == 1) {
 		return next();
 	} else {
 		res.redirect('/');
@@ -151,15 +151,18 @@ var server = app.listen(8080, function() {
 	console.log("StabOverflow server listening on port %d", server.address().port);
 });
 
+// generate render object
+function defaultRender(req) {
+	return {
+		loggedIn: req.isAuthenticated(),
+		username: req.user ? req.user.local.full_name : undefined,
+		user_uid: req.user ? req.user.local.uid : undefined,
+	}
+}
+
 // get landing page
 app.get('/', function(req, res) {
-	var render = {
-		loggedIn: req.isAuthenticated(),
-
-		// get these from session
-		username: req.user ? (req.user.local ? req.user.local.full_name : undefined) : undefined,
-		user_uid: req.user ? (req.user.local ? req.user.local.uid : undefined) : undefined
-	};
+	var render = defaultRender(req);
 
 	// this pulls most recent questions
 	con.query('SELECT posts.*, categories.name AS category FROM posts LEFT OUTER JOIN categories ON posts.category_uid = categories.uid WHERE posts.type = 1 ORDER BY posts.uid DESC LIMIT ?;', [settings.numQuestionsOnLanding], function(err, rows) {
@@ -179,11 +182,7 @@ app.get('/', function(req, res) {
 
 // ask a question page, restricted
 app.get('/ask', restrictAuth, function(req, res) {
-	var render = {
-		loggedIn: req.isAuthenticated(),
-		username: req.user ? (req.user.local ? req.user.local.full_name : undefined) : undefined,
-		user_uid: req.user ? (req.user.local ? req.user.local.uid : undefined) : undefined
-	};
+	var render = defaultRender(req);
 
 	// get all un-archived categories
 	con.query('SELECT * FROM categories WHERE is_archived = 0;', function(err, rows) {
@@ -196,11 +195,7 @@ app.get('/ask', restrictAuth, function(req, res) {
 
 // get user profile
 app.get('/users/:id', function(req, res) {
-	var render = {
-		loggedIn: req.isAuthenticated(),
-		username: req.user ? (req.user.local ? req.user.local.full_name : undefined) : undefined,
-		user_uid: req.user ? (req.user.local ? req.user.local.uid : undefined) : undefined
-	};
+	var render = defaultRender(req);
 
 	// get user corresponding to ID
 	con.query('SELECT * FROM users WHERE uid = ?;', [req.params.id], function(err, rows) {
@@ -239,11 +234,7 @@ app.get('/users/:id', function(req, res) {
 
 // request UI for editing user profile
 app.get('/users/edit/:id', restrictAuth, function(req, res) {
-	var render = {
-		loggedIn: req.isAuthenticated(),
-		username: req.user ? (req.user.local ? req.user.local.full_name : undefined) : undefined,
-		user_uid: req.user ? (req.user.local ? req.user.local.uid : undefined) : undefined
-	};
+	var render = defaultRender(req);
 
 	// ensure editing OWN profile
 	if (req.user.local.uid == req.params.id) {
@@ -264,12 +255,8 @@ app.get('/users/edit/:id', restrictAuth, function(req, res) {
 // get individual question page
 app.get('/questions/:id', function(req, res) {
 	var ansIDtoIndex = {}, ans, question_uid = req.params.id;
-	var render = {
-		loggedIn: req.isAuthenticated(),
-		username: req.user ? (req.user.local ? req.user.local.full_name : undefined) : undefined,
-		user_uid: req.user ? (req.user.local ? req.user.local.uid : undefined) : undefined,
-		question_uid: question_uid
-	};
+	var render = defaultRender(req);
+	render.question_uid = question_uid;
 
 	// check if post exists & get its data
 	con.query('SELECT posts.*, categories.name AS category FROM posts LEFT OUTER JOIN categories ON posts.category_uid = categories.uid WHERE posts.uid = ? AND type = 1 LIMIT 1;', [question_uid], function(err, rows) {
@@ -339,11 +326,7 @@ app.get('/questions/:id', function(req, res) {
 
 // allow admin to make special changes
 app.get('/adminPortal', restrictAdmin, function(req, res) {
-	var render = {
-		loggedIn: req.isAuthenticated(),
-		username: req.user ? (req.user.local ? req.user.local.full_name : undefined) : undefined,
-		user_uid: req.user ? (req.user.local ? req.user.local.uid : undefined) : undefined
-	};
+	var render = defaultRender(req);
 	con.query('SELECT * FROM categories WHERE is_archived = 0;', function(err, rows) {
 		if (!err && rows !== undefined && rows.length > 0) {
 			res.render('adminportal.html', Object.assign({ categories: rows }, render));
@@ -355,11 +338,7 @@ app.get('/adminPortal', restrictAdmin, function(req, res) {
 
 // request UI for editing existing post
 app.get('/editPost/:id', restrictAuth, function(req, res) {
-	var render = {
-		loggedIn: req.isAuthenticated(),
-		username: req.user ? (req.user.local ? req.user.local.full_name : undefined) : undefined,
-		user_uid: req.user ? (req.user.local ? req.user.local.uid : undefined) : undefined
-	};
+	var render = defaultRender(req);
 
 	// ensure editing own post
 	con.query('SELECT title, body FROM posts WHERE uid = ? AND owner_uid = ?;', [req.params.id, req.user.local.uid], function(err, rows) {
@@ -659,12 +638,9 @@ app.post('/deleteComment', isAdmin, function(req, res) {
 app.post('/search', function(req, res) {
 	var catFilter = categoryFilter(req.body.category);
 	var ansFilter = answerFilter(req.body.answeredStatus);
-	var render = {
-		loggedIn: req.isAuthenticated(),
-		username: req.user ? (req.user.local ? req.user.local.full_name : undefined) : undefined,
-		user_uid: req.user ? (req.user.local ? req.user.local.uid : undefined) : undefined,
-		query: req.body.query
-	};
+
+	var render = defaultRender(req);
+	render.query = req.body.query;
 
 	// pull question categories
 	con.query('SELECT * FROM categories;', function(err, categories) {
@@ -760,12 +736,7 @@ function isStopWord(w) {
 
 // render search page with recent questions
 app.get('/search', function(req, res) {
-		var render = {
-		loggedIn: req.isAuthenticated(),
-		username: req.user ? (req.user.local ? req.user.local.full_name : undefined) : undefined,
-		user_uid: req.user ? (req.user.local ? req.user.local.uid : undefined) : undefined
-	};
-
+	var render = defaultRender(req);
 	// get categories for filters
 	con.query('SELECT * FROM categories;', function(err, categories) {
 		if (!err && categories !== undefined && categories.length > 0) {
@@ -829,6 +800,10 @@ function indexPost(uid, title, body) {
 		}
 	});
 }
+
+app.get('/testing', function(req, res) {
+	res.send("isAuth: " + req.isAuthenticated() + ", req.user: " + req.user);
+})
 
 // fallback redirection to landing page
 app.get('*', function(req, res) {

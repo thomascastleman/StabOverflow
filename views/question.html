@@ -68,7 +68,7 @@
 			<a href="/search">Browse Questions</a>
 			{{#loggedIn}}
 				<a href="/logout">Log Out</a>
-				<a href="/users/{{user_uid}}">My Profile ({{username}})</a>
+				{{#user_uid}}<a href="/users/{{user_uid}}">My Profile{{#username}} ({{username}}){{/username}}</a>{{/user_uid}}
 			{{/loggedIn}}
 			{{^loggedIn}}
 				<a href="/auth/google">Log In</a>
