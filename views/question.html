@@ -8,6 +8,15 @@
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
 
 		<script>
+			// confirm leaving page if data entered
+			window.onbeforeunload = function() {
+				if (document.answerForm.body.value == '') {
+					return;
+				} else {
+					return "Are you sure you want to leave the page? Data entered will not be saved.";
+				}
+			}
+
 			// script to apply upvoting changes in UI
 			function upvote(uid) {
 				$.post('/upvote', { uid: uid })
@@ -164,7 +173,7 @@
 			{{#loggedIn}}
 			<!-- write an answer form -->
 			<h2>Your Answer</h2>
-			<form method="POST" action="/newPost">
+			<form method="POST" action="/newPost" name="answerForm">
 				<input hidden name="type" value="0">
 				<input hidden name="parent_question" value="{{question_uid}}">
 				<div class="wmd-panel">
@@ -173,7 +182,7 @@
 				</div>
 
 				<div id="wmd-preview" class="wmd-panel wmd-preview"></div>
-				<button type="submit">Post Your Answer</button>
+				<button type="submit" onclick="window.onbeforeunload = undefined;">Post Your Answer</button>
 			</form>
 
 			<script type="text/javascript">
