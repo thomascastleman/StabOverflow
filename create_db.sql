@@ -7,7 +7,7 @@ USE staboverflow;
 -- all user accounts
 CREATE TABLE users (
 	uid INT NOT NULL AUTO_INCREMENT,
-	email VARCHAR(32),
+	email VARCHAR(45),
 	full_name VARCHAR(32),
 	bio VARCHAR(140),
 	is_admin TINYINT(1) DEFAULT 0,
@@ -17,7 +17,7 @@ CREATE TABLE users (
 -- admin-defined categories under which to post
 CREATE TABLE categories (
 	uid INT NOT NULL AUTO_INCREMENT,
-	name VARCHAR(16),
+	name VARCHAR(32),
 	is_archived TINYINT(1) DEFAULT 0,
 	PRIMARY KEY (uid)
 );
@@ -85,7 +85,7 @@ CREATE TABLE scores (
 
 -- add new user and get their information
 DELIMITER //;
-CREATE PROCEDURE create_user (IN user_email VARCHAR(32), IN user_name VARCHAR(32))
+CREATE PROCEDURE create_user (IN user_email VARCHAR(45), IN user_name VARCHAR(32))
 BEGIN
 	INSERT INTO users (email, full_name) VALUES (user_email, user_name);
 	SELECT * FROM users WHERE uid = LAST_INSERT_ID();

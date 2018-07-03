@@ -327,12 +327,22 @@ app.get('/questions/:id', function(req, res) {
 // allow admin to make special changes
 app.get('/adminPortal', restrictAdmin, function(req, res) {
 	var render = defaultRender(req);
-	con.query('SELECT * FROM categories WHERE is_archived = 0;', function(err, rows) {
-		if (!err && rows !== undefined && rows.length > 0) {
-			res.render('adminportal.html', Object.assign({ categories: rows }, render));
-		} else {
-			res.render('adminportal.html', { categoryFail: true });
+
+	// get all categories (for delete)
+	con.query('SELECT * FROM categories;', function(err, categories) {
+		if (!err && categories !== undefined && categories.length > 0) {
+			render.categories = categories;
+			render.loadedAllCategories = true;
 		}
+
+		// get only unarchived categories (for archive)
+		con.query('SELECT * FROM categories WHERE is_archived = 0;', function(err, unarchived) {
+			if (!err && unarchived !== undefined && unarchived.length > 0) {
+				render.unarchived = unarchived;
+				render.loadedUnarchived = true;
+			}
+			res.render('adminportal.html', render);
+		});
 	});
 });
 
@@ -570,8 +580,8 @@ app.post('/newCategory', isAdmin, function(req, res) {
 	});
 });
 
-// admin: remove an existing category by uid
-app.post('/removeCategory', isAdmin, function(req, res) {
+// admin: archive an existing category by uid
+app.post('/archiveCategory', isAdmin, function(req, res) {
 	if (req.body.uid) {
 		// check if category used
 		con.query('SELECT COUNT(*) AS count FROM posts WHERE category_uid = ?;', [req.body.uid], function(err, rows) {
@@ -582,7 +592,7 @@ app.post('/removeCategory', isAdmin, function(req, res) {
 						if (!err) {
 							res.redirect('/adminPortal');
 						} else {
-							res.render('error.html', { message: "Failed to remove category." });
+							res.render('error.html', { message: "Failed to archive category." });
 						}
 					});
 				} else {
@@ -597,6 +607,29 @@ app.post('/removeCategory', isAdmin, function(req, res) {
 				}
 			} else {
 				res.render('error.html', { message: "There was an error attempting to remove category" });
+			}
+		});
+	} else {
+		res.redirect('/');
+	}
+});
+
+// admin: fully delete an existing category
+app.post('/deleteCategory', isAdmin, function(req, res) {
+	if (req.body.uid) {
+		// flush all posts with this category
+		con.query('UPDATE posts SET category_uid = NULL WHERE category_uid = ?;', [req.body.uid], function(err, rows) {
+			if (!err) {
+				// full delete actual category
+				con.query('DELETE FROM categories WHERE uid = ?;', [req.body.uid], function(err, rows) {
+					if (!err) {
+						res.redirect('/adminPortal');
+					} else {
+						res.render('error.html', { message: "Failed to delete category." });
+					}
+				});
+			} else {
+				res.render('error.html', { message: "Failed to remove category from posts." });
 			}
 		});
 	} else {
@@ -801,39 +834,7 @@ function indexPost(uid, title, body) {
 	});
 }
 
-app.get('/testing', function(req, res) {
-	res.send("isAuth: " + req.isAuthenticated() + ", req.user: " + req.user);
-})
-
 // fallback redirection to landing page
 app.get('*', function(req, res) {
 	res.redirect('/');
-});
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// ---------------------------------- TESTING -------------------------------------------------------------
-
-// debug oauth
-app.get('/testauth', function(req, res) {
-	res.send(req.user || "You are not authenticated.");
 });

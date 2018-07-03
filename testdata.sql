@@ -8,7 +8,10 @@ INSERT INTO users (email, full_name, is_admin) VALUES
 	("user4@gmail.com", "User Four", 0),
 	("user5@gmail.com", "User Five", 0);
 
-INSERT INTO categories (name) VALUES ("CSP"), ("HDS"), ("HSE");
+INSERT INTO categories (name) VALUES
+	("Computer Science Principles"), 
+	("Honors Data Structures"), 
+	("Honors Software Engineering");
 
 INSERT INTO posts (parent_question_uid, type, category_uid, owner_uid, owner_name, creation_date, title, body, upvotes, answer_count) VALUES
 	-- a question and two answers
