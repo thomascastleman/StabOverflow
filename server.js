@@ -503,8 +503,8 @@ app.post('/users/update', isAuthenticated, function(req, res) {
 					req.user.local.full_name = name;
 					req.user.local.bio = bio;
 
-					// update posts that stored this info
-					con.query('UPDATE posts, comments SET posts.owner_name = ?, comments.owner_name = ? WHERE posts.owner_uid = ? AND comments.owner_uid = ?;', [name, name, uid, uid], function(err, rows) {});
+					// update name info stored in posts / comments
+					con.query('CALL name_change(?, ?);', [uid, name], function(err, rows) {});
 					
 					// send back to updated user page
 					res.redirect('/users/' + req.user.local.uid);

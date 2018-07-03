@@ -111,6 +111,15 @@ BEGIN
 END;
 //;
 
+-- apply name change
+DELIMITER //;
+CREATE PROCEDURE name_change (IN user_uid INT, IN user_name VARCHAR(32))
+BEGIN
+	UPDATE posts SET owner_name = user_name WHERE owner_uid = user_uid;
+	UPDATE comments SET owner_name = user_name WHERE owner_uid = user_uid;
+END;
+//;
+
 -- get posts relevant to query ordered by score
 DELIMITER //
 CREATE PROCEDURE query(IN q VARCHAR(65535), IN category_filter VARCHAR(65535), IN answer_filter VARCHAR(65535))
