@@ -23,12 +23,12 @@
 			{{/loggedIn}}
 		</div>
 
-		<form name="secondary" method="POST" action="/search">
+		<form name="secondarySearch" method="POST" action="/search">
 			<input name="query" type="text" value="{{query}}">
 			<input type="submit" value="Search"><br>
 
 			Filter by Category
-			<select name="category">
+			<select name="category" onchange="document.secondarySearch.submit();">
 				<option value="0">All</option>
 				{{#categories}}
 					<option {{#isSelected}}selected="selected" {{/isSelected}}value="{{uid}}">{{name}}</option>
@@ -37,7 +37,7 @@
 			<br>
 
 			Filter by answers
-			<select name="answeredStatus">
+			<select name="answeredStatus" onchange="document.secondarySearch.submit();">
 				<option {{#All}}selected="selected" {{/All}}value="All">All</option>
 				<option {{#Unanswered}}selected="selected" {{/Unanswered}}value="Unanswered">Unanswered</option>
 				<option {{#Answered}}selected="selected" {{/Answered}}value="Answered">Answered</option>
