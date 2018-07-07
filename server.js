@@ -547,13 +547,15 @@ app.post('/users/update', isAuthenticated, function(req, res) {
 
 // admin: add account to system manually
 app.post('/addAccount', isAdmin, function(req, res) {
+	var render = defaultRender(req);
 	con.query('SELECT COUNT(*) AS count FROM users WHERE email = ?;', [req.body.email], function(err, rows) {
 		if (!err && rows !== undefined && rows.length > 0) {
 			if (rows[0].count == 0) {
 				// insert new user into table
 				con.query('INSERT INTO users (email, display_name) VALUES (?, ?);', [req.body.email, req.body.name], function(err, rows) {
 					if (!err) {
-						res.redirect('/adminPortal');
+						render.message = "Successfully added user \"" + req.body.name + "\" with email \"" + req.body.email + "\"!";
+						res.render('adminsuccess.html', render);
 					} else {
 						res.render('error.html', { message: "There was a problem adding the new user." });
 					}
@@ -569,9 +571,11 @@ app.post('/addAccount', isAdmin, function(req, res) {
 
 // admin: make user admin by posting email
 app.post('/makeAdmin', isAdmin, function(req, res) {
+	var render = defaultRender(req);
 	con.query('UPDATE users SET is_admin = 1 WHERE email = ?;', [req.body.email], function(err, rows) {
 		if (!err) {
-			res.redirect('/adminPortal');
+			render.message = "Successfully promoted \"" + req.body.email + "\" to admin status!";
+			res.render('adminsuccess.html', render);
 		} else {
 			res.render('error.html', { message: "Failed to make '" + req.body.email + "' an admin." });
 		}
@@ -580,11 +584,13 @@ app.post('/makeAdmin', isAdmin, function(req, res) {
 
 // admin: remove user's admin privileges
 app.post('/removeAdmin', isAdmin, function(req, res) {
+	var render = defaultRender(req);
 	// safety: prevent admin from removing themself
 	if (req.body.email != req.user.local.email) {
 		con.query('UPDATE users SET is_admin = 0 WHERE email = ?;', [req.body.email], function(err, rows) {
 			if (!err) {
-				res.redirect('/adminPortal');
+				render.message = "Successfully revoked the admin privileges of \"" + req.body.email + "\"!";
+				res.render('adminsuccess.html', render);
 			} else {
 				res.render('error.html', { message: "Failed to remove admin privileges from '" + req.body.email + "'" });
 			}
@@ -596,9 +602,11 @@ app.post('/removeAdmin', isAdmin, function(req, res) {
 
 // admin: create a new category
 app.post('/newCategory', isAdmin, function(req, res) {
+	var render = defaultRender(req);
 	con.query('INSERT INTO categories (name) VALUES (?);', [req.body.category], function(err, rows) {
 		if (!err) {
-			res.redirect('/adminPortal');
+			render.message = "Successfully created the category \"" + req.body.category + "\"!";
+			res.render('adminsuccess.html', render);
 		} else {
 			res.render('error.html', { message: "Failed to add category." });
 		}
@@ -608,30 +616,21 @@ app.post('/newCategory', isAdmin, function(req, res) {
 // admin: archive an existing category by uid
 app.post('/archiveCategory', isAdmin, function(req, res) {
 	if (req.body.uid) {
-		// check if category used
-		con.query('SELECT COUNT(*) AS count FROM posts WHERE category_uid = ?;', [req.body.uid], function(err, rows) {
-			if (!err && rows !== undefined && rows.length > 0) {
-				if (rows[0].count > 0) {
-					// archive category
-					con.query('UPDATE categories SET is_archived = 1 WHERE uid = ?;', [req.body.uid], function(err, rows) {
-						if (!err) {
-							res.redirect('/adminPortal');
-						} else {
-							res.render('error.html', { message: "Failed to archive category." });
-						}
-					});
-				} else {
-					// full delete category if never used
-					con.query('DELETE FROM categories WHERE uid = ?;', [req.body.uid], function(err, rows) {
-						if (!err) {
-							res.redirect('/adminPortal');
-						} else {
-							res.render('error.html', { message: "Unable to remove category" });
-						}
-					});
-				}
+		var render = defaultRender(req);
+
+		// archive category
+		con.query('UPDATE categories SET is_archived = 1 WHERE uid = ?;', [req.body.uid], function(err, rows) {
+			if (!err) {
+				con.query('SELECT * FROM categories WHERE uid = ?;', [req.body.uid], function(err, rows) {
+					if (!err && rows !== undefined && rows.length > 0) {
+						render.message = "Successfully archived the category \"" + rows[0].name + "\"!";
+					} else {
+						render.message = "Successfully archived category."
+					}
+					res.render('adminsuccess.html', render);
+				});
 			} else {
-				res.render('error.html', { message: "There was an error attempting to remove category" });
+				res.render('error.html', { message: "Failed to archive category." });
 			}
 		});
 	} else {
@@ -642,19 +641,29 @@ app.post('/archiveCategory', isAdmin, function(req, res) {
 // admin: fully delete an existing category
 app.post('/deleteCategory', isAdmin, function(req, res) {
 	if (req.body.uid) {
-		// flush all posts with this category
-		con.query('UPDATE posts SET category_uid = NULL WHERE category_uid = ?;', [req.body.uid], function(err, rows) {
-			if (!err) {
-				// full delete actual category
-				con.query('DELETE FROM categories WHERE uid = ?;', [req.body.uid], function(err, rows) {
+		var render = defaultRender(req), category;
+		con.query('SELECT * FROM categories WHERE uid = ?;', [req.body.uid], function(err, rows) {
+			if (!err && rows !== undefined && rows.length > 0) {
+				category = rows[0].name;
+
+				// flush all posts with this category
+				con.query('UPDATE posts SET category_uid = NULL WHERE category_uid = ?;', [req.body.uid], function(err, rows) {
 					if (!err) {
-						res.redirect('/adminPortal');
+						// full delete actual category
+						con.query('DELETE FROM categories WHERE uid = ?;', [req.body.uid], function(err, rows) {
+							if (!err) {
+								render.message = "Successfully deleted the category \"" + category + "\"!";
+								res.render('adminsuccess.html', render);
+							} else {
+								res.render('error.html', { message: "Failed to delete category." });
+							}
+						});
 					} else {
-						res.render('error.html', { message: "Failed to delete category." });
+						res.render('error.html', { message: "Failed to remove category from posts." });
 					}
 				});
 			} else {
-				res.render('error.html', { message: "Failed to remove category from posts." });
+				res.render('error.html', { message: "Unable to delete. This category does not exist." });
 			}
 		});
 	} else {

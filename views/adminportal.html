@@ -55,9 +55,9 @@
 		<form method="POST" action="/archiveCategory" name="archiveCat" onsubmit="return confirm('Are you sure you want to archive the category ' + $('#archiveCat option:selected').text() + '? (Users will no longer be able to make posts under this category)');">
 			Archive an existing category:<br>
 			<select id="archiveCat" name="uid">
-				{{#categories}}
+				{{#unarchived}}
 				<option value="{{uid}}">{{name}}</option>
-				{{/categories}}
+				{{/unarchived}}
 			</select>
 			<br>
 			<button type="submit">Archive Category</button>

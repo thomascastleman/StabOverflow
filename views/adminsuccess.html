@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>Stab Overflow</title>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
+	</head>
+	<body>
+		<div id="navbar">
+			<!-- put StabOverflow image here -->
+			<form name="search" method="POST" action="/search">
+				<input name="category" value="None" hidden>
+				<input name="answeredStatus" value="All" hidden>
+				<input name="query" type="text" placeholder="Search StabOverflow" onchange="document.search.submit()">
+			</form>
+			<a href="/search">Browse Questions</a>
+			{{#loggedIn}}
+				<a href="/logout">Log Out</a>
+				{{#user_uid}}<a href="/users/{{user_uid}}">My Profile{{#username}} ({{username}}){{/username}}</a>{{/user_uid}}
+			{{/loggedIn}}
+			{{^loggedIn}}
+				<a href="/auth/google">Log In</a>
+				<a href="/auth/google">Sign Up</a>
+			{{/loggedIn}}
+		</div>
+
+		<h1>Admin Portal</h1>
+
+		<p>{{message}}</p>
+
+		<a href="/adminPortal">Back to Administrator Portal</a>
+	</body>
+</html>
