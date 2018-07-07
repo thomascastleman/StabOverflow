@@ -26,7 +26,7 @@
 		<h1>Edit your profile</h1>
 		<form method="POST" action="/users/update">
 			<input name="uid" value="{{uid}}" hidden>
-			Display Name: <input name="full_name" type="text" value="{{full_name}}" maxlength="32"><br>
+			Display Name: <input name="display_name" type="text" value="{{display_name}}" maxlength="32"><br>
 			Bio: <textarea name="bio" maxlength="140">{{bio}}</textarea>
 			<button type="submit">Save Profile</button>
 		</form>

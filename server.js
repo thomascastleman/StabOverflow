@@ -153,10 +153,16 @@ var server = app.listen(8080, function() {
 
 // generate render object
 function defaultRender(req) {
-	return {
-		loggedIn: req.isAuthenticated(),
-		username: req.user ? req.user.local.full_name : undefined,
-		user_uid: req.user ? req.user.local.uid : undefined,
+	if (req.user && req.user.local) {
+		return {
+			loggedIn: req.isAuthenticated(),
+			username: req.user.local.display_name,
+			user_uid: req.user.local.uid
+		}
+	} else {
+		return {
+			loggedIn: req.isAuthenticated()
+		};
 	}
 }
 
@@ -165,8 +171,9 @@ app.get('/', function(req, res) {
 	var render = defaultRender(req);
 
 	// this pulls most recent questions
-	con.query('SELECT posts.*, categories.name AS category FROM posts LEFT OUTER JOIN categories ON posts.category_uid = categories.uid WHERE posts.type = 1 ORDER BY posts.uid DESC LIMIT ?;', [settings.numQuestionsOnLanding], function(err, rows) {
+	con.query('SELECT posts.*, categories.name AS category, users.real_name AS owner_real, users.display_name AS owner_display FROM posts LEFT OUTER JOIN categories ON posts.category_uid = categories.uid JOIN users ON posts.owner_uid = users.uid WHERE posts.type = 1 ORDER BY posts.uid DESC LIMIT ?;', [settings.numQuestionsOnLanding], function(err, rows) {
 		if (!err && rows !== undefined && rows.length > 0) {
+
 			// format time posted
 			for (var i = 0; i < rows.length; i++) {
 				rows[i].when_asked = moment(rows[i].creation_date).fromNow();
@@ -259,7 +266,7 @@ app.get('/questions/:id', function(req, res) {
 	render.question_uid = question_uid;
 
 	// check if post exists & get its data
-	con.query('SELECT posts.*, categories.name AS category FROM posts LEFT OUTER JOIN categories ON posts.category_uid = categories.uid WHERE posts.uid = ? AND type = 1 LIMIT 1;', [question_uid], function(err, rows) {
+	con.query('SELECT posts.*, categories.name AS category, users.real_name AS owner_real, users.display_name AS owner_display FROM posts LEFT OUTER JOIN categories ON posts.category_uid = categories.uid JOIN users ON posts.owner_uid = users.uid WHERE posts.uid = ? AND type = 1 LIMIT 1;', [question_uid], function(err, rows) {
 		if (!err && rows !== undefined && rows.length > 0) {
 			render = Object.assign(rows[0], render);
 
@@ -277,7 +284,7 @@ app.get('/questions/:id', function(req, res) {
 			if (render.category_uid == null) render.noCategory = true;
 
 			// get associated answers, highest upvotes first
-			con.query('SELECT * FROM posts WHERE parent_question_uid = ? ORDER BY upvotes DESC;', [question_uid], function(err, rows) {
+			con.query('SELECT posts.*, users.real_name AS owner_real, users.display_name AS owner_display FROM posts JOIN users ON posts.owner_uid = users.uid WHERE parent_question_uid = ? ORDER BY upvotes DESC;', [question_uid], function(err, rows) {
 				if (!err && rows !== undefined && rows.length > 0) {
 					render.answers = rows;
 
@@ -288,13 +295,13 @@ app.get('/questions/:id', function(req, res) {
 						ansIDtoIndex[ans.uid] = i;	// record answer ID to index
 						ans.answer_uid = ans.uid;	// put uid under name 'answer_uid'
 
-						if (render.loggedIn) ans.isOwner = ans.owner_uid == req.user.local.uid;
+						if (render.loggedIn) ans.isOwner = (ans.owner_uid == req.user.local.uid);
 
 						ans.creation_date = moment(ans.creation_date).format('h:mm A, MMM Do, YYYY');
 					}
 				}
 				// get associated comments
-				con.query('SELECT * FROM comments WHERE parent_question_uid = ?;', [question_uid], function(err, rows) {
+				con.query('SELECT comments.*, users.real_name AS owner_real, users.display_name AS owner_display FROM comments JOIN users ON comments.owner_uid = users.uid WHERE parent_question_uid = ?;', [question_uid], function(err, rows) {
 					if (!err && rows !== undefined && rows.length > 0) {
 						render.comments = [];
 
@@ -375,7 +382,7 @@ app.post('/newPost', isAuthenticated, function(req, res) {
 			if (isNaN(req.body.category_uid)) req.body.category_uid = null;
 
 			// insert question into posts
-			con.query('CALL create_question(?, ?, ?, ?, ?);', [req.body.category_uid, req.user.local.uid, req.user.local.full_name, req.body.title, req.body.body], function(err, rows) {
+			con.query('CALL create_question(?, ?, ?, ?);', [req.body.category_uid, req.user.local.uid, req.body.title, req.body.body], function(err, rows) {
 				if (!err && rows !== undefined && rows.length > 0 && rows[0].length > 0) {
 					indexPost(rows[0][0].redirect_uid, req.body.title, req.body.body);	// index the new question
 					res.redirect('/questions/' + rows[0][0].redirect_uid);	// redirect to this question's page
@@ -389,7 +396,7 @@ app.post('/newPost', isAuthenticated, function(req, res) {
 			// if legitimate parent question id
 			if (req.body.parent_question != undefined && !isNaN(parseInt(req.body.parent_question, 10))) {
 				// insert answer into posts
-				con.query('CALL create_answer(?, ?, ?, ?);', [req.body.parent_question, req.user.local.uid, req.user.local.full_name, req.body.body], function(err, rows) {
+				con.query('CALL create_answer(?, ?, ?);', [req.body.parent_question, req.user.local.uid, req.body.body], function(err, rows) {
 					if (!err && rows !== undefined && rows.length > 0 && rows[0].length > 0) {
 						indexPost(rows[0][0].answer_uid, req.body.title, req.body.body);	// index the new answer
 						res.redirect('/questions/' + req.body.parent_question);	// redirect to parent question's page
@@ -413,8 +420,8 @@ app.post('/newComment', isAuthenticated, function(req, res) {
 	// check if request is legitimate
 	if (req.body.body != '' && !isNaN(parseInt(req.body.parent_question, 10)) && !isNaN(parseInt(req.body.parent_uid, 10))) {
 		// insert new comment
-		con.query('INSERT INTO comments (parent_uid, parent_question_uid, body, owner_uid, owner_name) VALUES (?, ?, ?, ?, ?);',
-			[req.body.parent_uid, req.body.parent_question, req.body.body, req.user.local.uid, req.user.local.full_name], function(err, rows) {
+		con.query('INSERT INTO comments (parent_uid, parent_question_uid, body, owner_uid) VALUES (?, ?, ?, ?);',
+			[req.body.parent_uid, req.body.parent_question, req.body.body, req.user.local.uid], function(err, rows) {
 
 			// direct to relevant question page
 			if (!err) {
@@ -492,19 +499,16 @@ app.post('/upvote', isAuthenticated, function(req, res) {
 
 // apply updates to a user's profile
 app.post('/users/update', isAuthenticated, function(req, res) {
-	var uid = req.body.uid, name = req.body.full_name, bio = req.body.bio;
+	var uid = req.body.uid, name = req.body.display_name, bio = req.body.bio;
 
 	if (!isNaN(parseInt(uid, 10))) {
 		// if user is authorized to make edits
 		if (uid == req.user.local.uid) {
-			con.query('UPDATE users SET full_name = ?, bio = ? WHERE uid = ?;', [name, bio, req.user.local.uid], function(err, rows) {
+			con.query('UPDATE users SET display_name = ?, bio = ? WHERE uid = ?;', [name, bio, req.user.local.uid], function(err, rows) {
 				if (!err) {
 					// update session info
-					req.user.local.full_name = name;
+					req.user.local.display_name = name;
 					req.user.local.bio = bio;
-
-					// update name info stored in posts / comments
-					con.query('CALL name_change(?, ?);', [uid, name], function(err, rows) {});
 					
 					// send back to updated user page
 					res.redirect('/users/' + req.user.local.uid);
@@ -526,7 +530,7 @@ app.post('/addAccount', isAdmin, function(req, res) {
 		if (!err && rows !== undefined && rows.length > 0) {
 			if (rows[0].count == 0) {
 				// insert new user into table
-				con.query('INSERT INTO users (email, full_name) VALUES (?, ?);', [req.body.email, req.body.name], function(err, rows) {
+				con.query('INSERT INTO users (email, display_name) VALUES (?, ?);', [req.body.email, req.body.name], function(err, rows) {
 					if (!err) {
 						res.redirect('/adminPortal');
 					} else {
@@ -833,6 +837,23 @@ function indexPost(uid, title, body) {
 		}
 	});
 }
+
+
+
+
+
+
+
+
+
+
+
+
+// ------------------- TESTING --------------
+app.get('/test', function(req, res) {
+	res.send(req.user);
+});
+// --------------------------------
 
 // fallback redirection to landing page
 app.get('*', function(req, res) {
