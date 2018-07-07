@@ -104,7 +104,10 @@
 
 				<h1>{{title}}</h1>
 				<div>{{{body}}}</div>
-				<div>asked at {{creation_date}} by <a href="/users/{{owner_uid}}" title="{{owner_real}}">{{owner_display}}</a></div>
+				<div>
+					asked at {{creation_date}} by <a href="/users/{{owner_uid}}" title="{{owner_real}}">{{owner_display}}</a>
+					{{#image_url}}<img src="{{image_url}}" width="50"/>{{/image_url}}
+				</div>
 				{{#isQuestionOwner}}<a href="/editPost/{{question_uid}}">Edit this question</a>{{/isQuestionOwner}}
 				{{#isAdmin}}<div onclick="deletePost({{question_uid}}, undefined);"><strong>Delete question</strong></div>{{/isAdmin}}
 
@@ -140,6 +143,7 @@
 						<a onclick="upvote({{answer_uid}});" title="Upvote if you found this answer helpful">Upvote</a>
 						<div>{{{body}}}</div>
 						answered at {{creation_date}} by <a href="/users/{{owner_uid}}" title="{{owner_real}}">{{owner_display}}</a>
+						{{#image_url}}<img src="{{image_url}}" width="50"/>{{/image_url}}
 						{{#isOwner}}<br><a href="/editPost/{{answer_uid}}">Edit this answer</a>{{/isOwner}}
 						{{#isAdmin}}<div onclick="deletePost({{answer_uid}}, {{parent_question_uid}});"><strong>Delete answer</strong></div>{{/isAdmin}}
 

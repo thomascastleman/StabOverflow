@@ -59,7 +59,10 @@
 					<!-- title, owner, time -->
 					<div>
 						<div><a href='/questions/{{redirect_uid}}'>{{title}}</a></div>
-						<div>asked {{creation_date}} by <a href="/users/{{owner_uid}}" title="{{owner_real}}">{{owner_display}}</a></div>
+						<div>
+							asked {{creation_date}} by <a href="/users/{{owner_uid}}" title="{{owner_real}}">{{owner_display}}</a>
+							{{#image_url}}<img src="{{image_url}}" width="50"/>{{/image_url}}
+						</div>
 					</div>
 				</div>
 				<br>

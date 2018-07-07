@@ -281,7 +281,7 @@ app.get('/questions/:id', function(req, res) {
 	render.question_uid = question_uid;
 
 	// check if post exists & get its data
-	con.query('SELECT posts.*, categories.name AS category, users.real_name AS owner_real, users.display_name AS owner_display FROM posts LEFT OUTER JOIN categories ON posts.category_uid = categories.uid JOIN users ON posts.owner_uid = users.uid WHERE posts.uid = ? AND type = 1 LIMIT 1;', [question_uid], function(err, rows) {
+	con.query('SELECT posts.*, categories.name AS category, users.real_name AS owner_real, users.display_name AS owner_display, users.image_url FROM posts LEFT OUTER JOIN categories ON posts.category_uid = categories.uid JOIN users ON posts.owner_uid = users.uid WHERE posts.uid = ? AND type = 1 LIMIT 1;', [question_uid], function(err, rows) {
 		if (!err && rows !== undefined && rows.length > 0) {
 			render = Object.assign(rows[0], render);
 
@@ -299,7 +299,7 @@ app.get('/questions/:id', function(req, res) {
 			if (render.category_uid == null) render.noCategory = true;
 
 			// get associated answers, highest upvotes first
-			con.query('SELECT posts.*, users.real_name AS owner_real, users.display_name AS owner_display FROM posts JOIN users ON posts.owner_uid = users.uid WHERE parent_question_uid = ? ORDER BY upvotes DESC;', [question_uid], function(err, rows) {
+			con.query('SELECT posts.*, users.real_name AS owner_real, users.display_name AS owner_display, users.image_url FROM posts JOIN users ON posts.owner_uid = users.uid WHERE parent_question_uid = ? ORDER BY upvotes DESC;', [question_uid], function(err, rows) {
 				if (!err && rows !== undefined && rows.length > 0) {
 					render.answers = rows;
 

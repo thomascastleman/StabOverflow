@@ -116,7 +116,7 @@ DELIMITER //
 CREATE PROCEDURE query(IN q VARCHAR(65535), IN category_filter VARCHAR(65535), IN answer_filter VARCHAR(65535))
 BEGIN
     SET @query = CONCAT ("
-    	SELECT redirect_uid, SUM(score) AS score, title, owner_uid, owner_real, owner_display, creation_date, answer_count, upvotes, category FROM (
+    	SELECT redirect_uid, SUM(score) AS score, title, owner_uid, owner_real, owner_display, image_url, creation_date, answer_count, upvotes, category FROM (
 			SELECT 
 					scores.score,
 					q.uid AS redirect_uid,
@@ -124,6 +124,7 @@ BEGIN
 					q.owner_uid,
 					users.real_name AS owner_real,
 					users.display_name AS owner_display,
+					users.image_url,
 					DATE_FORMAT(q.creation_date, '%l:%i %p, %b %D, %Y') AS creation_date,
 					q.answer_count,
 					q.upvotes,
@@ -154,6 +155,7 @@ BEGIN
 			q.owner_uid,
 			users.real_name AS owner_real,
 			users.display_name AS owner_display,
+			users.image_url,
 			DATE_FORMAT(q.creation_date, '%l:%i %p, %b %D, %Y') AS creation_date,
 			q.upvotes, 
 			q.answer_count, 
