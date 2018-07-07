@@ -9,6 +9,8 @@
 		<script type="text/javascript" src="../pagedown/Markdown.Converter.js"></script>
         <script type="text/javascript" src="../pagedown/Markdown.Sanitizer.js"></script>
         <script type="text/javascript" src="../pagedown/Markdown.Editor.js"></script>
+
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
         <script>
 			// confirm leaving page if data entered
 			window.onbeforeunload = function() {
@@ -62,6 +64,21 @@
                 var editor = new Markdown.Editor(converter);
                 editor.run();
             })();
+
+			var $input = $('#wmd-input');
+
+			// override tab from redirecting focus
+			$input.keydown(function(event) {
+				if (event.keyCode == 9) {
+					event.preventDefault();	// prevent refocus
+				    var cursorPos = $input.prop('selectionStart');
+				    var v = $input.val();
+				    var textBefore = v.substring(0,  cursorPos);
+				    var textAfter  = v.substring(cursorPos, v.length);
+				    $input.val(textBefore + "\t" + textAfter);
+				    document.questionForm.appendage.setSelectionRange(cursorPos + 1, cursorPos + 1);
+				}
+			});
         </script>
 	</body>
 </html>
