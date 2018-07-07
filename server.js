@@ -572,27 +572,43 @@ app.post('/addAccount', isAdmin, function(req, res) {
 // admin: make user admin by posting email
 app.post('/makeAdmin', isAdmin, function(req, res) {
 	var render = defaultRender(req);
-	con.query('UPDATE users SET is_admin = 1 WHERE email = ?;', [req.body.email], function(err, rows) {
-		if (!err) {
-			render.message = "Successfully promoted \"" + req.body.email + "\" to admin status!";
-			res.render('adminsuccess.html', render);
+	con.query('SELECT * FROM users WHERE email = ?;', [req.body.email], function(err, rows) {
+		if (!err && rows !== undefined && rows.length > 0) {
+			// apply updated privileges
+			con.query('UPDATE users SET is_admin = 1 WHERE uid = ?;', [rows[0].uid], function(err, rows) {
+				if (!err) {
+					render.message = "Successfully promoted \"" + req.body.email + "\" to admin status!";
+					res.render('adminsuccess.html', render);
+				} else {
+					res.render('error.html', { message: "Failed to make '" + req.body.email + "' an admin." });
+				}
+			});
 		} else {
-			res.render('error.html', { message: "Failed to make '" + req.body.email + "' an admin." });
+			res.render('error.html', { message: "User with email \"" + req.body.email + "\" does not exist." });
 		}
 	});
 });
 
 // admin: remove user's admin privileges
 app.post('/removeAdmin', isAdmin, function(req, res) {
-	var render = defaultRender(req);
 	// safety: prevent admin from removing themself
 	if (req.body.email != req.user.local.email) {
-		con.query('UPDATE users SET is_admin = 0 WHERE email = ?;', [req.body.email], function(err, rows) {
-			if (!err) {
-				render.message = "Successfully revoked the admin privileges of \"" + req.body.email + "\"!";
-				res.render('adminsuccess.html', render);
+		var render = defaultRender(req);
+
+		// verify that user exists
+		con.query('SELECT * FROM users WHERE email = ?;', [req.body.email], function(err, rows) {
+			if (!err && rows !== undefined && rows.length > 0) {
+				// apply demotion
+				con.query('UPDATE users SET is_admin = 0 WHERE uid = ?;', [rows[0].uid], function(err, rows) {
+					if (!err) {
+						render.message = "Successfully revoked the admin privileges of \"" + req.body.email + "\"!";
+						res.render('adminsuccess.html', render);
+					} else {
+						res.render('error.html', { message: "Failed to remove admin privileges from '" + req.body.email + "'" });
+					}
+				});
 			} else {
-				res.render('error.html', { message: "Failed to remove admin privileges from '" + req.body.email + "'" });
+				res.render('error.html', { message: "User with email \"" + req.body.email + "\" does not exist." });
 			}
 		});
 	} else {
