@@ -49,6 +49,12 @@ passport.serializeUser(function(user, done) {
 				con.query('UPDATE users SET image_url = ? WHERE uid = ?;', [img, user.local.uid], function(err, rows) {});
 			}
 
+			// ensure real name recorded
+			if (user.local.real_name == undefined) {
+				user.local.real_name = user.displayName;
+				con.query('UPDATE users SET real_name = ? WHERE uid = ?;', [user.displayName, user.local.uid], function(err, rows) {});
+			}
+
 			done(null, user);
 
 		// if email domain legitimate
