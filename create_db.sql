@@ -10,6 +10,7 @@ CREATE TABLE users (
 	email VARCHAR(45),
 	real_name VARCHAR(32),
 	display_name VARCHAR(32),
+	image_url VARCHAR(500),
 	bio VARCHAR(140),
 	is_admin TINYINT(1) DEFAULT 0,
 	PRIMARY KEY (uid)
@@ -84,9 +85,9 @@ CREATE TABLE scores (
 
 -- add new user and get their information
 DELIMITER //;
-CREATE PROCEDURE create_user (IN user_email VARCHAR(45), IN user_name VARCHAR(32))
+CREATE PROCEDURE create_user (IN user_email VARCHAR(45), IN user_name VARCHAR(32), IN image VARCHAR(500))
 BEGIN
-	INSERT INTO users (email, real_name, display_name) VALUES (user_email, user_name, user_name);
+	INSERT INTO users (email, real_name, display_name, image_url) VALUES (user_email, user_name, user_name, image);
 	SELECT * FROM users WHERE uid = LAST_INSERT_ID();
 END;
 //;

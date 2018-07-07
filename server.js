@@ -29,17 +29,32 @@ var settings = {
 	numPostsOnUserPage: 20			// number of posts shown on user page
 }
 
+// get image URL without ?sz=50 (size format)
+function stripImageURL(url) {
+	var patt = new RegExp(".+(?=\\?sz)");
+	return patt.exec(url);
+}
+
 passport.serializeUser(function(user, done) {
 	// lookup user in system
 	con.query('SELECT * FROM users WHERE email = ?;', [user.email], function(err, rows) {
 		if (!err && rows !== undefined && rows.length > 0) {
 			user.local = rows[0];
+
+			// check for profile image update
+			var img = stripImageURL(user._json.image.url);
+			if (img != user.local.image_url) {
+				// apply updates to session and in db
+				user.local.image_url = img;
+				con.query('UPDATE users SET image_url = ? WHERE uid = ?;', [img, user.local.uid], function(err, rows) {});
+			}
+
 			done(null, user);
 
 		// if email domain legitimate
 		} else if (/.+?@(students\.)?stab\.org/.test(user.email)) {
 			// create new user
-			con.query('CALL create_user(?, ?);', [user.email, user.displayName], function(err, rows) {
+			con.query('CALL create_user(?, ?, ?);', [user.email, user.displayName, stripImageURL(user._json.image.url)], function(err, rows) {
 				if (!err && rows !== undefined && rows.length > 0 && rows[0].length > 0) {
 					user.local = rows[0][0];
 					done(null, user);

@@ -22,7 +22,7 @@
 				<a href="/auth/google">Sign Up</a>
 			{{/loggedIn}}
 		</div>
-
+		{{#image_url}}<img src="{{image_url}}" width="170"/>{{/image_url}}
 		<h1>{{display_name}}</h1>
 		<h4>{{real_name}}</h4>
 		{{#is_admin}}<h3><em>Admin</em></h3>{{/is_admin}}

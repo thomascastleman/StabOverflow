@@ -8,6 +8,8 @@ INSERT INTO users (email, real_name, display_name, is_admin) VALUES
 	("user4@gmail.com", "Four's Real Name", "User Four", 0),
 	("user5@gmail.com", "Five's Real Name", "User Five", 0);
 
+UPDATE users SET image_url = "https://lh5.googleusercontent.com/-39Ro4gCIPRU/AAAAAAAAAAI/AAAAAAAAAAA/AAnnY7rq8oKrGNsJef9tJpeMK6l8CqW8dA/mo/photo.jpg";
+
 INSERT INTO categories (name) VALUES
 	("Computer Science Principles"), 
 	("Honors Data Structures"), 
