@@ -4,11 +4,9 @@ var app 				= express();
 var mustacheExpress 	= require('mustache-express');
 var bodyParser 			= require('body-parser');
 var cookieParser 		= require('cookie-parser');
-var moment 				= require('moment');
 var session 			= require('cookie-session');
 var passport 			= require('passport');
 var pagedown			= require('pagedown');
-var con					= require('./database.js').connection;
 var creds				= require('./credentials.js');
 var mdConverter			= new pagedown.getSanitizingConverter();
 
