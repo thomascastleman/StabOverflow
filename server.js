@@ -6,7 +6,6 @@ var bodyParser 			= require('body-parser');
 var cookieParser 		= require('cookie-parser');
 var moment 				= require('moment');
 var session 			= require('cookie-session');
-var GoogleStrategy 		= require('passport-google-oauth2').Strategy;
 var passport 			= require('passport');
 var querystring			= require('querystring');
 var pagedown			= require('pagedown');
@@ -24,73 +23,6 @@ app.set('views', __dirname + '/views');
 app.use(express.static(__dirname + '/public'));
 app.use(express.static(__dirname + '/views'));
 
-var settings = {
-	numQuestionsOnLanding: 50,		// number of recent questions shown on the landing page
-	numPostsOnUserPage: 20			// number of posts shown on user page
-}
-
-// get image URL without ?sz=50 (size format)
-function stripImageURL(url) {
-	var patt = new RegExp(".+(?=\\?sz)");
-	return patt.exec(url);
-}
-
-passport.serializeUser(function(user, done) {
-	// lookup user in system
-	con.query('SELECT * FROM users WHERE email = ?;', [user.email], function(err, rows) {
-		if (!err && rows !== undefined && rows.length > 0) {
-			user.local = rows[0];
-
-			// check for profile image update
-			var img = stripImageURL(user._json.image.url);
-			if (img != user.local.image_url) {
-				// apply updates to session and in db
-				user.local.image_url = img;
-				con.query('UPDATE users SET image_url = ? WHERE uid = ?;', [img, user.local.uid], function(err, rows) {});
-			}
-
-			// ensure real name recorded
-			if (user.local.real_name == undefined) {
-				user.local.real_name = user.displayName;
-				con.query('UPDATE users SET real_name = ? WHERE uid = ?;', [user.displayName, user.local.uid], function(err, rows) {});
-			}
-
-			done(null, user);
-
-		// if email domain legitimate
-		} else if (/.+?@(students\.)?stab\.org/.test(user.email)) {
-			// create new user
-			con.query('CALL create_user(?, ?, ?);', [user.email, user.displayName, stripImageURL(user._json.image.url)], function(err, rows) {
-				if (!err && rows !== undefined && rows.length > 0 && rows[0].length > 0) {
-					user.local = rows[0][0];
-					done(null, user);
-				} else {
-					done("There was an error creating your profile.", null);
-				}
-			});
-		} else {
-			done("Your email cannot be used with this service. Please use a 'students.stab.org' or 'stab.org' email.", null);
-		}
-	});
-});
-
-passport.deserializeUser(function(user, done) {
-	done(null, user);
-});
-
-passport.use(new GoogleStrategy({
-		clientID:		creds.GOOGLE_CLIENT_ID,
-		clientSecret:	creds.GOOGLE_CLIENT_SECRET,
-		callbackURL:	creds.domain + "/auth/google/callback",
-		passReqToCallback: true
-	},
-	function(request, accessToken, refreshToken, profile, done) {
-		process.nextTick(function () {
-			return done(null, profile);
-		});
-	}
-));
-
 app.use(session({ 
 	secret: creds.SESSION_SECRET,
 	name: 'session',
@@ -98,75 +30,12 @@ app.use(session({
 	saveUninitialized: true
 }));
 
-app.use(passport.initialize());
-app.use(passport.session());
-
-app.get('/auth/google', checkReturnTo, passport.authenticate('google', { scope: [
-		'https://www.googleapis.com/auth/userinfo.profile',
-		'https://www.googleapis.com/auth/userinfo.email'
-	]
-}));
-
-app.get('/auth/google/callback',
-	passport.authenticate('google', {
-		successReturnToOrRedirect: '/',
-		failureRedirect: '/failure'
-}));
-
-app.get('/failure', function(req, res) {
-	res.render('error.html', { message: "Unable to authenticate." });
-});
-
-app.get('/logout', function(req, res){
-	req.logout();
-	res.redirect('/');
-});
-
-function checkReturnTo(req, res, next) {
-	var returnTo = req.query['returnTo'];
-	if (returnTo) {
-		req.session = req.session || {};
-		req.session.returnTo = querystring.unescape(returnTo);
-	}
-	next();
+var settings = {
+	numQuestionsOnLanding: 50,		// number of recent questions shown on the landing page
+	numPostsOnUserPage: 20			// number of posts shown on user page
 }
 
-// middleware to restrict pages to authenticated users
-function restrictAuth(req, res, next) {
-	if (req.isAuthenticated() && req.user.local) return next();
-	else res.redirect('/auth/google?returnTo=' + querystring.escape(req.url));
-}
-
-// middleware to restrict pages to admin users
-function restrictAdmin(req, res, next) {
-	if (req.isAuthenticated() && req.user.local) {
-		if (req.user.local.is_admin) {
-			return next();
-		} else {
-			res.redirect('/');
-		}
-	} else {
-		res.redirect('/auth/google?returnTo=' + querystring.escape(req.url));
-	}
-}
-
-// middleware (mainly for POST reqs) to check if auth'd
-function isAuthenticated(req, res, next) {
-	if (req.isAuthenticated() && req.user.local) {
-		return next();
-	} else {
-		res.redirect('/');
-	}
-}
-
-// middleware (POSTs) to check if requester is admin
-function isAdmin(req, res, next) {
-	if (req.isAuthenticated() && req.user.local && req.user.local.is_admin == 1) {
-		return next();
-	} else {
-		res.redirect('/');
-	}
-}
+var auth = require('./auth.js').init(app, passport);
 
 var server = app.listen(8080, function() {
 	console.log("StabOverflow server listening on port %d", server.address().port);
@@ -209,7 +78,7 @@ app.get('/', function(req, res) {
 });
 
 // ask a question page, restricted
-app.get('/ask', restrictAuth, function(req, res) {
+app.get('/ask', auth.restrictAuth, function(req, res) {
 	var render = defaultRender(req);
 
 	// get all un-archived categories
@@ -261,7 +130,7 @@ app.get('/users/:id', function(req, res) {
 });
 
 // request UI for editing user profile
-app.get('/users/edit/:id', restrictAuth, function(req, res) {
+app.get('/users/edit/:id', auth.restrictAuth, function(req, res) {
 	var render = defaultRender(req);
 
 	// ensure editing OWN profile
@@ -353,7 +222,7 @@ app.get('/questions/:id', function(req, res) {
 });
 
 // allow admin to make special changes
-app.get('/adminPortal', restrictAdmin, function(req, res) {
+app.get('/adminPortal', auth.restrictAdmin, function(req, res) {
 	var render = defaultRender(req);
 
 	// get all categories (for delete)
@@ -375,7 +244,7 @@ app.get('/adminPortal', restrictAdmin, function(req, res) {
 });
 
 // request UI for editing existing post
-app.get('/editPost/:id', restrictAuth, function(req, res) {
+app.get('/editPost/:id', auth.restrictAuth, function(req, res) {
 	var render = defaultRender(req);
 
 	// ensure editing own post
@@ -393,7 +262,7 @@ app.get('/editPost/:id', restrictAuth, function(req, res) {
 });
 
 // receive a new question or answer
-app.post('/newPost', isAuthenticated, function(req, res) {
+app.post('/newPost', auth.isAuthenticated, function(req, res) {
 	// check for empty request
 	if (req.body.body != '' && (req.body.title != '' || req.body.type == 0)) {
 		// if question
@@ -437,7 +306,7 @@ app.post('/newPost', isAuthenticated, function(req, res) {
 });
 
 // receive a new comment
-app.post('/newComment', isAuthenticated, function(req, res) {
+app.post('/newComment', auth.isAuthenticated, function(req, res) {
 	// check if request is legitimate
 	if (req.body.body != '' && !isNaN(parseInt(req.body.parent_question, 10)) && !isNaN(parseInt(req.body.parent_uid, 10))) {
 		// insert new comment
@@ -457,7 +326,7 @@ app.post('/newComment', isAuthenticated, function(req, res) {
 });
 
 // append to an existing post
-app.post('/updatePost', isAuthenticated, function(req, res) {
+app.post('/updatePost', auth.isAuthenticated, function(req, res) {
 	// avoid empty appendage
 	if (req.body.appendage != '' && !isNaN(parseInt(req.body.uid, 10))) {
 		// ensure editing own post
@@ -489,7 +358,7 @@ app.post('/updatePost', isAuthenticated, function(req, res) {
 });
 
 // receive request to upvote a post, send back delta to change post's count by in UI
-app.post('/upvote', isAuthenticated, function(req, res) {
+app.post('/upvote', auth.isAuthenticated, function(req, res) {
 	if (req.body.uid && !isNaN(parseInt(req.body.uid))) {
 		// check for previous upvote to same post
 		con.query('SELECT COUNT(*) AS count FROM upvotes WHERE user_uid = ? AND post_uid = ?;', [req.user.local.uid, req.body.uid], function(err, rows) {
@@ -519,7 +388,7 @@ app.post('/upvote', isAuthenticated, function(req, res) {
 });
 
 // apply updates to a user's profile
-app.post('/users/update', isAuthenticated, function(req, res) {
+app.post('/users/update', auth.isAuthenticated, function(req, res) {
 	var uid = req.body.uid, name = req.body.display_name, bio = req.body.bio;
 
 	if (!isNaN(parseInt(uid, 10))) {
@@ -546,7 +415,7 @@ app.post('/users/update', isAuthenticated, function(req, res) {
 });
 
 // admin: add account to system manually
-app.post('/addAccount', isAdmin, function(req, res) {
+app.post('/addAccount', auth.isAdmin, function(req, res) {
 	var render = defaultRender(req);
 	con.query('SELECT COUNT(*) AS count FROM users WHERE email = ?;', [req.body.email], function(err, rows) {
 		if (!err && rows !== undefined && rows.length > 0) {
@@ -570,7 +439,7 @@ app.post('/addAccount', isAdmin, function(req, res) {
 });
 
 // admin: make user admin by posting email
-app.post('/makeAdmin', isAdmin, function(req, res) {
+app.post('/makeAdmin', auth.isAdmin, function(req, res) {
 	var render = defaultRender(req);
 	con.query('SELECT * FROM users WHERE email = ?;', [req.body.email], function(err, rows) {
 		if (!err && rows !== undefined && rows.length > 0) {
@@ -590,7 +459,7 @@ app.post('/makeAdmin', isAdmin, function(req, res) {
 });
 
 // admin: remove user's admin privileges
-app.post('/removeAdmin', isAdmin, function(req, res) {
+app.post('/removeAdmin', auth.isAdmin, function(req, res) {
 	// safety: prevent admin from removing themself
 	if (req.body.email != req.user.local.email) {
 		var render = defaultRender(req);
@@ -617,7 +486,7 @@ app.post('/removeAdmin', isAdmin, function(req, res) {
 });
 
 // admin: create a new category
-app.post('/newCategory', isAdmin, function(req, res) {
+app.post('/newCategory', auth.isAdmin, function(req, res) {
 	var render = defaultRender(req);
 	con.query('INSERT INTO categories (name) VALUES (?);', [req.body.category], function(err, rows) {
 		if (!err) {
@@ -630,7 +499,7 @@ app.post('/newCategory', isAdmin, function(req, res) {
 });
 
 // admin: archive an existing category by uid
-app.post('/archiveCategory', isAdmin, function(req, res) {
+app.post('/archiveCategory', auth.isAdmin, function(req, res) {
 	if (req.body.uid) {
 		var render = defaultRender(req);
 
@@ -655,7 +524,7 @@ app.post('/archiveCategory', isAdmin, function(req, res) {
 });
 
 // admin: fully delete an existing category
-app.post('/deleteCategory', isAdmin, function(req, res) {
+app.post('/deleteCategory', auth.isAdmin, function(req, res) {
 	if (req.body.uid) {
 		var render = defaultRender(req), category;
 		con.query('SELECT * FROM categories WHERE uid = ?;', [req.body.uid], function(err, rows) {
@@ -688,7 +557,7 @@ app.post('/deleteCategory', isAdmin, function(req, res) {
 });
 
 // admin: remove a post
-app.post('/deletePost', isAdmin, function(req, res) {
+app.post('/deletePost', auth.isAdmin, function(req, res) {
 	con.query('DELETE FROM posts WHERE uid = ?;', [req.body.uid], function(err, rows) {
 		if (!err) {
 			res.redirect('/adminPortal');
@@ -707,7 +576,7 @@ app.post('/deletePost', isAdmin, function(req, res) {
 });
 
 // admin: remove a comment
-app.post('/deleteComment', isAdmin, function(req, res) {
+app.post('/deleteComment', auth.isAdmin, function(req, res) {
 	con.query('DELETE FROM comments WHERE uid = ?;', [req.body.uid], function(err, rows) {
 		if (!err) {
 			res.redirect('/adminPortal');
