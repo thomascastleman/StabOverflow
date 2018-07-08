@@ -1,5 +1,6 @@
 
 var GoogleStrategy = require('passport-google-oauth2').Strategy;
+var querystring = require('querystring');
 var con = require('./database.js').connection;
 var creds = require('./credentials.js');
 

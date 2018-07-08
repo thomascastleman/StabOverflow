@@ -7,12 +7,9 @@ var cookieParser 		= require('cookie-parser');
 var moment 				= require('moment');
 var session 			= require('cookie-session');
 var passport 			= require('passport');
-var querystring			= require('querystring');
 var pagedown			= require('pagedown');
-var chunk				= require('lodash.chunk');
 var con					= require('./database.js').connection;
 var creds				= require('./credentials.js');
-var porterStemmer		= require('./porterstemmer.js');
 var mdConverter			= new pagedown.getSanitizingConverter();
 
 app.use(cookieParser());
@@ -32,42 +29,11 @@ app.use(session({
 
 var auth = require('./auth.js').init(app, passport);
 var visitors = require('./visitor.js').init(app, mdConverter);
+var user = require('./user.js').init(app, mdConverter);
+var search = require('./search.js').init(app);
 
 var server = app.listen(8080, function() {
 	console.log("StabOverflow server listening on port %d", server.address().port);
-});
-
-// ask a question page, restricted
-app.get('/ask', auth.restrictAuth, function(req, res) {
-	var render = auth.defaultRender(req);
-
-	// get all un-archived categories
-	con.query('SELECT * FROM categories WHERE is_archived = 0;', function(err, rows) {
-		if (!err && rows !== undefined && rows.length > 0) {
-			render.categories = rows;
-		}
-		res.render('ask.html', render);
-	});
-});
-
-// request UI for editing user profile
-app.get('/users/edit/:id', auth.restrictAuth, function(req, res) {
-	var render = auth.defaultRender(req);
-
-	// ensure editing OWN profile
-	if (req.user.local.uid == req.params.id) {
-		// pull user data
-		con.query('SELECT * FROM users WHERE uid = ?;', [req.user.local.uid], function(err, rows) {
-			if (!err && rows !== undefined && rows.length > 0) {
-				render = Object.assign(rows[0], render);
-				res.render('editprofile.html', render);
-			} else {
-				res.render('error.html', { message: "There was a problem accessing user information." });
-			}
-		});
-	} else {
-		res.render('error.html', { message: "You do not have authorization to edit this profile." });
-	}
 });
 
 // allow admin to make special changes
@@ -90,177 +56,6 @@ app.get('/adminPortal', auth.restrictAdmin, function(req, res) {
 			res.render('adminportal.html', render);
 		});
 	});
-});
-
-// request UI for editing existing post
-app.get('/editPost/:id', auth.restrictAuth, function(req, res) {
-	var render = auth.defaultRender(req);
-
-	// ensure editing own post
-	con.query('SELECT title, body FROM posts WHERE uid = ? AND owner_uid = ?;', [req.params.id, req.user.local.uid], function(err, rows) {
-		if (!err && rows !== undefined && rows.length > 0) {
-			res.render('editpost.html', Object.assign({
-				uid: req.params.id,
-				title: rows[0].title,
-				body: mdConverter.makeHtml(rows[0].body)
-			}, render));
-		} else {
-			res.render('error.html', { message: "Unable to edit post" });
-		}
-	});
-});
-
-// receive a new question or answer
-app.post('/newPost', auth.isAuthenticated, function(req, res) {
-	// check for empty request
-	if (req.body.body != '' && (req.body.title != '' || req.body.type == 0)) {
-		// if question
-		if (req.body.type == 1) {
-			// check uncategorized (id == 0)
-			req.body.category_uid = parseInt(req.body.category_uid, 10);
-			if (isNaN(req.body.category_uid)) req.body.category_uid = null;
-
-			// insert question into posts
-			con.query('CALL create_question(?, ?, ?, ?);', [req.body.category_uid, req.user.local.uid, req.body.title, req.body.body], function(err, rows) {
-				if (!err && rows !== undefined && rows.length > 0 && rows[0].length > 0) {
-					indexPost(rows[0][0].redirect_uid, req.body.title, req.body.body);	// index the new question
-					res.redirect('/questions/' + rows[0][0].redirect_uid);	// redirect to this question's page
-				} else {
-					res.render('error.html', { message: "Failed to post question." });
-				}
-			});
-
-		// if answer
-		} else if (req.body.type == 0) {
-			// if legitimate parent question id
-			if (req.body.parent_question != undefined && !isNaN(parseInt(req.body.parent_question, 10))) {
-				// insert answer into posts
-				con.query('CALL create_answer(?, ?, ?);', [req.body.parent_question, req.user.local.uid, req.body.body], function(err, rows) {
-					if (!err && rows !== undefined && rows.length > 0 && rows[0].length > 0) {
-						indexPost(rows[0][0].answer_uid, req.body.title, req.body.body);	// index the new answer
-						res.redirect('/questions/' + req.body.parent_question);	// redirect to parent question's page
-					} else {
-						res.render('error.html', { message: "Failed to post answer." });
-					}
-				});
-			} else {
-				res.redirect('/');
-			}
-		} else {
-			res.redirect('/');
-		}
-	} else {
-		res.redirect('/');
-	}
-});
-
-// receive a new comment
-app.post('/newComment', auth.isAuthenticated, function(req, res) {
-	// check if request is legitimate
-	if (req.body.body != '' && !isNaN(parseInt(req.body.parent_question, 10)) && !isNaN(parseInt(req.body.parent_uid, 10))) {
-		// insert new comment
-		con.query('INSERT INTO comments (parent_uid, parent_question_uid, body, owner_uid) VALUES (?, ?, ?, ?);',
-			[req.body.parent_uid, req.body.parent_question, req.body.body, req.user.local.uid], function(err, rows) {
-
-			// direct to relevant question page
-			if (!err) {
-				res.redirect('/questions/' + req.body.parent_question);
-			} else {
-				res.render('error.html', { message: "Failed to post comment." });
-			}
-		});
-	} else {
-		res.redirect('/');
-	}
-});
-
-// append to an existing post
-app.post('/updatePost', auth.isAuthenticated, function(req, res) {
-	// avoid empty appendage
-	if (req.body.appendage != '' && !isNaN(parseInt(req.body.uid, 10))) {
-		// ensure editing own post
-		con.query('SELECT type, parent_question_uid FROM posts WHERE uid = ? AND owner_uid = ?;', [req.body.uid, req.user.local.uid], function(err, rows) {
-			if (!err && rows !== undefined && rows.length > 0) {
-
-				var editMessage = '\n\n*Edited ' + moment().format('h:mm A M/D/YYYY') + ':*\n\n';
-
-				// apply edits
-				con.query('UPDATE posts SET body = concat(body, ?) WHERE uid = ?;', [editMessage + req.body.appendage, req.body.uid], function(err, rows2) {
-					if (!err) {
-						// redirect to edited post
-						var redirect_uid = rows[0].type == 1 ? req.body.uid : rows[0].parent_question_uid
-						res.redirect(redirect_uid ? '/questions/' + redirect_uid : '/');
-
-						// index new appendage
-						indexPost(req.body.uid, "", req.body.appendage);
-					} else {
-						res.render('error.html', { message: "Failed to apply edits to post" });
-					}
-				});
-			} else {
-				res.render('error.html', { message: "You are unable to edit this post." });
-			}
-		});
-	} else {
-		res.render('error.html', { message: "Failed to make edits (empty appendage)" });
-	}
-});
-
-// receive request to upvote a post, send back delta to change post's count by in UI
-app.post('/upvote', auth.isAuthenticated, function(req, res) {
-	if (req.body.uid && !isNaN(parseInt(req.body.uid))) {
-		// check for previous upvote to same post
-		con.query('SELECT COUNT(*) AS count FROM upvotes WHERE user_uid = ? AND post_uid = ?;', [req.user.local.uid, req.body.uid], function(err, rows) {
-			if (!err && rows !== undefined && rows.length > 0) {
-				// if no upvote already made
-				if (rows[0].count == 0) {
-					// increment upvotes
-					con.query('UPDATE posts SET upvotes = upvotes + 1 WHERE uid = ?;', [req.body.uid], function(err, rows) {
-						if (!err) {
-							// add record of upvote
-							con.query('INSERT INTO upvotes (user_uid, post_uid) VALUES (?, ?);', [req.user.local.uid, req.body.uid], function(err, rows) {});
-							res.send({ delta: 1 });
-						} else {
-							res.send({ delta: 0 });
-						}
-					});
-				} else {
-					res.send({ delta: 0 });
-				}
-			} else {
-				res.send({ delta: 0 });
-			}
-		});
-	} else {
-		res.send({ delta: 0 });
-	}
-});
-
-// apply updates to a user's profile
-app.post('/users/update', auth.isAuthenticated, function(req, res) {
-	var uid = req.body.uid, name = req.body.display_name, bio = req.body.bio;
-
-	if (!isNaN(parseInt(uid, 10))) {
-		// if user is authorized to make edits
-		if (uid == req.user.local.uid) {
-			con.query('UPDATE users SET display_name = ?, bio = ? WHERE uid = ?;', [name, bio, req.user.local.uid], function(err, rows) {
-				if (!err) {
-					// update session info
-					req.user.local.display_name = name;
-					req.user.local.bio = bio;
-					
-					// send back to updated user page
-					res.redirect('/users/' + req.user.local.uid);
-				} else {
-					res.render('error.html', { message: "Failed to change user information." });
-				}
-			});
-		} else {
-			res.redirect('/users/' + uid);
-		}
-	} else {
-		res.redirect('/');
-	}
 });
 
 // admin: add account to system manually
@@ -435,172 +230,13 @@ app.post('/deleteComment', auth.isAdmin, function(req, res) {
 	});
 });
 
-// post search query, render results
-app.post('/search', function(req, res) {
-	var catFilter = categoryFilter(req.body.category);
-	var ansFilter = answerFilter(req.body.answeredStatus);
 
-	var render = auth.defaultRender(req);
-	render.query = req.body.query;
 
-	// pull question categories
-	con.query('SELECT * FROM categories;', function(err, categories) {
-		if (!err && categories !== undefined && categories.length > 0) {
-			render.categories = categories;
 
-			// register which category was filtered
-			for (var i = 0; i < categories.length; i++) {
-				if (categories[i].uid == req.body.category) {
-					categories[i].isSelected = true;
-					break;
-				}
-			}
-		}
 
-		render[req.body.answeredStatus] = true;	// register which answer filter used
 
-		// search by query if possible
-		if (req.body.query) {
-			var query = parseQuery(req.body.query);
 
-			// get relevant posts
-			con.query('CALL query(?, ?, ?);', [query, catFilter, ansFilter], function(err, rows) {
-				if (!err && rows !== undefined && rows.length > 0 && rows[0].length > 0) {
-					render.results = rows[0];
-				}
 
-				res.render('search.html', render);
-			});
-
-		// search only by constraints if they exist
-		} else if (req.body.category && req.body.answeredStatus) {
-			
-			// get posts meeting constraints
-			con.query('CALL noquery(?, ?);', [catFilter, ansFilter], function(err, rows) {
-				if (!err && rows !== undefined && rows.length > 0 && rows[0].length > 0) {
-					render.results = rows[0];
-				}
-
-				res.render('search.html', render);	
-			});
-		// fallback
-		} else {
-			res.redirect('/search');
-		}
-	});
-});
-
-// given free text query, strip of stop words, etc, and format for SQL query
-function parseQuery(q) {
-	// query preprocessing
-	var re = new RegExp(/[^a-zA-Z ]/, 'g'), query = [];
-	var words = q.replace(re, '');
-	words = words.toLowerCase().split(" ");
-
-	// filter out stop words, stem query terms
-	for (var i = 0; i < words.length; i++) {
-		if (!isStopWord(words[i])) {
-			query.push('"' + porterStemmer.stem(words[i]) + '"');
-		}
-	}
-
-	return query.join(',');
-}
-
-// generate SQL to apply answer status constraint
-function answerFilter(status) {
-	if (status == "Unanswered") {
-		return " AND q.answer_count = 0";
-	} else if (status == "Answered") {
-		return " AND q.answer_count > 0";
-	} else {
-		return "";
-	}
-}
-
-// generate SQL to apply category constraint
-function categoryFilter(uid) {
-	uid = parseInt(uid, 10);
-
-	if (!uid || uid == 0) {
-		return "";
-	} else {
-		return " AND q.category_uid = " + uid;
-	}
-}
-
-// determine if word is irrelevant
-// (from https://gist.github.com/sebleier/554280)
-function isStopWord(w) {
-	return ["", "i", "me", "my", "myself", "we", "our", "ours", "ourselves", "you", "your", "yours", "yourself", "yourselves", "he", "him", "his", "himself", "she", "her", "hers", "herself", "it", "its", "itself", "they", "them", "their", "theirs", "themselves", "what", "which", "who", "whom", "this", "that", "these", "those", "am", "is", "are", "was", "were", "be", "been", "being", "have", "has", "had", "having", "do", "does", "did", "doing", "a", "an", "the", "and", "but", "if", "or", "because", "as", "until", "while", "of", "at", "by", "for", "with", "about", "against", "between", "into", "through", "during", "before", "after", "above", "below", "to", "from", "up", "down", "in", "out", "on", "off", "over", "under", "again", "further", "then", "once", "here", "there", "when", "where", "why", "how", "all", "any", "both", "each", "few", "more", "most", "other", "some", "such", "no", "nor", "not", "only", "own", "same", "so", "than", "too", "very", "s", "t", "can", "will", "just", "don", "should", "now"].indexOf(w) != -1;
-}
-
-// render search page with recent questions
-app.get('/search', function(req, res) {
-	var render = auth.defaultRender(req);
-	// get categories for filters
-	con.query('SELECT * FROM categories;', function(err, categories) {
-		if (!err && categories !== undefined && categories.length > 0) {
-			render.categories = categories;
-		}
-
-		// get recent posts
-		con.query('CALL noquery("", "");', function(err, rows) {
-			if (!err && rows !== undefined && rows.length > 0 && rows[0].length > 0) {
-				render.results = rows[0];
-			}
-
-			res.render('search.html', render);
-		});
-	});
-});
-
-// make post accessible to search engine
-function indexPost(uid, title, body) {
-
-	var re = new RegExp(/[^a-zA-Z ]/, 'g');
-	var words = (title + '\n' + body).toLowerCase().split(/\s/);
-	var stems = [], scores = {}, max;
-
-	// for each term in post
-	for (var i = 0; i < words.length; i++) {
-		words[i] = words[i].replace(re, '');	// strip punctuation
-
-		// if relevant, add stem
-		if (!isStopWord(words[i])) {
-			var stem = porterStemmer.stem(words[i]);
-			stems.push(stem);
-
-			// update frequency
-			if (!scores[stem]) scores[stem] = 0;
-			scores[stem]++;
-
-			// update maximum frequency
-			if (!max || scores[stem] > max) {
-				max = scores[stem];
-			}
-		}
-	}
-
-	// record stems in db
-	con.query('INSERT IGNORE INTO stems (stem) VALUES ?;', [chunk(stems, 1)], function(err, rows) {
-		if (!err) {
-			// get uid's
-			con.query('SELECT uid, stem FROM stems WHERE FIND_IN_SET(stem, ?);', [stems.join(',')], function(err, rows) {
-				if (!err && rows !== undefined && rows.length > 0) {
-					// finalize scores
-					var insertScores = [];
-					for (var i = 0; i < rows.length; i++) {
-						insertScores.push([rows[i].uid, uid, scores[rows[i].stem] / max]);
-					}
-
-					// insert scores
-					con.query('INSERT INTO scores (stem_uid, post_uid, score) VALUES ?;', [insertScores], function(err, rows) {});
-				}
-			});
-		}
-	});
-}
 
 
 
