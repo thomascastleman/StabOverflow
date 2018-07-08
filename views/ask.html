@@ -20,6 +20,16 @@
 					return "Are you sure you want to leave the page? Data entered will not be saved.";
 				}
 			}
+
+			// validate that non-empty question is being submitted
+			function validate() {
+				if (document.questionForm.body.value == '' || document.questionForm.title.value == '') {
+					alert("Please ensure your question has both a title and a body.");
+					return false;
+				} else {
+					return true;
+				}
+			}
 		</script>
 	</head>
 	<body>
@@ -43,7 +53,7 @@
 
 		<h2>Ask a Question</h2>
 
-		<form method="POST" action="/newPost" name="questionForm">
+		<form method="POST" action="/newPost" name="questionForm" onsubmit="return validate();">
 			<input hidden name="type" value="1">
 			<center>Title <input name="title" type="text"></center>
 

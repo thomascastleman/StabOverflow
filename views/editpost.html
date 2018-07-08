@@ -20,6 +20,16 @@
 					return "Are you sure you want to leave the page? Data entered will not be saved.";
 				}
 			}
+
+			// validate that non-empty appendage is being submitted
+			function validate() {
+				if (document.questionForm.appendage.value == '') {
+					alert("Please ensure your update has content in the body.");
+					return false;
+				} else {
+					return true;
+				}
+			}
 		</script>
 	</head>
 	<body>
@@ -44,7 +54,7 @@
 		<h1>{{title}}</h1>
 		<div>{{{body}}}</div>
 
-		<form method="POST" action="/updatePost" name="questionForm">
+		<form method="POST" action="/updatePost" name="questionForm" onsubmit="return validate();">
 			<input name="uid" value="{{uid}}" hidden>
 
 			<center><h3>Type below to <em>add</em> to your original post.</h3></center>

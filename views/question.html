@@ -17,6 +17,17 @@
 				}
 			}
 
+			{{#loggedIn}}
+			// validate that non-empty appendage is being submitted
+			function validate() {
+				if (document.answerForm.body.value == '') {
+					alert("Please ensure your answer has content in the body.");
+					return false;
+				} else {
+					return true;
+				}
+			}
+
 			// script to apply upvoting changes in UI
 			function upvote(uid) {
 				$.post('/upvote', { uid: uid })
@@ -29,7 +40,7 @@
 					});
 			}
 
-			{{#loggedIn}}
+			// toggle display of comment box
 			function showCommentBox(id) {
 				$('#commentBox' + id).toggle();
 			}
@@ -177,7 +188,7 @@
 			{{#loggedIn}}
 			<!-- write an answer form -->
 			<h2>Your Answer</h2>
-			<form method="POST" action="/newPost" name="answerForm">
+			<form method="POST" action="/newPost" name="answerForm" onsubmit="return validate();">
 				<input hidden name="type" value="0">
 				<input hidden name="parent_question" value="{{question_uid}}">
 				<div class="wmd-panel">
