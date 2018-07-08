@@ -21,7 +21,15 @@ module.exports = {
 						render.unarchived = unarchived;
 						render.loadedUnarchived = true;
 					}
-					res.render('adminportal.html', render);
+
+					// get user info (for authorizing / deauthorizing admins)
+					con.query('SELECT email, is_admin, IFNULL(real_name, display_name) AS name FROM users;', function(err, rows) {
+						if (!err && rows !== undefined && rows.length > 0) {
+							render.users = rows;
+						}
+
+						res.render('adminportal.html', render);
+					});
 				});
 			});
 		});

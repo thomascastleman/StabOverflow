@@ -35,15 +35,18 @@
 		<br>
 		<form method="POST" action="/makeAdmin" name="makeAdmin" onsubmit="return confirm('Are you sure you want to make ' + document.makeAdmin.email.value + ' an administrator?');">
 			Grant admin privileges:<br>
-			<input name="email" type="text" placeholder="Email (existing account)"><br>
+			<input name="email" type="text" placeholder="Email (existing account)" oninput="renderMatches(document.makeAdmin.email.value, 0);" autocomplete="off"><br>
 			<button type="submit">Grant privileges</button>
 		</form>
 		<br>
 		<form method="POST" action="/removeAdmin" name="removeAdmin" onsubmit="return confirm('Are you sure you want to revoke the privileges of ' + document.removeAdmin.email.value + '?');">
 			Revoke admin privileges:<br>
-			<input name="email" type="text" placeholder="Email (existing account)"><br>
+			<input name="email" type="text" placeholder="Email (existing account)" oninput="renderMatches(document.removeAdmin.email.value, 1);" autocomplete="off"><br>
 			<button type="submit">Revoke privileges</button>
 		</form>
+
+		<div id="emailMatches"></div>
+
 		<br>
 		<form method="POST" action="/newCategory" name="newCat" onsubmit="return confirm('Are you sure you want to create the category ' + document.newCat.category.value + '?');">
 			Create a new category:<br>
@@ -77,4 +80,37 @@
 		</form>
 		{{/loadedAllCategories}}
 	</body>
+
+	<script>
+		var users = [
+			{{#users}}
+				{ name: "{{{name}}}", email: "{{{email}}}", is_admin: {{{is_admin}}} },
+			{{/users}}
+		];
+
+		$matches = $('#emailMatches');
+		function renderMatches(fragment, adminStatus) {
+			fragment = fragment.toLowerCase();
+			$matches.empty();
+
+			if (fragment != "") {
+				if (adminStatus == 1) {
+					$matches.append("<h4>Possible Administrator Matches:</h4>");
+				} else {
+					$matches.append("<h4>Possible Regular User Matches:</h4>");
+				}
+				var found;
+				for (var i = 0; i < users.length; i++) {
+					if ((users[i].email.toLowerCase().includes(fragment) || users[i].name.toLowerCase().includes(fragment)) && users[i].is_admin == adminStatus) {
+						$matches.append("<span>" + users[i].name + " (" + users[i].email + ")</span><br>");
+						found = true;
+					}
+				}
+
+				if (!found) {
+					$matches.append("<span>No matches found!</span>")
+				}
+			}
+		}
+	</script>
 </html>
