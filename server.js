@@ -30,56 +30,16 @@ app.use(session({
 	saveUninitialized: true
 }));
 
-var settings = {
-	numQuestionsOnLanding: 50,		// number of recent questions shown on the landing page
-	numPostsOnUserPage: 20			// number of posts shown on user page
-}
-
 var auth = require('./auth.js').init(app, passport);
+var visitors = require('./visitor.js').init(app, mdConverter);
 
 var server = app.listen(8080, function() {
 	console.log("StabOverflow server listening on port %d", server.address().port);
 });
 
-// generate render object
-function defaultRender(req) {
-	if (req.user && req.user.local) {
-		return {
-			loggedIn: req.isAuthenticated(),
-			username: req.user.local.display_name,
-			user_uid: req.user.local.uid
-		}
-	} else {
-		return {
-			loggedIn: req.isAuthenticated()
-		};
-	}
-}
-
-// get landing page
-app.get('/', function(req, res) {
-	var render = defaultRender(req);
-
-	// this pulls most recent questions
-	con.query('SELECT posts.*, categories.name AS category, users.real_name AS owner_real, users.display_name AS owner_display FROM posts LEFT OUTER JOIN categories ON posts.category_uid = categories.uid JOIN users ON posts.owner_uid = users.uid WHERE posts.type = 1 ORDER BY posts.uid DESC LIMIT ?;', [settings.numQuestionsOnLanding], function(err, rows) {
-		if (!err && rows !== undefined && rows.length > 0) {
-
-			// format time posted
-			for (var i = 0; i < rows.length; i++) {
-				rows[i].when_asked = moment(rows[i].creation_date).fromNow();
-				delete rows[i].creation_date;
-				if (rows[i].category_uid == null) rows[i].noCategory = true;
-			}
-			render.questions = rows;
-		}
-
-		res.render('landingpage.html', render);
-	});
-});
-
 // ask a question page, restricted
 app.get('/ask', auth.restrictAuth, function(req, res) {
-	var render = defaultRender(req);
+	var render = auth.defaultRender(req);
 
 	// get all un-archived categories
 	con.query('SELECT * FROM categories WHERE is_archived = 0;', function(err, rows) {
@@ -90,48 +50,9 @@ app.get('/ask', auth.restrictAuth, function(req, res) {
 	});
 });
 
-// get user profile
-app.get('/users/:id', function(req, res) {
-	var render = defaultRender(req);
-
-	// get user corresponding to ID
-	con.query('SELECT * FROM users WHERE uid = ?;', [req.params.id], function(err, rows) {
-		if (!err && rows !== undefined && rows.length > 0) {
-			render = Object.assign(rows[0], render);
-			
-			// check if user is visiting their own user page
-			render.ownProfile = render.loggedIn && req.user.local.uid == req.params.id;
-
-			// count questions and answers
-			con.query('SELECT SUM(CASE WHEN type = 1 THEN 1 ELSE 0 END) questionCount, SUM(CASE WHEN type = 0 THEN 1 ELSE 0 END) answerCount FROM posts WHERE owner_uid = ?;', [req.params.id], function(err, rows) {
-				if (!err && rows !== undefined && rows.length > 0) {
-					render.questions_asked = rows[0].questionCount ? rows[0].questionCount : 0;
-					render.answers_given = rows[0].answerCount ? rows[0].answerCount : 0;
-				}
-
-				// get recent questions and answers by this user
-				con.query('SELECT IFNULL(p.parent_question_uid, p.uid) AS redirect_uid, IFNULL(q.title, p.title) AS title, p.type AS isQuestion, DATE_FORMAT(CASE WHEN p.type = 1 THEN p.creation_date ELSE q.creation_date END, "%M %D, %Y") date FROM posts p LEFT JOIN posts q ON p.parent_question_uid = q.uid WHERE p.owner_uid = ? ORDER BY p.uid DESC LIMIT ?;', [req.params.id, settings.numPostsOnUserPage], function(err, rows) {
-					if (!err && rows !== undefined && rows.length > 0) {
-						// convert to boolean
-						for (var i = 0; i < rows.length; i++) {
-							rows[i].isQuestion = !!rows[i].isQuestion;
-						}
-
-						render.posts = rows;
-					}
-
-					res.render('user.html', render);
-				});
-			});
-		} else {
-			res.render('error.html', { message: "User not found." });
-		}
-	});
-});
-
 // request UI for editing user profile
 app.get('/users/edit/:id', auth.restrictAuth, function(req, res) {
-	var render = defaultRender(req);
+	var render = auth.defaultRender(req);
 
 	// ensure editing OWN profile
 	if (req.user.local.uid == req.params.id) {
@@ -149,81 +70,9 @@ app.get('/users/edit/:id', auth.restrictAuth, function(req, res) {
 	}
 });
 
-// get individual question page
-app.get('/questions/:id', function(req, res) {
-	var ansIDtoIndex = {}, ans, question_uid = req.params.id;
-	var render = defaultRender(req);
-	render.question_uid = question_uid;
-
-	// check if post exists & get its data
-	con.query('SELECT posts.*, categories.name AS category, users.real_name AS owner_real, users.display_name AS owner_display, users.image_url FROM posts LEFT OUTER JOIN categories ON posts.category_uid = categories.uid JOIN users ON posts.owner_uid = users.uid WHERE posts.uid = ? AND type = 1 LIMIT 1;', [question_uid], function(err, rows) {
-		if (!err && rows !== undefined && rows.length > 0) {
-			render = Object.assign(rows[0], render);
-
-			// format creation date
-			render.creation_date = moment(render.creation_date).format('h:mm A, MMM Do, YYYY');
-
-			// check if admin, if owns question
-			render.isAdmin = render.loggedIn ? req.user.local.is_admin : false;
-			if (render.loggedIn) render.isQuestionOwner = render.owner_uid == req.user.local.uid;
-
-			// convert MD to HTML
-			render.body = mdConverter.makeHtml(render.body);
-
-			// compensate for lack of category
-			if (render.category_uid == null) render.noCategory = true;
-
-			// get associated answers, highest upvotes first
-			con.query('SELECT posts.*, users.real_name AS owner_real, users.display_name AS owner_display, users.image_url FROM posts JOIN users ON posts.owner_uid = users.uid WHERE parent_question_uid = ? ORDER BY upvotes DESC;', [question_uid], function(err, rows) {
-				if (!err && rows !== undefined && rows.length > 0) {
-					render.answers = rows;
-
-					for (var i = 0; i < render.answers.length; i++) {
-						ans = render.answers[i];
-
-						ans.body = mdConverter.makeHtml(ans.body);	// convert answers to HTML
-						ansIDtoIndex[ans.uid] = i;	// record answer ID to index
-						ans.answer_uid = ans.uid;	// put uid under name 'answer_uid'
-
-						if (render.loggedIn) ans.isOwner = (ans.owner_uid == req.user.local.uid);
-
-						ans.creation_date = moment(ans.creation_date).format('h:mm A, MMM Do, YYYY');
-					}
-				}
-				// get associated comments
-				con.query('SELECT comments.*, users.real_name AS owner_real, users.display_name AS owner_display FROM comments JOIN users ON comments.owner_uid = users.uid WHERE parent_question_uid = ?;', [question_uid], function(err, rows) {
-					if (!err && rows !== undefined && rows.length > 0) {
-						render.comments = [];
-
-						// assign comments to their parent posts
-						for (var i = 0; i < rows.length; i++) {
-							rows[i].creation_date = moment(rows[i].creation_date).format('h:mm A, MMM Do');
-
-							// attach comment to either question or parent answer
-							if (rows[i].parent_uid == question_uid) {
-								render.comments.push(rows[i]);
-							} else {
-								ans = render.answers[ansIDtoIndex[rows[i].parent_uid]];
-								if (!ans.answer_comments) ans.answer_comments = [];
-								ans.answer_comments.push(rows[i]);
-							}
-						}
-					}
-
-					// render full question page
-					res.render('question.html', render);
-				});
-			});
-		} else {
-			// question not found, send not found page
-			res.render('error.html', { message: "Question not found." });
-		}
-	});
-});
-
 // allow admin to make special changes
 app.get('/adminPortal', auth.restrictAdmin, function(req, res) {
-	var render = defaultRender(req);
+	var render = auth.defaultRender(req);
 
 	// get all categories (for delete)
 	con.query('SELECT * FROM categories;', function(err, categories) {
@@ -245,7 +94,7 @@ app.get('/adminPortal', auth.restrictAdmin, function(req, res) {
 
 // request UI for editing existing post
 app.get('/editPost/:id', auth.restrictAuth, function(req, res) {
-	var render = defaultRender(req);
+	var render = auth.defaultRender(req);
 
 	// ensure editing own post
 	con.query('SELECT title, body FROM posts WHERE uid = ? AND owner_uid = ?;', [req.params.id, req.user.local.uid], function(err, rows) {
@@ -416,7 +265,7 @@ app.post('/users/update', auth.isAuthenticated, function(req, res) {
 
 // admin: add account to system manually
 app.post('/addAccount', auth.isAdmin, function(req, res) {
-	var render = defaultRender(req);
+	var render = auth.defaultRender(req);
 	con.query('SELECT COUNT(*) AS count FROM users WHERE email = ?;', [req.body.email], function(err, rows) {
 		if (!err && rows !== undefined && rows.length > 0) {
 			if (rows[0].count == 0) {
@@ -440,7 +289,7 @@ app.post('/addAccount', auth.isAdmin, function(req, res) {
 
 // admin: make user admin by posting email
 app.post('/makeAdmin', auth.isAdmin, function(req, res) {
-	var render = defaultRender(req);
+	var render = auth.defaultRender(req);
 	con.query('SELECT * FROM users WHERE email = ?;', [req.body.email], function(err, rows) {
 		if (!err && rows !== undefined && rows.length > 0) {
 			// apply updated privileges
@@ -462,7 +311,7 @@ app.post('/makeAdmin', auth.isAdmin, function(req, res) {
 app.post('/removeAdmin', auth.isAdmin, function(req, res) {
 	// safety: prevent admin from removing themself
 	if (req.body.email != req.user.local.email) {
-		var render = defaultRender(req);
+		var render = auth.defaultRender(req);
 
 		// verify that user exists
 		con.query('SELECT * FROM users WHERE email = ?;', [req.body.email], function(err, rows) {
@@ -487,7 +336,7 @@ app.post('/removeAdmin', auth.isAdmin, function(req, res) {
 
 // admin: create a new category
 app.post('/newCategory', auth.isAdmin, function(req, res) {
-	var render = defaultRender(req);
+	var render = auth.defaultRender(req);
 	con.query('INSERT INTO categories (name) VALUES (?);', [req.body.category], function(err, rows) {
 		if (!err) {
 			render.message = "Successfully created the category \"" + req.body.category + "\"!";
@@ -501,7 +350,7 @@ app.post('/newCategory', auth.isAdmin, function(req, res) {
 // admin: archive an existing category by uid
 app.post('/archiveCategory', auth.isAdmin, function(req, res) {
 	if (req.body.uid) {
-		var render = defaultRender(req);
+		var render = auth.defaultRender(req);
 
 		// archive category
 		con.query('UPDATE categories SET is_archived = 1 WHERE uid = ?;', [req.body.uid], function(err, rows) {
@@ -526,7 +375,7 @@ app.post('/archiveCategory', auth.isAdmin, function(req, res) {
 // admin: fully delete an existing category
 app.post('/deleteCategory', auth.isAdmin, function(req, res) {
 	if (req.body.uid) {
-		var render = defaultRender(req), category;
+		var render = auth.defaultRender(req), category;
 		con.query('SELECT * FROM categories WHERE uid = ?;', [req.body.uid], function(err, rows) {
 			if (!err && rows !== undefined && rows.length > 0) {
 				category = rows[0].name;
@@ -591,7 +440,7 @@ app.post('/search', function(req, res) {
 	var catFilter = categoryFilter(req.body.category);
 	var ansFilter = answerFilter(req.body.answeredStatus);
 
-	var render = defaultRender(req);
+	var render = auth.defaultRender(req);
 	render.query = req.body.query;
 
 	// pull question categories
@@ -688,7 +537,7 @@ function isStopWord(w) {
 
 // render search page with recent questions
 app.get('/search', function(req, res) {
-	var render = defaultRender(req);
+	var render = auth.defaultRender(req);
 	// get categories for filters
 	con.query('SELECT * FROM categories;', function(err, categories) {
 		if (!err && categories !== undefined && categories.length > 0) {

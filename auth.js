@@ -140,5 +140,20 @@ module.exports = {
 		} else {
 			res.redirect('/');
 		}
+	},
+
+	// generate render object for most pages
+	defaultRender: function(req) {
+		if (req.user && req.user.local) {
+			return {
+				loggedIn: req.isAuthenticated(),
+				username: req.user.local.display_name,
+				user_uid: req.user.local.uid
+			}
+		} else {
+			return {
+				loggedIn: req.isAuthenticated()
+			};
+		}
 	}
 }
