@@ -227,19 +227,20 @@
 	        </script>
 	        {{/loggedIn}}
 
-	        <script>
-	        	$('pre').attr('class', 'prettyprint');
-	        	$('code').attr('class', 'prettyprint');
-	        </script>
-	        <style>
-	        	pre {
-	        		background-color: #e6e6e6;
-	        		border: none !important;
-	        	}
-	        	code {
-	        		background-color: #e6e6e6;
-	        	}
-	    	</style>
+			<script>
+				// syntax highlight all <pre>'s and <code>'s 
+				$('pre').attr('class', 'prettyprint');
+				$('code').attr('class', 'prettyprint');
+			</script>
+			<style>
+				pre {
+					background-color: #e6e6e6;
+					border: none !important;
+				}
+				code {
+					background-color: #e6e6e6;
+				}
+			</style>
 		</div>
 
 	</body>
