@@ -33,7 +33,6 @@ module.exports = {
 			});
 		});
 
-
 		// get user profile
 		app.get('/users/:id', function(req, res) {
 			var render = auth.defaultRender(req);

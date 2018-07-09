@@ -83,9 +83,9 @@ module.exports = {
 			res.render('error.html', { message: "Unable to authenticate." });
 		});
 
-		app.get('/logout', function(req, res){
+		app.get('/logout', module.exports.checkReturnTo, function(req, res){
 			req.logout();
-			res.redirect('/');
+			res.redirect(req.session.returnTo || '/');
 		});
 
 		return module.exports;
