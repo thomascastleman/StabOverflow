@@ -8,7 +8,7 @@
 	</head>
 	<body>
 		<div id="navbar">
-			<a href="/"><img id="logo" src="http://tcastleman.com/overflow.png" width="200"/></a>
+			<!-- <a href="/"><img id="logo" src="http://tcastleman.com/overflow.png" width="200"/></a> -->
 			<form id="searchForm" name="search" method="POST" action="/search">
 				<input name="category" value="None" hidden>
 				<input name="answeredStatus" value="All" hidden>
@@ -18,12 +18,30 @@
 
 			<div id="authLinks">
 			{{#loggedIn}}
-				<div id="logOutBox"><a href="/logout">Log Out <i class="fas fa-sign-out-alt"></i></a></div>
-				{{#user_uid}}<div id="profileBox"><a href="/users/{{user_uid}}">My Profile {{#username}}({{username}}) {{/username}}<i class="fas fa-user"></i></a></div>{{/user_uid}}
+				<a href="/logout">
+					<div id="logOutBox">
+						Log Out <i class="fas fa-sign-out-alt"></i>
+					</div>
+				</a>
+				{{#user_uid}}
+				<a href="/users/{{user_uid}}">
+					<div id="profileBox">
+						My Profile {{#username}}({{username}}) {{/username}}<i class="fas fa-user"></i>
+					</div>
+				</a>
+				{{/user_uid}}
 			{{/loggedIn}}
 			{{^loggedIn}}
-				<div id="logInBox"><a href="/auth/google">Log In <i class="fas fa-sign-in-alt"></i></a></div>
-				<div id="signUpBox"><a href="/auth/google">Sign Up</a></div>
+				<a href="/auth/google">
+					<div id="logInBox">
+						Log In <i class="fas fa-sign-in-alt"></i>
+					</div>
+				</a>
+				<a href="/auth/google">
+					<div id="signUpBox">
+						Sign Up
+					</div>
+				</a>
 			{{/loggedIn}}
 			</div>
 		</div>
