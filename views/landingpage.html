@@ -3,23 +3,29 @@
 	<head>
 		<meta charset="UTF-8">
 		<title>Stab Overflow</title>
+		<link rel="stylesheet" type="text/css" href="navbar.css">
+		<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.1.0/css/all.css" integrity="sha384-lKuwvrZot6UHsBSfcMvOkWwlCMgc0TaWr+30HWe3a4ltaBwTZhyTEggF5tJv8tbt" crossorigin="anonymous">
 	</head>
 	<body>
 		<div id="navbar">
-			<form name="search" method="POST" action="/search">
+			<a href="/"><img id="logo" src="http://tcastleman.com/overflow.png" width="200"/></a>
+			<form id="searchForm" name="search" method="POST" action="/search">
 				<input name="category" value="None" hidden>
 				<input name="answeredStatus" value="All" hidden>
 				<input name="query" type="text" placeholder="Search StabOverflow" onchange="document.search.submit()">
 			</form>
 			<a href="/search">Browse Questions</a>
+
+			<div id="authLinks">
 			{{#loggedIn}}
-				<a href="/logout">Log Out</a>
-				{{#user_uid}}<a href="/users/{{user_uid}}">My Profile{{#username}} ({{username}}){{/username}}</a>{{/user_uid}}
+				<div id="logOutBox"><a href="/logout">Log Out <i class="fas fa-sign-out-alt"></i></a></div>
+				{{#user_uid}}<div id="profileBox"><a href="/users/{{user_uid}}">My Profile {{#username}}({{username}}) {{/username}}<i class="fas fa-user"></i></a></div>{{/user_uid}}
 			{{/loggedIn}}
 			{{^loggedIn}}
-				<a href="/auth/google">Log In</a>
-				<a href="/auth/google">Sign Up</a>
+				<div id="logInBox"><a href="/auth/google">Log In <i class="fas fa-sign-in-alt"></i></a></div>
+				<div id="signUpBox"><a href="/auth/google">Sign Up</a></div>
 			{{/loggedIn}}
+			</div>
 		</div>
 
 		<a href="/ask">Ask a Question</a>

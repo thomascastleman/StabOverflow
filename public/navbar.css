@@ -1,0 +1,56 @@
+
+
+body {
+	margin: 0px;
+	padding: 0px;
+}
+
+
+
+/* --------------------------- NAVBAR BELOW -------------------------------- */
+
+
+/* navbar container div */
+#navbar {
+	background-color: rgba(0, 0, 0, 0.2);
+	position: sticky;
+	top: 0px;
+	left: 0px;
+	margin: 0px;
+	width: 100%;
+}
+
+/* staboverflow logo image */
+#logo {
+	display: inline;
+}
+
+/* form for main searchbar */
+#searchForm {
+	display: inline;
+}
+
+/* container for login/signup links */
+#authLinks {
+	float: right;
+}
+
+/* container for login link / graphics */
+#logInBox {
+	display: inline;
+}
+
+/* container for sign in link / graphics */
+#signUpBox {
+	display: inline;
+}
+
+/* container for logout link / graphics */
+#logOutBox {
+	display: inline;
+}
+
+/* container for profile link */
+#profileBox {
+	display: inline;
+}
