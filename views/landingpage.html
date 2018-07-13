@@ -7,44 +7,40 @@
 		<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.1.0/css/all.css" integrity="sha384-lKuwvrZot6UHsBSfcMvOkWwlCMgc0TaWr+30HWe3a4ltaBwTZhyTEggF5tJv8tbt" crossorigin="anonymous">
 	</head>
 	<body>
-		<div id="navbar">
-			<!-- <a href="/"><img id="logo" src="http://tcastleman.com/overflow.png" width="200"/></a> -->
+		<header>
+			<a href="/"><img src="http://tcastleman.com/overflow.png" width="200"/></a>
 			<form id="searchForm" name="search" method="POST" action="/search">
-				<input name="category" value="None" hidden>
-				<input name="answeredStatus" value="All" hidden>
-				<input name="query" type="text" placeholder="Search StabOverflow" onchange="document.search.submit()">
+				<input id="searchBar" name="query" type="text" placeholder="Search StabOverflow">
+				<input id="submit" type="submit" hidden>
 			</form>
 			<a href="/search">Browse Questions</a>
-
 			<div id="authLinks">
-			{{#loggedIn}}
-				<a href="/logout">
-					<div id="logOutBox">
-						Log Out <i class="fas fa-sign-out-alt"></i>
-					</div>
-				</a>
-				{{#user_uid}}
-				<a href="/users/{{user_uid}}">
-					<div id="profileBox">
-						My Profile {{#username}}({{username}}) {{/username}}<i class="fas fa-user"></i>
-					</div>
-				</a>
-				{{/user_uid}}
-			{{/loggedIn}}
-			{{^loggedIn}}
-				<a href="/auth/google">
-					<div id="logInBox">
-						Log In <i class="fas fa-sign-in-alt"></i>
-					</div>
-				</a>
-				<a href="/auth/google">
-					<div id="signUpBox">
-						Sign Up
-					</div>
-				</a>
-			{{/loggedIn}}
+				<ul>
+				{{#loggedIn}}
+					<li>
+						<a href="/logout">Log Out <i class="fas fa-sign-out-alt"></i></a>
+					</li>
+					{{#user_uid}}
+					<li>
+						<a href="/users/{{user_uid}}">My Profile {{#username}}({{username}}) {{/username}}<i class="fas fa-user"></i></a>
+					</li>
+					{{/user_uid}}
+				{{/loggedIn}}
+				{{^loggedIn}}
+					<a href="/auth/google">
+						<div id="logInBox">
+							Log In <i class="fas fa-sign-in-alt"></i>
+						</div>
+					</a>
+					<a href="/auth/google">
+						<div id="signUpBox">
+							Sign Up <i class="fas fa-user-plus"></i>
+						</div>
+					</a>
+				{{/loggedIn}}
+				</ul>
 			</div>
-		</div>
+		</header>
 
 		<a href="/ask">Ask a Question</a>
 
