@@ -59,7 +59,27 @@ header a:hover {
 	width: 300px;
 }
 
+/* search submit button */
 #searchSubmit {
 	vertical-align: middle;
+	line-height: 40px;
 	height: 80%;
+}
+
+/* FA search icon */
+#searchIcon {
+	font-size: 18px;
+}
+
+#searchTools {
+	position: absolute;
+	left: 280px;
+}
+
+header img {
+	position: fixed;
+	left: 15px;
+	top: 0px;
+	height: 60px;
+	z-index: -2;
 }
