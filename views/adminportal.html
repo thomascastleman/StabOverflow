@@ -4,26 +4,51 @@
 		<meta charset="UTF-8">
 		<title>Stab Overflow</title>
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
+
+		<!-- navbar style -->
+		<link rel="stylesheet" type="text/css" href="/navbar.css">
+		<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.1.0/css/all.css" integrity="sha384-lKuwvrZot6UHsBSfcMvOkWwlCMgc0TaWr+30HWe3a4ltaBwTZhyTEggF5tJv8tbt" crossorigin="anonymous">
+		<link href="https://fonts.googleapis.com/css?family=Kanit" rel="stylesheet"> 
 	</head>
 	<body>
-		<div id="navbar">
-			<!-- put StabOverflow image here -->
-			<form name="search" method="POST" action="/search">
-				<input name="category" value="None" hidden>
-				<input name="answeredStatus" value="All" hidden>
-				<input name="query" type="text" placeholder="Search StabOverflow" onchange="document.search.submit()">
-			</form>
-			<a href="/search">Browse Questions</a>
-			{{#loggedIn}}
-				<a href="/logout">Log Out</a>
-				{{#user_uid}}<a href="/users/{{user_uid}}">My Profile{{#username}} ({{username}}){{/username}}</a>{{/user_uid}}
-			{{/loggedIn}}
-			{{^loggedIn}}
-				<a href="/auth/google">Log In</a>
-				<a href="/auth/google">Sign Up</a>
-			{{/loggedIn}}
-		</div>
-
+		<header>
+			<a href="/"><img src="/staboverflow.png" align="middle"/></a>
+			<div id="searchTools">
+				<ul>
+					<li>
+						<form id="searchForm" name1="search" method="POST" action="/search">
+							<input id="searchBar" name="query" type="text" placeholder="Search StabOverflow" autocomplete="off">
+							<button id="searchSubmit" type="submit" form="searchForm"><i id="searchIcon" class="fas fa-search"></i></button>
+						</form>
+					</li>
+					<li>
+						<a id="browse" href="/search">Browse Questions</a>
+					</li>
+				</ul>
+			</div>
+			<div id="authLinks">
+				<ul>
+				{{#loggedIn}}
+					<li>
+						<a href="/logout">Log Out <i class="fas fa-sign-out-alt"></i></a>
+					</li>
+					{{#user_uid}}
+					<li>
+						<a href="/users/{{user_uid}}">My Profile {{#username}}({{username}}) {{/username}}<i class="fas fa-user"></i></a>
+					</li>
+					{{/user_uid}}
+				{{/loggedIn}}
+				{{^loggedIn}}
+					<li>
+						<a href="/auth/google">Log In <i class="fas fa-sign-in-alt"></i></a>
+					</li>
+					<li>
+						<a href="/auth/google">Sign Up <i class="fas fa-user-plus"></i></a>
+					</li>
+				{{/loggedIn}}
+				</ul>
+			</div>
+		</header>
 		<h1>Admin Portal</h1>
 
 		<form method="POST" action="/addAccount" name="account" onsubmit="return confirm('Are you sure you want to add ' + document.account.email.value + '?');">
