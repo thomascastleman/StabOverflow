@@ -53,7 +53,7 @@ module.exports = {
 						}
 
 						// get recent questions and answers by this user
-						con.query('SELECT IFNULL(p.parent_question_uid, p.uid) AS redirect_uid, IFNULL(q.title, p.title) AS title, p.type AS isQuestion, DATE_FORMAT(CASE WHEN p.type = 1 THEN p.creation_date ELSE q.creation_date END, "%M %D, %Y") date FROM posts p LEFT JOIN posts q ON p.parent_question_uid = q.uid WHERE p.owner_uid = ? ORDER BY p.uid DESC LIMIT ?;', [req.params.id, settings.numPostsOnUserPage], function(err, rows) {
+						con.query('SELECT IFNULL(p.parent_question_uid, p.uid) AS redirect_uid, IFNULL(q.title, p.title) AS title, p.type AS isQuestion, DATE_FORMAT(p.creation_date, "%M %D, %Y") date FROM posts p LEFT JOIN posts q ON p.parent_question_uid = q.uid WHERE p.owner_uid = ? ORDER BY p.uid DESC LIMIT ?;', [req.params.id, settings.numPostsOnUserPage], function(err, rows) {
 							if (!err && rows !== undefined && rows.length > 0) {
 								// convert to boolean
 								for (var i = 0; i < rows.length; i++) {

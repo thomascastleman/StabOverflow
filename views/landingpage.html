@@ -8,12 +8,20 @@
 	</head>
 	<body>
 		<header>
-			<a href="/"><img src="http://tcastleman.com/overflow.png" width="200"/></a>
-			<form id="searchForm" name="search" method="POST" action="/search">
-				<input id="searchBar" name="query" type="text" placeholder="Search StabOverflow">
-				<input id="submit" type="submit" hidden>
-			</form>
-			<a href="/search">Browse Questions</a>
+			<a href="/"><img src="/staboverflow.jpg" width="200" align="middle"/></a>
+			<div>
+				<ul>
+					<li>
+						<form id="searchForm" name="search" method="POST" action="/search">
+							<input id="searchBar" name="query" type="text" placeholder="Search StabOverflow">
+							<button id="searchSubmit" type="submit" form="searchForm"><i class="fas fa-search"></i></button>
+						</form>
+					</li>
+					<li>
+						<a href="/search">Browse Questions</a>
+					</li>
+				</ul>
+			</div>
 			<div id="authLinks">
 				<ul>
 				{{#loggedIn}}
