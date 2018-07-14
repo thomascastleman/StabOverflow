@@ -12,13 +12,15 @@
 
 /* navbar container div */
 header {
-	background-color: rgba(0, 0, 0, 0.2);
+	background-color: #d9d9d9;
 	position: sticky;
 	top: 0px;
 	left: 0px;
 	width: 100%;
-	height: 60px;
+	height: 55px;
 	padding: 0px;
+
+	font-family: 'Kanit', sans-serif;
 }
 
 /* all elements within navbar */
@@ -28,7 +30,7 @@ header * {
 }
 
 header ul {
-	line-height: 60px;
+	line-height: 55px;
 }
 
 header ul li {
@@ -36,34 +38,42 @@ header ul li {
 	height: 100%;
 }
 
+header ul li a {
+	padding-left: 7px;
+	padding-right: 7px;
+}
 /* all links in header */
 header a {
 	text-decoration: none;
 	outline: none;
+	color: #333333;
 }
 
 header a:hover {
-	background-color: #999999;
+	background-color: #bfbfbf;
 }
+
+
 
 /* container for login/signup links */
 #authLinks {
 	float: right;
 	height: 100%;
-	margin-right: 30px;
+	margin-right: 20px;
 }
 
 /* search bar input element */
 #searchBar {
-	height: 80%;
+	height: 70%;
 	width: 300px;
 }
 
 /* search submit button */
 #searchSubmit {
 	vertical-align: middle;
-	line-height: 40px;
-	height: 80%;
+	line-height: 32px;
+	height: 70%;
+	width: 50px;
 }
 
 /* FA search icon */
@@ -73,13 +83,18 @@ header a:hover {
 
 #searchTools {
 	position: absolute;
-	left: 280px;
+	left: 250px;
 }
 
 header img {
 	position: fixed;
-	left: 15px;
-	top: 0px;
-	height: 60px;
-	z-index: -2;
+	left: 25px;
+	top: 2.5px;
+	height: 50px;
+}
+
+@media (max-width: 55em) {
+	#searchTools {
+		display: none;
+	}
 }

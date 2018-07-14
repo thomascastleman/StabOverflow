@@ -5,15 +5,16 @@
 		<title>Stab Overflow</title>
 		<link rel="stylesheet" type="text/css" href="navbar.css">
 		<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.1.0/css/all.css" integrity="sha384-lKuwvrZot6UHsBSfcMvOkWwlCMgc0TaWr+30HWe3a4ltaBwTZhyTEggF5tJv8tbt" crossorigin="anonymous">
+		<link href="https://fonts.googleapis.com/css?family=Kanit" rel="stylesheet"> 
 	</head>
 	<body>
 		<header>
-			<a href="/"><img src="/staboverflow.jpg" align="middle"/></a>
+			<a href="/"><img src="/staboverflow.png" align="middle"/></a>
 			<div id="searchTools">
 				<ul>
 					<li>
 						<form id="searchForm" name="search" method="POST" action="/search">
-							<input id="searchBar" name="query" type="text" placeholder="Search StabOverflow">
+							<input id="searchBar" name="query" type="text" placeholder="Search StabOverflow" autocomplete="off">
 							<button id="searchSubmit" type="submit" form="searchForm"><i id="searchIcon" class="fas fa-search"></i></button>
 						</form>
 					</li>
@@ -35,16 +36,12 @@
 					{{/user_uid}}
 				{{/loggedIn}}
 				{{^loggedIn}}
-					<a href="/auth/google">
-						<div id="logInBox">
-							Log In <i class="fas fa-sign-in-alt"></i>
-						</div>
-					</a>
-					<a href="/auth/google">
-						<div id="signUpBox">
-							Sign Up <i class="fas fa-user-plus"></i>
-						</div>
-					</a>
+					<li>
+						<a href="/auth/google">Log In <i class="fas fa-sign-in-alt"></i></a>
+					</li>
+					<li>
+						<a href="/auth/google">Sign Up <i class="fas fa-user-plus"></i></a>
+					</li>
 				{{/loggedIn}}
 				</ul>
 			</div>
