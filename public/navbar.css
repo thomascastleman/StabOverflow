@@ -103,14 +103,19 @@ header a:hover {
 #searchTools {
 	position: absolute;
 	left: 250px;
+	height: 55px;
 }
 
 /* header logo */
 header img {
-	position: fixed;
-	left: 25px;
-	top: 2.5px;
+	position: sticky;
+	left: 0px;
+	top: 0px;
 	height: 50px;
+}
+
+header > a {
+	margin-left: 20px;
 }
 
 @media (max-width: 68em) {
