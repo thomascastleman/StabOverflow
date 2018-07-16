@@ -29,6 +29,7 @@
 	margin-bottom: 4px;
 }
 
+/* button to see more from same category */
 #questioncategory {
 	display: inline-block;
 	font-size: 14px;
@@ -53,19 +54,95 @@
 .questionmeta {
 	float:left;
 	width: 10%;
+	font-size: 25px;
+	color: black;
+	text-align: center;
 }
 
-.questioncomments {
+.questionmeta a, .questionmeta a:visited {
+	color: black;
+}
+
+/* table of comments */
+.comments {
+	border-collapse: collapse;
 	clear: both;
+	font-size: 14px;
+	width: 70%;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+/* comment table rows*/
+.comments tr {
+	border: solid;
+	border-width: 1px 0;
+	border-color: #d9d9d9;
+}
+
+.comments tr:first-child {
+	border: none;
+}
+
+.comments tr:last-child {
+	border: none;
+}
+
+.comments td {
+	padding: 7px;
+}
+
+/* comment table links */
+.comments td a, .comments td a:visited {
+	color: #0066ff;
+	text-decoration: none;
+	outline: none;
+}
+
+/* comment asker metadata */
+.commentasker {
+	color: #8c8c8c;
+}
+
+/* add comment icon */
+.addcomment {
+	font-size: 19px;
+	cursor: pointer;
+}
+
+/* comment textarea input */
+.commentinput {
+	width: 100%;
+	height: auto;
+}
+
+/* button to submit comment */
+.postcomment {
+	color: white !important;
+	border: none;
+	margin-top: 5px;
+	background-color: #4d88ff;
+	padding: 6px;
+	border-radius: 4px;
+}
+
+.postcomment:hover {
+	background-color: #6699ff;
+	cursor: pointer;
 }
 
 .upvote {
-	font-size: 25px;
+	font-size: 30px;
 	cursor: pointer;
 }
 
 .upvotecount {
 	font-size: 25px;
+}
+
+.delete {
+	cursor: pointer;
+	color: #4d4d4d;
 }
 
 /* code formatting */

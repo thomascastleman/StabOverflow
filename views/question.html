@@ -131,55 +131,54 @@
 		<div id="container">
 			<!-- question -->
 			<div>
-				<div>
-					<div class="questionmeta">
-						<div class="upvote" onclick="upvote({{question_uid}});" title="This question was helpful"><i class="fas fa-chevron-circle-up"></i></div>
-						<div class="upvotecount" id="{{question_uid}}">{{upvotes}}</div>
-					</div>
+				<div class="questionmeta">
+					<div class="upvote" onclick="upvote({{question_uid}});" title="This question was helpful"><i class="fas fa-chevron-circle-up"></i></div>
+					<div class="upvotecount" id="{{question_uid}}">{{upvotes}}</div>
+					{{#isQuestionOwner}}<div class="edit"><a href="/editPost/{{question_uid}}" title="Edit this Question"><i class="far fa-edit"></i></a></div>{{/isQuestionOwner}}
+					{{#isAdmin}}<div class="delete" onclick="deletePost({{question_uid}}, undefined);" title="Delete Question"><i class="fas fa-trash-alt"></i></div>{{/isAdmin}}
+				</div>
 
-					<div class="questionbody"> 
-						<h1>{{title}}</h1>
-						{{#category}}
-						<form name="getCategory" method="POST" action="/search">
-							<input name="category" value="{{category_uid}}" hidden>
-							<input name="answeredStatus" value="All" hidden>
-							<div id="questioncategory" onclick="document.getCategory.submit()" title="See more under this category">{{category}}</div>
-						</form>
-						{{/category}}
-						<hr>
-						<br>
-						<div>{{{body}}}</div>
-						<div class="asker">
-							<div>asked at {{creation_date}}</div>
-							{{#image_url}}<img src="{{image_url}}" width="40" align="middle"/>{{/image_url}}
-							<a href="/users/{{owner_uid}}" title="{{owner_real}}">{{owner_display}}</a>
-						</div>
-						{{#isQuestionOwner}}<a href="/editPost/{{question_uid}}">Edit this question</a>{{/isQuestionOwner}}
-						{{#isAdmin}}<div onclick="deletePost({{question_uid}}, undefined);"><strong>Delete question</strong></div>{{/isAdmin}}
+				<div class="questionbody"> 
+					<h1>{{title}}</h1>
+					{{#category}}
+					<form name="getCategory" method="POST" action="/search">
+						<input name="category" value="{{category_uid}}" hidden>
+						<input name="answeredStatus" value="All" hidden>
+						<div id="questioncategory" onclick="document.getCategory.submit()" title="See more under this category">{{category}}</div>
+					</form>
+					{{/category}}
+					<hr>
+					<br>
+					<div>{{{body}}}</div>
+					<div class="asker">
+						<div>asked at {{creation_date}}</div>
+						{{#image_url}}<img src="{{image_url}}" width="40" align="middle"/>{{/image_url}}
+						<a href="/users/{{owner_uid}}" title="{{owner_real}}">{{owner_display}}</a>
 					</div>
 				</div>
 
 				<!-- question comments -->
-				<div class="questioncomments">
+				<table class="comments">
 					{{#comments}}
-					<div>
-						<div>{{{body}}}</div>
-						- <a href="/users/{{owner_uid}}" title="{{owner_real}}">{{owner_display}}</a> at {{creation_date}}
-					</div>
-					{{#isAdmin}}<div onclick="deleteComment({{uid}});"><strong>Delete comment</strong></div>{{/isAdmin}}
+					<tr>
+						<td>{{#isAdmin}}<div class="delete" onclick="deleteComment({{uid}});"><i class="fas fa-trash-alt"></i></div>{{/isAdmin}}</td>
+						<td>{{{body}}} <span class="commentasker">- <a href="/users/{{owner_uid}}" title="{{owner_real}}">{{owner_display}}</a> at {{creation_date}}</span></td>
+					</tr>
 					{{/comments}}
-				</div>
-
-				{{#loggedIn}}
-				<a onclick="showCommentBox({{question_uid}});">Add a comment</a><br>
-				<!-- make question comment -->
-				<form hidden id="commentBox{{question_uid}}" method="POST" action="/newComment">
-					<input name="parent_question" value="{{question_uid}}" hidden>
-					<input name="parent_uid" value="{{question_uid}}" hidden>
-					<textarea name="body"></textarea>
-					<button type="submit">Post Comment</button>
-				</form>
-				{{/loggedIn}}
+					{{#loggedIn}}
+					<tr>
+						<td><a class="addcomment" onclick="showCommentBox({{question_uid}});" title="Add a Comment"><i class="far fa-comment"></i></a></td>
+						<td>
+							<form hidden id="commentBox{{question_uid}}" method="POST" action="/newComment">
+								<input name="parent_question" value="{{question_uid}}" hidden>
+								<input name="parent_uid" value="{{question_uid}}" hidden>
+								<textarea class="commentinput" name="body" rows="3"></textarea>
+								<button class="postcomment" type="submit">Post Comment</button>
+							</form>
+						</td>
+					</tr>
+					{{/loggedIn}}
+				</table>
 			</div>
 
 			<br> 
