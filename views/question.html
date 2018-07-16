@@ -15,13 +15,8 @@
 		<!-- Google code prettify -->
 		<script src="https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js"></script>
 
-		<link href="https://fonts.googleapis.com/css?family=Kanit:300" rel="stylesheet">
-
-		<style>
-			div {
-				font-family: 'Kanit', sans-serif;
-			}
-		</style>
+		<link href="https://fonts.googleapis.com/css?family=Kanit:300,400" rel="stylesheet">
+		<link rel="stylesheet" type="text/css" href="/question.css">
 
 		<script>
 			// confirm leaving page if data entered
@@ -133,34 +128,39 @@
 			</div>
 		</header>
 		
-		<div>
+		<div id="container">
 			<!-- question -->
 			<div>
 				<div>
-					{{^noCategory}}
-					<form name="getCategory" method="POST" action="/search">
-						<input name="category" value="{{category_uid}}" hidden>
-						<input name="answeredStatus" value="All" hidden>
-						<div onclick="document.getCategory.submit()">{{category}}</div>
-					</form>
-					{{/noCategory}}
-					<div>
-						<span id="{{question_uid}}">{{upvotes}}</span> upvotes<br>
-						<a onclick="upvote({{question_uid}});" title="Upvote if you found this question helpful">Upvote</a>
+					<div class="questionmeta">
+						<div class="upvote" onclick="upvote({{question_uid}});" title="This question was helpful"><i class="fas fa-chevron-circle-up"></i></div>
+						<div class="upvotecount" id="{{question_uid}}">{{upvotes}}</div>
+					</div>
+
+					<div class="questionbody"> 
+						<h1>{{title}}</h1>
+						{{#category}}
+						<form name="getCategory" method="POST" action="/search">
+							<input name="category" value="{{category_uid}}" hidden>
+							<input name="answeredStatus" value="All" hidden>
+							<div id="questioncategory" onclick="document.getCategory.submit()" title="See more under this category">{{category}}</div>
+						</form>
+						{{/category}}
+						<hr>
+						<br>
+						<div>{{{body}}}</div>
+						<div class="asker">
+							<div>asked at {{creation_date}}</div>
+							{{#image_url}}<img src="{{image_url}}" width="40" align="middle"/>{{/image_url}}
+							<a href="/users/{{owner_uid}}" title="{{owner_real}}">{{owner_display}}</a>
+						</div>
+						{{#isQuestionOwner}}<a href="/editPost/{{question_uid}}">Edit this question</a>{{/isQuestionOwner}}
+						{{#isAdmin}}<div onclick="deletePost({{question_uid}}, undefined);"><strong>Delete question</strong></div>{{/isAdmin}}
 					</div>
 				</div>
 
-				<h1>{{title}}</h1>
-				<div>{{{body}}}</div>
-				<div>
-					asked at {{creation_date}} by <a href="/users/{{owner_uid}}" title="{{owner_real}}">{{owner_display}}</a>
-					{{#image_url}}<img src="{{image_url}}" width="50"/>{{/image_url}}
-				</div>
-				{{#isQuestionOwner}}<a href="/editPost/{{question_uid}}">Edit this question</a>{{/isQuestionOwner}}
-				{{#isAdmin}}<div onclick="deletePost({{question_uid}}, undefined);"><strong>Delete question</strong></div>{{/isAdmin}}
-
 				<!-- question comments -->
-				<div>
+				<div class="questioncomments">
 					{{#comments}}
 					<div>
 						<div>{{{body}}}</div>
@@ -182,6 +182,7 @@
 				{{/loggedIn}}
 			</div>
 
+			<br> 
 			<!-- answers -->
 			<div>
 				<h2>{{answer_count}} Answers</h2>
@@ -266,15 +267,6 @@
 				$('pre').attr('class', 'prettyprint');
 				$('code').attr('class', 'prettyprint');
 			</script>
-			<style>
-				pre {
-					background-color: #e6e6e6;
-					border: none !important;
-				}
-				code {
-					background-color: #e6e6e6;
-				}
-			</style>
 		</div>
 
 	</body>
