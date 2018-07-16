@@ -16,6 +16,7 @@
 	font-size: 13px;
 	color: #4d4d4d;
 	padding: 7px;
+	margin-top: 5px;
 }
 
 .asker > a, .asker a:visited {
@@ -46,12 +47,12 @@
 	background-color: #cce6ff;
 }
 
-.questionbody {
+.postbody {
 	width: 90%;
 	float:right;
 }
 
-.questionmeta {
+.postmeta {
 	float:left;
 	width: 10%;
 	font-size: 25px;
@@ -59,7 +60,7 @@
 	text-align: center;
 }
 
-.questionmeta a, .questionmeta a:visited {
+.postmeta a, .postmeta a:visited {
 	color: black;
 }
 
@@ -133,11 +134,14 @@
 
 .upvote {
 	font-size: 30px;
+	color: #0066ff;
 	cursor: pointer;
 }
 
 .upvotecount {
-	font-size: 25px;
+	font-family: 'Kanit', sans-serif;
+	font-weight: 300;
+	font-size: 30px;
 }
 
 .delete {
@@ -149,6 +153,8 @@
 pre {
 	background-color: #e6e6e6;
 	border: none !important;
+	overflow: auto;
+	max-height: 800px;
 }
 
 code {
