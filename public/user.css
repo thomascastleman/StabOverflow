@@ -1,0 +1,76 @@
+
+/* container for page content */
+#container {
+	font-family: 'Kanit', sans-serif;
+	font-weight: 300;
+	background-color: #f2f2f2;
+	padding: 20px;
+	width: 60%;
+	min-width: 500px;
+	margin-top: 20px;
+	margin-bottom: 20px;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+
+/* links to question pages */
+#container a, #container a:visited {
+	color: #0066ff;
+	text-decoration: none;
+	outline: none;
+}
+
+#container a:hover {
+	color: #4d94ff;
+}
+
+/* table of question links */
+table {
+	border-collapse: collapse;
+	width: 100%;
+}
+
+tr {
+	border: solid;
+	border-width: 1px 0;
+	border-color: #d9d9d9;
+}
+
+tr:first-child {
+	border: none;
+}
+
+tr:last-child {
+	border: none;
+}
+
+td {
+	padding: 5px;
+}
+
+/* usernames */
+h1, h4, h3 {
+	font-family: 'Kanit', sans-serif;
+	font-weight:300;
+}
+
+/* real name subtitle */
+h4 {
+	color: #4d4d4d;
+}
+
+/* questions asked and answers given figures */
+.bignumber {
+	font-size: 22px;
+}
+
+/* edit profile and admin portal icons */
+#tools {
+	float:right;
+	font-size: 23px;
+}
+
+#tools > a, #tools > a:visited {
+	color: #333333 !important;
+}

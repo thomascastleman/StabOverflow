@@ -7,7 +7,10 @@
 		<!-- navbar style -->
 		<link rel="stylesheet" type="text/css" href="/navbar.css">
 		<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.1.0/css/all.css" integrity="sha384-lKuwvrZot6UHsBSfcMvOkWwlCMgc0TaWr+30HWe3a4ltaBwTZhyTEggF5tJv8tbt" crossorigin="anonymous">
-		<link href="https://fonts.googleapis.com/css?family=Kanit" rel="stylesheet"> 
+
+		 <link href="https://fonts.googleapis.com/css?family=Kanit:300,400" rel="stylesheet"> 
+
+		<link rel="stylesheet" type="text/css" href="/user.css">
 	</head>
 	<body>
 		<header>
@@ -49,32 +52,35 @@
 			</div>
 		</header>
 
-		{{#image_url}}<img src="{{image_url}}" width="170"/>{{/image_url}}
-		<h1>{{display_name}}</h1>
-		<h4>{{real_name}}</h4>
-		{{#is_admin}}<h3><em>Admin</em></h3>{{/is_admin}}
-		<p>{{bio}}</p>
+		<div id="container">
+			<div id="tools">
+			{{#ownProfile}}
+				<a id="edit" title="Edit Profile" href="/users/edit/{{uid}}"><i class="fas fa-user-edit"></i></a>
+				{{#is_admin}}<a id="admin" title="Administrator Portal" href="/adminPortal"><i class="fas fa-unlock-alt"></i></a>{{/is_admin}}
+			{{/ownProfile}}
+			</div>
 
-		<span>Questions asked: {{questions_asked}}</span><br>
-		<span>Answers given: {{answers_given}}</span><br>
+			{{#image_url}}<img src="{{image_url}}" width="170"/>{{/image_url}}
+			<h1>{{display_name}}</h1>
+			<h4>{{real_name}}{{#is_admin}} <em>(Administrator)</em>{{/is_admin}}</h4>
+			<p>{{{bio}}}</p><br>
 
-		{{#ownProfile}}
-			<a href="/users/edit/{{uid}}">Edit my profile</a><br>
+			<div>
+				<span class="bignumber">{{questions_asked}}</span> questions asked<br>
+				<span class="bignumber">{{answers_given}}</span> answers given
+			</div>
+			<br>
 
-			{{#is_admin}}
-				<a href="/adminPortal">Admin Portal</a>
-			{{/is_admin}}
-		{{/ownProfile}}
-
-		<h3>Recent Posts:</h3>
-		<table>
-			{{#posts}}
-				<tr>
-					<td>{{#isQuestion}}Q:{{/isQuestion}}{{^isQuestion}}A:{{/isQuestion}}</td>
-					<td><a href="/questions/{{redirect_uid}}">{{title}}</a></td>
-					<td>{{date}}</td>
-				</tr>
-			{{/posts}}
-		</table>
+			<h3>Recent Posts:</h3>
+			<table>
+				{{#posts}}
+					<tr>
+						<td>{{#isQuestion}}Q:{{/isQuestion}}{{^isQuestion}}A:{{/isQuestion}}</td>
+						<td><a href="/questions/{{redirect_uid}}">{{title}}</a></td>
+						<td>{{date}}</td>
+					</tr>
+				{{/posts}}
+			</table>
+		</div>
 	</body>
 </html>
