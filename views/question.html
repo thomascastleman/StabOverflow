@@ -108,7 +108,7 @@
 				<ul>
 				{{#loggedIn}}
 					<li>
-						<a href="/logout">Log Out <i class="fas fa-sign-out-alt"></i></a>
+						<a href="/logout?returnTo=%2Fquestions%2F{{question_uid}}">Log Out <i class="fas fa-sign-out-alt"></i></a>
 					</li>
 					{{#user_uid}}
 					<li>
@@ -118,7 +118,7 @@
 				{{/loggedIn}}
 				{{^loggedIn}}
 					<li>
-						<a href="/auth/google">Log In <i class="fas fa-sign-in-alt"></i></a>
+						<a href="/auth/google?returnTo=%2Fquestions%2F{{question_uid}}">Log In <i class="fas fa-sign-in-alt"></i></a>
 					</li>
 					<li>
 						<a href="/auth/google">Sign Up <i class="fas fa-user-plus"></i></a>
@@ -172,7 +172,7 @@
 							<form hidden id="commentBox{{question_uid}}" method="POST" action="/newComment">
 								<input name="parent_question" value="{{question_uid}}" hidden>
 								<input name="parent_uid" value="{{question_uid}}" hidden>
-								<textarea class="commentinput" name="body" rows="3"></textarea>
+								<textarea class="commentinput" name="body" rows="3"></textarea><br>
 								<button class="postcomment" type="submit">Post Comment</button>
 							</form>
 						</td>
@@ -217,7 +217,7 @@
 									<form hidden id="commentBox{{answer_uid}}" method="POST" action="/newComment">
 										<input name="parent_question" value="{{question_uid}}" hidden>
 										<input name="parent_uid" value="{{answer_uid}}" hidden>
-										<textarea class="commentinput" name="body" rows="3"></textarea>
+										<textarea class="commentinput" name="body" rows="3"></textarea><br>
 										<button class="postcomment" type="submit">Post Comment</button>
 									</form>
 								</td>
