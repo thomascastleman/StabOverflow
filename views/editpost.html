@@ -15,6 +15,8 @@
         <script type="text/javascript" src="../pagedown/Markdown.Sanitizer.js"></script>
         <script type="text/javascript" src="../pagedown/Markdown.Editor.js"></script>
 
+        <link rel="stylesheet" type="text/css" href="/editpost.css">
+
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
 
         <!-- Google code prettify -->
@@ -80,13 +82,18 @@
 			</div>
 		</header>
 
-		<h1>{{title}}</h1>
-		<div>{{{body}}}</div>
+		<div id="container">
+			<h1>{{title}}</h1>
+			<hr/>
+			<br>
+			<div>{{{body}}}</div>
+		</div>
+		<br>
 
 		<form method="POST" action="/updatePost" name="questionForm" onsubmit="return validate();">
 			<input name="uid" value="{{uid}}" hidden>
 
-			<center><h3>Type below to <em>add</em> to your original post.</h3></center>
+			<center><h3 id="instructions">Type below to <em>add</em> to your original post.</h3></center>
 			<div class="wmd-panel">
                 <div id="wmd-button-bar"></div>
                 <textarea name="appendage" class="wmd-input" id="wmd-input"></textarea>
@@ -94,7 +101,7 @@
 
             <div id="wmd-preview" class="wmd-panel wmd-preview"></div>
 
-			<center><button type="submit" onclick="window.onbeforeunload = undefined;">Post Your Question</button></center>
+			<center><button id="post" type="submit" onclick="window.onbeforeunload = undefined;">Post Your Updates</button></center>
 		</form>
 
 		<script type="text/javascript">
@@ -123,14 +130,5 @@
 			$('pre').attr('class', 'prettyprint');
 			$('code').attr('class', 'prettyprint');
         </script>
-			<style>
-				pre {
-					background-color: #e6e6e6;
-					border: none !important;
-				}
-				code {
-					background-color: #e6e6e6;
-				}
-			</style>
 	</body>
 </html>
