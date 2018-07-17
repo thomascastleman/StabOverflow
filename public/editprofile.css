@@ -1,0 +1,47 @@
+
+
+/* container for page content */
+#container {
+	font-family: 'Kanit', sans-serif;
+	width: 55%;
+	min-width: 500px;
+	margin-top: 20px;
+	margin-left: auto;
+	margin-right: auto;
+	background-color: #f2f2f2;
+	padding: 20px;
+	border-radius: 5px;
+	line-height: 50px;
+}
+
+/* display name input */
+#displayname {
+	width: 40%;
+	height: 25px;
+	border: 1px solid #cccccc;
+	border-radius: 4px;
+	padding: 5px;
+}
+
+/* bio input */
+#bio {
+	width: 90%;
+	resize: vertical;
+	padding: 5px;
+	border: 1px solid DarkGray;
+	border-radius: 5px;
+}
+
+/* save profile button */
+#save {
+	color: white;
+	background-color: #4d88ff;
+	padding: 10px;
+	border:none;
+	border-radius: 4px;
+}
+
+#save:hover {
+	background-color: #6699ff;
+	cursor: pointer;
+}

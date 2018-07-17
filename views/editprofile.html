@@ -8,6 +8,25 @@
 		<link rel="stylesheet" type="text/css" href="/navbar.css">
 		<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.1.0/css/all.css" integrity="sha384-lKuwvrZot6UHsBSfcMvOkWwlCMgc0TaWr+30HWe3a4ltaBwTZhyTEggF5tJv8tbt" crossorigin="anonymous">
 		<link href="https://fonts.googleapis.com/css?family=Kanit" rel="stylesheet"> 
+
+		<link rel="stylesheet" type="text/css" href="/editprofile.css">
+
+		<script>
+			// confirm leaving page if data entered
+			window.onbeforeunload = function() {
+				return "Are you sure you want to leave the page? Data entered will not be saved.";
+			}
+
+			// validate that non-empty appendage is being submitted
+			function validate() {
+				if (document.updates.display_name.value == '') {
+					alert("Please ensure your display name is non-empty.");
+					return false;
+				} else {
+					return true;
+				}
+			}
+		</script>
 	</head>
 	<body>
 		<header>
@@ -49,12 +68,14 @@
 			</div>
 		</header>
 
-		<h1>Edit your profile</h1>
-		<form method="POST" action="/users/update">
-			<input name="uid" value="{{uid}}" hidden>
-			Display Name: <input name="display_name" type="text" value="{{display_name}}" maxlength="32"><br>
-			Bio: <textarea name="bio" maxlength="140">{{bio}}</textarea>
-			<button type="submit">Save Profile</button>
-		</form>
+		<div id="container">
+			<h1>Edit Your Profile</h1>
+			<form name="updates" method="POST" action="/users/update" onsubmit="return validate();">
+				<input name="uid" value="{{uid}}" hidden>
+				Display Name: <input id="displayname" name="display_name" type="text" value="{{display_name}}" maxlength="32" autocomplete="off"><br>
+				Bio:<br><textarea id="bio" name="bio" maxlength="140" rows="5">{{bio}}</textarea><br>
+				<button id="save" type="submit" onclick="window.onbeforeunload = undefined;">Save Profile</button>
+			</form>
+		</div>
 	</body>
 </html>

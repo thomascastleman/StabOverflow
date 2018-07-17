@@ -188,7 +188,7 @@ module.exports = {
 		app.post('/users/update', auth.isAuthenticated, function(req, res) {
 			var uid = req.body.uid, name = req.body.display_name, bio = req.body.bio;
 
-			if (!isNaN(parseInt(uid, 10))) {
+			if (!isNaN(parseInt(uid, 10)) && name != "") {
 				// if user is authorized to make edits
 				if (uid == req.user.local.uid) {
 					con.query('UPDATE users SET display_name = ?, bio = ? WHERE uid = ?;', [name, bio, req.user.local.uid], function(err, rows) {
