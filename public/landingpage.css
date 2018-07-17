@@ -2,6 +2,7 @@
 /* "Recent Questions" title */
 h2 {
 	font-family: 'Kanit', sans-serif;
+	font-weight: 300;
 }
 
 /* ask a question link */
