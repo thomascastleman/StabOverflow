@@ -53,10 +53,9 @@ td {
 .upvotes, .answers {
 	display: inline-block;
 	font-size: 13px;
-	padding: 2px;
-	border: solid;
-	border-width: 1px;
-	border-color: #d9d9d9;
+	color: #0066ff;
+	padding: 3px;
+	border: 1px solid #0066ff;
 	border-radius: 3px;
 }
 
