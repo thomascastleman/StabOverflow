@@ -17,6 +17,7 @@ header {
 	height: 55px;
 	padding: 0px;
 	font-family: 'Kanit', sans-serif;
+	z-index: 1;
 }
 
 /* all elements within navbar */

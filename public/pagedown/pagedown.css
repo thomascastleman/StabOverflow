@@ -5,13 +5,14 @@ body
 }
 
 blockquote {
-	border-left: 2px dotted #888;
+	border-left: 2px solid #888;
 	padding-left: 5px;
 	background: #d0f0ff;
 }
 
 .wmd-panel
 {
+	margin-top: 10px;
 	margin-left: 25%;
 	margin-right: 25%;
 	width: 50%;
@@ -30,10 +31,13 @@ blockquote {
 	width: 100%;
 	background-color: white;
 	border: 1px solid DarkGray;
+	border-radius: 5px;
+	padding: 3px;
 }
 
 .wmd-preview 
 { 
+	font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;;
 	background-color: white; 
 }
 

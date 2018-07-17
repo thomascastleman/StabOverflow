@@ -149,6 +149,21 @@
 	color: #4d4d4d;
 }
 
+#postanswer {
+	color: white;
+	background-color: #4d88ff;
+	padding: 10px;
+	border:none;
+	border-radius: 4px;
+	margin-top: 10px;
+	margin-bottom: 150px;
+}
+
+#postanswer:hover {
+	background-color: #6699ff;
+	cursor: pointer;
+}
+
 /* code formatting */
 pre {
 	background-color: #e6e6e6;
