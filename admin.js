@@ -50,7 +50,7 @@ module.exports = {
 							}
 						});
 					} else {
-						res.render('error.html', { message: "Conflict with existing email." });
+						res.render('error.html', { message: "\"" + req.body.email + "\" caused a conflict with an existing email." });
 					}
 				} else {
 					res.render('error.html');
