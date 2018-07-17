@@ -7,7 +7,10 @@
 		<!-- navbar style -->
 		<link rel="stylesheet" type="text/css" href="/navbar.css">
 		<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.1.0/css/all.css" integrity="sha384-lKuwvrZot6UHsBSfcMvOkWwlCMgc0TaWr+30HWe3a4ltaBwTZhyTEggF5tJv8tbt" crossorigin="anonymous">
-		<link href="https://fonts.googleapis.com/css?family=Kanit" rel="stylesheet"> 
+		<link href="https://fonts.googleapis.com/css?family=Kanit:400,300" rel="stylesheet"> 
+
+		<link rel="stylesheet" type="text/css" href="/questionlinks.css">
+		<link rel="stylesheet" type="text/css" href="/search.css">
 	</head>
 	<body>
 		<header>
@@ -49,53 +52,58 @@
 			</div>
 		</header>
 
-		<form name="secondarySearch" method="POST" action="/search">
-			<input name="query" type="text" value="{{query}}">
-			<input type="submit" value="Search"><br>
 
-			Filter by Category
-			<select name="category" onchange="document.secondarySearch.submit();">
-				<option value="0">All</option>
-				{{#categories}}
-					<option {{#isSelected}}selected="selected" {{/isSelected}}value="{{uid}}">{{name}}</option>
-				{{/categories}}
-			</select>
-			<br>
+		<div id="container">
 
-			Filter by answers
-			<select name="answeredStatus" onchange="document.secondarySearch.submit();">
-				<option {{#All}}selected="selected" {{/All}}value="All">All</option>
-				<option {{#Unanswered}}selected="selected" {{/Unanswered}}value="Unanswered">Unanswered</option>
-				<option {{#Answered}}selected="selected" {{/Answered}}value="Answered">Answered</option>
-			</select>
-		</form>
+			<div id="searchFilters">
+				<form name="secondarySearch" method="POST" action="/search">
+					<input id="query" name="query" type="text" value="{{query}}" autocomplete="off">
+					<input id="search" type="submit" value="Search"><br>
 
-		<h2>Search Results</h2>
+					Filter by Category
+					<select name="category" onchange="document.secondarySearch.submit();">
+						<option value="0">All</option>
+						{{#categories}}
+							<option {{#isSelected}}selected="selected" {{/isSelected}}value="{{uid}}">{{name}}</option>
+						{{/categories}}
+					</select>
 
-		<div>
-			{{#results}}
-				<div>
-					<!-- category, upvotes, answers -->
-					<div>
-						{{#category}}<div>{{category}}</div>{{/category}}
-						<div>{{upvotes}} upvotes</div>
-						<div>{{answer_count}} answers</div>
-					</div>
+					Filter by Answers
+					<select name="answeredStatus" onchange="document.secondarySearch.submit();">
+						<option {{#All}}selected="selected" {{/All}}value="All">All</option>
+						<option {{#Unanswered}}selected="selected" {{/Unanswered}}value="Unanswered">Unanswered</option>
+						<option {{#Answered}}selected="selected" {{/Answered}}value="Answered">Answered</option>
+					</select>
+				</form>
+			</div>
 
-					<!-- title, owner, time -->
-					<div>
-						<div><a href='/questions/{{redirect_uid}}'>{{title}}</a></div>
-						<div>
-							asked {{creation_date}} by <a href="/users/{{owner_uid}}" title="{{owner_real}}">{{owner_display}}</a>
-							{{#image_url}}<img src="{{image_url}}" width="50"/>{{/image_url}}
-						</div>
-					</div>
-				</div>
-				<br>
-			{{/results}}
-			{{^results}}
-			No results found!
-			{{/results}}
+			<h2>Search Results{{#query}} for "{{query}}"{{/query}}</h2>
+
+			<table>
+				{{#results}}
+					<tr>
+						<!-- category, upvotes, answers -->
+						<td class="meta">
+							<a class="metawrapper" href='/questions/{{redirect_uid}}'>
+								{{#category}}<div class="category"><em>{{category}}</em></div>{{/category}}
+								<div>
+									<div class="upvotes"><span class="number">{{upvotes}}</span><br>upvotes</div>
+									<div class="answers"><span class="number">{{answer_count}}</span><br>answers</div>
+								</div>
+							</a>
+						</td>
+
+						<!-- title, owner, time -->
+						<td>
+							<div><a href='/questions/{{redirect_uid}}'>{{title}}</a></div>
+							<div class="asker">asked {{creation_date}} by <a href="/users/{{owner_uid}}" title="{{owner_real}}">{{owner_display}}</a></div>
+						</td>
+					</tr>
+				{{/results}}
+				{{^results}}
+				<span id="noresults">No results found!</span>
+				{{/results}}
+			</table>
 		</div>
 
 	</body>

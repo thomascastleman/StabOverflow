@@ -1,0 +1,57 @@
+
+/* container for search filter tools */
+#searchFilters {
+	font-family: 'Kanit', sans-serif;
+	font-weight: 300;
+	background-color: #f2f2f2;
+	text-align: center;
+	padding: 15px;
+	border-radius: 5px;
+}
+
+/* "search results" header */
+h2 {
+	font-family: 'Kanit', sans-serif;
+	font-weight: 400;
+	margin-top: 15px;
+	margin-bottom: 10px;
+}
+
+/* selects for filters */
+select {
+	border: none;
+	padding: 5px;
+	border-radius: 3px;
+	margin-top: 10px;
+	margin-left: 20px;
+	margin-right: 20px;
+}
+
+/* secondary search bar */
+#query {
+	width: 50%;
+	height: 25px;
+	border: 1px solid #cccccc;
+	border-radius: 4px;
+	padding: 5px;
+}
+
+/* secondary search submit button */
+#search {
+	color: white;
+	background-color: #4d88ff;
+	padding: 10px;
+	border:none;
+	border-radius: 4px;
+}
+
+#search:hover {
+	background-color: #6699ff;
+	cursor: pointer;
+}
+
+/* "no results" message */
+#noresults {
+	font-family: 'Kanit', sans-serif;
+	font-weight: 300;
+}

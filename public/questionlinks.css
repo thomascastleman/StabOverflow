@@ -1,0 +1,83 @@
+
+/* container for page content */
+#container {
+	font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+	width: 60%;
+	min-width: 500px;
+	margin-top: 20px;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+/* table of question links */
+table {
+	border-collapse: collapse;
+	width: 100%;
+}
+
+tr {
+	border: solid;
+	border-width: 1px 0;
+	border-color: #d9d9d9;
+}
+
+tr:first-child {
+	border: none;
+}
+
+tr:last-child {
+	border: none;
+}
+
+td {
+	padding: 8px;
+}
+
+/* links to question / user pages */
+#container a, #container a:visited {
+	color: #0066ff;
+	text-decoration: none;
+	outline: none;
+}
+
+#container a:hover {
+	color: #4d94ff;
+}
+
+/* upvote and answer counts on each question */
+.upvotes, .answers {
+	display: inline-block;
+	font-size: 13px;
+	color: #0066ff;
+	padding: 3px;
+	border: 1px solid #0066ff;
+	border-radius: 3px;
+}
+
+/* enlarged count number for upvotes / answers */
+.number {
+	font-size: 17px;
+}
+
+/* question category name */
+.category {
+	font-size: 13px;
+	margin-bottom: 10px;
+}
+
+/* asker metadata */
+.asker {
+	font-size: 13px;
+	color: #999999;
+	float:right;
+	margin-top: 5px;
+}
+
+/* container for question metadata */
+.meta {
+	text-align: center;
+}
+
+.metawrapper {
+	color: #595959 !important;
+}
