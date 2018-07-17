@@ -59,7 +59,9 @@ header a:hover {
 /* search bar input element */
 #searchBar {
 	height: 70%;
-	width: 300px;
+	/*width: 300px;*/
+	width: 20vw;
+	min-width: 70px;
 	font-size: 15px;
 	font-family: 'Kanit', sans-serif;
 	outline: 0;
@@ -124,8 +126,8 @@ header > a {
 	}
 }
 
-@media (max-width: 60em) {
-	#searchTools {
+@media (max-width: 53em) {
+	#searchSubmit {
 		display: none;
 	}
 }
