@@ -64,59 +64,67 @@
 		</header>
 
 		<div id="container">
-			<h1>Administrator Portal</h1>
 
-			<form method="POST" action="/addAccount" name="account" onsubmit="return validate(document.account.email.value) && validate(document.account.name.value) && confirm('Are you sure you want to add ' + document.account.email.value + '?');">
-				Authorize a new account:<br>
-				<input name="name" type="text" placeholder="Full name" maxlength="32" autocomplete="off"><br>
-				<input name="email" type="text" placeholder="Email" maxlength="45" autocomplete="off"><br>
-				<button type="submit">Authorize</button>
-			</form>
-			<br>
-			<form method="POST" action="/makeAdmin" name="makeAdmin" onsubmit="return validate(document.makeAdmin.email.value) && confirm('Are you sure you want to make ' + document.makeAdmin.email.value + ' an administrator?');">
-				Grant admin privileges:<br>
-				<input name="email" type="text" placeholder="Email (existing account)" oninput="renderMatches(document.makeAdmin.email.value, 0);" autocomplete="off">
-				<button type="submit">Grant privileges</button>
-			</form>
-			<br>
-			<form method="POST" action="/removeAdmin" name="removeAdmin" onsubmit="return validate(document.removeAdmin.email.value) && confirm('Are you sure you want to revoke the privileges of ' + document.removeAdmin.email.value + '?');">
-				Revoke admin privileges:<br>
-				<input name="email" type="text" placeholder="Email (existing account)" oninput="renderMatches(document.removeAdmin.email.value, 1);" autocomplete="off">
-				<button type="submit">Revoke privileges</button>
-			</form>
+			<div id="left">
+				<h1>Administrator Portal</h1>
 
-			<div id="emailMatches"></div>
+				<form method="POST" action="/addAccount" name="account" onsubmit="return validate(document.account.email.value) && validate(document.account.name.value) && confirm('Are you sure you want to add ' + document.account.email.value + '?');">
+					Authorize a new account:<br>
+					<input name="name" type="text" placeholder="Full name" maxlength="32" autocomplete="off"><br>
+					<input name="email" type="text" placeholder="Email" maxlength="45" autocomplete="off" oninput="renderMatches(document.account.email.value, 'Possible Email Conflicts:');"><br>
+					<button type="submit">Authorize</button>
+				</form>
+				<br>
+				<form method="POST" action="/makeAdmin" name="makeAdmin" onsubmit="return validate(document.makeAdmin.email.value) && confirm('Are you sure you want to make ' + document.makeAdmin.email.value + ' an administrator?');">
+					Grant admin privileges:<br>
+					<input name="email" type="text" placeholder="Email (existing account)" oninput="renderMatches(document.makeAdmin.email.value);" autocomplete="off">
+					<button type="submit">Grant privileges</button>
+				</form>
+				<br>
+				<form method="POST" action="/removeAdmin" name="removeAdmin" onsubmit="return validate(document.removeAdmin.email.value) && confirm('Are you sure you want to revoke the privileges of ' + document.removeAdmin.email.value + '?');">
+					Revoke admin privileges:<br>
+					<input name="email" type="text" placeholder="Email (existing account)" oninput="renderMatches(document.removeAdmin.email.value);" autocomplete="off">
+					<button type="submit">Revoke privileges</button>
+				</form>
+				<br>
+				<form method="POST" action="/newCategory" name="newCat" onsubmit="return validate(document.newCat.category.value) && confirm('Are you sure you want to create the category ' + document.newCat.category.value + '?');">
+					Create a new category:<br>
+					<input name="category" type="text" placeholder="Category name" maxlength="32" autocomplete="off">
+					<button type="submit">Create Category</button>
+				</form>
+				{{#loadedUnarchived}}
+				<br>
+				<form method="POST" action="/archiveCategory" name="archiveCat" onsubmit="return confirm('Are you sure you want to archive the category ' + $('#archiveCat option:selected').text() + '? (Users will no longer be able to make posts under this category)');">
+					Archive an existing category:<br>
+					<select id="archiveCat" name="uid">
+						{{#unarchived}}
+						<option value="{{uid}}">{{name}}</option>
+						{{/unarchived}}
+					</select>
+					<button type="submit">Archive Category</button>
+				</form>
+				{{/loadedUnarchived}}
+				{{#loadedAllCategories}}
+				<br>
+				<form method="POST" action="/deleteCategory" name="deleteCat" onsubmit="return confirm('Are you sure you want to FULLY DELETE the category ' + $('#deleteCat option:selected').text() + '? (This category will disappear from the site completely)');">
+					Delete an existing category:<br>
+					<select id="deleteCat" name="uid">
+						{{#categories}}
+						<option value="{{uid}}">{{name}}</option>
+						{{/categories}}
+					</select>
+					<button type="submit">Delete Category</button>
+				</form>
+				{{/loadedAllCategories}}
+			</div>
 
-			<br>
-			<form method="POST" action="/newCategory" name="newCat" onsubmit="return validate(document.newCat.category.value) && confirm('Are you sure you want to create the category ' + document.newCat.category.value + '?');">
-				Create a new category:<br>
-				<input name="category" type="text" placeholder="Category name" maxlength="32" autocomplete="off">
-				<button type="submit">Create Category</button>
-			</form>
-			{{#loadedUnarchived}}
-			<br>
-			<form method="POST" action="/archiveCategory" name="archiveCat" onsubmit="return confirm('Are you sure you want to archive the category ' + $('#archiveCat option:selected').text() + '? (Users will no longer be able to make posts under this category)');">
-				Archive an existing category:<br>
-				<select id="archiveCat" name="uid">
-					{{#unarchived}}
-					<option value="{{uid}}">{{name}}</option>
-					{{/unarchived}}
-				</select>
-				<button type="submit">Archive Category</button>
-			</form>
-			{{/loadedUnarchived}}
-			{{#loadedAllCategories}}
-			<br>
-			<form method="POST" action="/deleteCategory" name="deleteCat" onsubmit="return confirm('Are you sure you want to FULLY DELETE the category ' + $('#deleteCat option:selected').text() + '? (This category will disappear from the site completely)');">
-				Delete an existing category:<br>
-				<select id="deleteCat" name="uid">
-					{{#categories}}
-					<option value="{{uid}}">{{name}}</option>
-					{{/categories}}
-				</select>
-				<button type="submit">Delete Category</button>
-			</form>
-			{{/loadedAllCategories}}
+			<div id="right">
+				User Search:<br>
+				<input id="userSearch" type="text" autocomplete="off" placeholder="Search for a user" oninput="renderMatches($(this).val());">
+				<div id="emailMatches"></div>
+			</div>
+
+			<div id="buffer"></div>
 		</div>
 	</body>
 
@@ -128,26 +136,27 @@
 		];
 
 		$matches = $('#emailMatches');
-		function renderMatches(fragment, adminStatus) {
+
+		// render users whose info matches that of the search fragment
+		function renderMatches(fragment, title) {
 			fragment = fragment.toLowerCase();
 			$matches.empty();
 
 			if (fragment != "") {
-				if (adminStatus == 1) {
-					$matches.append("<h4>Possible Administrator Matches:</h4>");
-				} else {
-					$matches.append("<h4>Possible Regular User Matches:</h4>");
-				}
-				var found;
+				if (!title) title = "Possible User Matches:";
+				$matches.append("<strong>" + title + "</strong><br>");
+
+				var found, admin;
 				for (var i = 0; i < users.length; i++) {
-					if ((users[i].email.toLowerCase().includes(fragment) || users[i].name.toLowerCase().includes(fragment)) && users[i].is_admin == adminStatus) {
-						$matches.append("<span>" + users[i].name + " (" + users[i].email + ")</span><br>");
+					if ((users[i].email.toLowerCase().includes(fragment) || users[i].name.toLowerCase().includes(fragment))) {
+						admin = users[i].is_admin ? "Admin" : ""
+						$matches.append("<span>" + users[i].name + " (" + users[i].email + ") <em>" + admin + "</em></span><br>");
 						found = true;
 					}
 				}
 
 				if (!found) {
-					$matches.append("<span>No matches found!</span>")
+					$matches.append("<span>No matches for \"" + fragment + "\" found!</span>")
 				}
 			}
 		}

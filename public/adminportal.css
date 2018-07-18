@@ -3,8 +3,8 @@
 #container {
 	font-family: 'Kanit', sans-serif;
 	font-weight: 300;
-	width: 40%;
-	min-width: 500px;
+	width: 75%;
+	min-width: 300px;
 	margin-top: 20px;
 	margin-bottom: 100px;
 	margin-left: auto;
@@ -38,9 +38,27 @@
 
 /* text input */
 #container input {
-	width: 40%;
+	width: 50%;
 	height: 22px;
 	border: 1px solid #cccccc;
 	border-radius: 4px;
 	padding: 5px;
+}
+
+#left {
+	float:left;
+	width: 50%;
+}
+
+#right {
+	float:right;
+	width: 50%;
+}
+
+#right input {
+	width: 75%;
+}
+
+#buffer {
+	clear:both;
 }
