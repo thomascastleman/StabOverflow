@@ -17,7 +17,12 @@ header {
 	height: 55px;
 	padding: 0px;
 	font-family: 'Kanit', sans-serif;
+	font-weight: 300;
 	z-index: 1;
+}
+
+header input {
+	font-weight: 300;
 }
 
 /* all elements within navbar */
