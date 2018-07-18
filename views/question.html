@@ -130,7 +130,7 @@
 		
 		<div id="container">
 			<!-- question -->
-			<div>
+			<div class="post">
 				<div class="postmeta">
 					<div class="upvote" onclick="upvote({{question_uid}});" title="This question was helpful"><i class="fas fa-chevron-circle-up"></i></div>
 					<div class="upvotecount" id="{{question_uid}}">{{upvotes}}</div>
@@ -161,7 +161,7 @@
 				<table class="comments">
 					{{#comments}}
 					<tr>
-						<td>{{#isAdmin}}<div class="delete" onclick="deleteComment({{uid}});"><i class="fas fa-trash-alt"></i></div>{{/isAdmin}}</td>
+						<td>{{#isAdmin}}<div class="delete" onclick="deleteComment({{uid}});" title="Delete Comment"><i class="fas fa-trash-alt"></i></div>{{/isAdmin}}</td>
 						<td>{{{body}}} <span class="commentasker">- <a href="/users/{{owner_uid}}" title="{{owner_real}}">{{owner_display}}</a> at {{creation_date}}</span></td>
 					</tr>
 					{{/comments}}
@@ -186,7 +186,7 @@
 			<div>
 				<h2>{{answer_count}} Answers</h2><br>
 				{{#answers}}
-					<div>
+					<div class="post">
 						<div class="postmeta">
 							<div class="upvote" onclick="upvote({{answer_uid}});" title="This answer was helpful"><i class="fas fa-chevron-circle-up"></i></div>
 							<div class="upvotecount" id="{{answer_uid}}">{{upvotes}}</div>
@@ -206,7 +206,7 @@
 						<table class="comments">
 							{{#answer_comments}}
 							<tr>
-								<td>{{#isAdmin}}<div class="delete" onclick="deleteComment({{uid}});"><i class="fas fa-trash-alt"></i></div>{{/isAdmin}}</td>
+								<td>{{#isAdmin}}<div class="delete" onclick="deleteComment({{uid}});" title="Delete Comment"><i class="fas fa-trash-alt"></i></div>{{/isAdmin}}</td>
 								<td>{{{body}}} <span class="commentasker">- <a href="/users/{{owner_uid}}" title="{{owner_real}}">{{owner_display}}</a> at {{creation_date}}</span></td>
 							</tr>
 							{{/answer_comments}}

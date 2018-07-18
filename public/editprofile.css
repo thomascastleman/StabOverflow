@@ -1,5 +1,14 @@
 
 
+#container * {
+	font-family: 'Kanit', sans-serif;
+	font-weight: 300;
+}
+
+#container h1 {
+	font-weight: 400;
+}
+
 /* container for page content */
 #container {
 	font-family: 'Kanit', sans-serif;

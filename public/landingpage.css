@@ -7,6 +7,8 @@ h2 {
 
 /* ask a question link */
 #ask {
+	font-family: 'Kanit', sans-serif;
+	font-weight: 300;
 	float: right;
 	color: white !important;
 	background-color: #4d88ff;
