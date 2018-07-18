@@ -11,6 +11,18 @@
 		<link href="https://fonts.googleapis.com/css?family=Kanit:300,400" rel="stylesheet">
 
 		<link rel="stylesheet" type="text/css" href="/adminportal.css">
+
+		<script>
+			function validate(field) {
+				if (field == "") {
+					alert("Please ensure you are submitting a non-empty field.");
+					return false;
+				} else {
+					return true;
+				}
+
+			}
+		</script>
 	</head>
 	<body>
 		<header>
@@ -55,20 +67,20 @@
 		<div id="container">
 			<h1>Administrator Portal</h1>
 
-			<form method="POST" action="/addAccount" name="account" onsubmit="return confirm('Are you sure you want to add ' + document.account.email.value + '?');">
+			<form method="POST" action="/addAccount" name="account" onsubmit="return validate(document.account.email.value) && validate(document.account.name.value) && confirm('Are you sure you want to add ' + document.account.email.value + '?');">
 				Authorize a new account:<br>
 				<input name="name" type="text" placeholder="Full name" maxlength="32" autocomplete="off"><br>
 				<input name="email" type="text" placeholder="Email" maxlength="45" autocomplete="off"><br>
 				<button type="submit">Authorize</button>
 			</form>
 			<br>
-			<form method="POST" action="/makeAdmin" name="makeAdmin" onsubmit="return confirm('Are you sure you want to make ' + document.makeAdmin.email.value + ' an administrator?');">
+			<form method="POST" action="/makeAdmin" name="makeAdmin" onsubmit="return validate(document.makeAdmin.email.value) && confirm('Are you sure you want to make ' + document.makeAdmin.email.value + ' an administrator?');">
 				Grant admin privileges:<br>
 				<input name="email" type="text" placeholder="Email (existing account)" oninput="renderMatches(document.makeAdmin.email.value, 0);" autocomplete="off">
 				<button type="submit">Grant privileges</button>
 			</form>
 			<br>
-			<form method="POST" action="/removeAdmin" name="removeAdmin" onsubmit="return confirm('Are you sure you want to revoke the privileges of ' + document.removeAdmin.email.value + '?');">
+			<form method="POST" action="/removeAdmin" name="removeAdmin" onsubmit="return validate(document.removeAdmin.email.value) && confirm('Are you sure you want to revoke the privileges of ' + document.removeAdmin.email.value + '?');">
 				Revoke admin privileges:<br>
 				<input name="email" type="text" placeholder="Email (existing account)" oninput="renderMatches(document.removeAdmin.email.value, 1);" autocomplete="off">
 				<button type="submit">Revoke privileges</button>
@@ -77,7 +89,7 @@
 			<div id="emailMatches"></div>
 
 			<br>
-			<form method="POST" action="/newCategory" name="newCat" onsubmit="return confirm('Are you sure you want to create the category ' + document.newCat.category.value + '?');">
+			<form method="POST" action="/newCategory" name="newCat" onsubmit="return validate(document.newCat.category.value) && confirm('Are you sure you want to create the category ' + document.newCat.category.value + '?');">
 				Create a new category:<br>
 				<input name="category" type="text" placeholder="Category name" maxlength="32" autocomplete="off">
 				<button type="submit">Create Category</button>
