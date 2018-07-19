@@ -52,7 +52,8 @@ td {
 .upvotes, .answers {
 	display: inline-block;
 	font-size: 13px;
-	color: #0066ff;
+	color: #666666;
+	background-color: #cce0ff;
 	padding: 3px;
 	border: 1px solid #0066ff;
 	border-radius: 3px;
@@ -60,7 +61,10 @@ td {
 
 /* enlarged count number for upvotes / answers */
 .number {
-	font-size: 17px;
+	font-family: 'Kanit', sans-serif;
+	font-weight: 400;
+	font-size: 19px;
+	color: #595959;
 }
 
 /* question category name */

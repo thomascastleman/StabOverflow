@@ -120,6 +120,8 @@ header img {
 	left: 0px;
 	top: 0px;
 	height: 50px;
+	margin-right: 5px;
+	margin-left: 5px;
 }
 
 header > a {
