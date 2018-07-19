@@ -125,7 +125,7 @@ BEGIN
 					users.real_name AS owner_real,
 					users.display_name AS owner_display,
 					users.image_url,
-					DATE_FORMAT(q.creation_date, '%l:%i %p, %b %D, %Y') AS creation_date,
+					DATE_FORMAT(q.creation_date, '%b %D, %Y at %l:%i %p') AS creation_date,
 					q.answer_count,
 					q.upvotes,
 					c.name AS category
@@ -156,7 +156,7 @@ BEGIN
 			users.real_name AS owner_real,
 			users.display_name AS owner_display,
 			users.image_url,
-			DATE_FORMAT(q.creation_date, '%l:%i %p, %b %D, %Y') AS creation_date,
+			DATE_FORMAT(q.creation_date, '%b %D, %Y at %l:%i %p') AS creation_date,
 			q.upvotes, 
 			q.answer_count, 
 			c.name AS category 

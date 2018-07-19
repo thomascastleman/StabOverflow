@@ -53,7 +53,7 @@ module.exports = {
 						res.render('error.html', auth.errorRender(req, "\"" + req.body.email + "\" caused a conflict with an existing email."));
 					}
 				} else {
-					res.render('error.html' auth.errorRender(req, undefined));
+					res.render('error.html', auth.errorRender(req, undefined));
 				}
 			});
 		});

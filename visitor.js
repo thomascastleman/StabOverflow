@@ -84,7 +84,7 @@ module.exports = {
 					render = Object.assign(rows[0], render);
 
 					// format creation date
-					render.creation_date = moment(render.creation_date).format('h:mm A, MMM Do, YYYY');
+					render.creation_date = moment(render.creation_date).format('MMM Do, YYYY [at] h:mm A');
 
 					// check if admin, if owns question
 					render.isAdmin = render.loggedIn ? req.user.local.is_admin : false;
@@ -110,7 +110,7 @@ module.exports = {
 
 								if (render.loggedIn) ans.isOwner = (ans.owner_uid == req.user.local.uid);
 
-								ans.creation_date = moment(ans.creation_date).format('h:mm A, MMM Do, YYYY');
+								ans.creation_date = moment(ans.creation_date).format('MMM Do, YYYY [at] h:mm A');
 							}
 						}
 						// get associated comments
