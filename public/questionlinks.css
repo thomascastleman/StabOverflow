@@ -38,6 +38,10 @@ td {
 	padding: 8px;
 }
 
+.postpreview {
+	width: 75%;
+}
+
 /* links to question / user pages */
 #container a, #container a:visited {
 	color: #0066ff;
@@ -58,7 +62,6 @@ td {
 	padding: 3px;
 	border: 1px solid #0066ff;
 	border-radius: 3px;
-	margin-top: 2px;
 }
 
 /* enlarged count number for upvotes / answers */
