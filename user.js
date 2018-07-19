@@ -53,7 +53,7 @@ module.exports = {
 						body: mdConverter.makeHtml(rows[0].body)
 					}, render));
 				} else {
-					res.render('error.html', auth.errorRender(req, "Unable to edit post"));
+					res.render('error.html', auth.errorRender(req, "Unable to edit: failed to retrive post information."));
 				}
 			});
 		});
@@ -150,7 +150,7 @@ module.exports = {
 					}
 				});
 			} else {
-				res.render('error.html', auth.errorRender(req, "Failed to make edits (empty appendage)"));
+				res.render('error.html', auth.errorRender(req, "Failed to apply edits (empty appendage)."));
 			}
 		});
 
@@ -200,7 +200,7 @@ module.exports = {
 							// send back to updated user page
 							res.redirect('/users/' + req.user.local.uid);
 						} else {
-							res.render('error.html', auth.errorRender(req, "Failed to change user information."));
+							res.render('error.html', auth.errorRender(req, "Failed to update user information."));
 						}
 					});
 				} else {

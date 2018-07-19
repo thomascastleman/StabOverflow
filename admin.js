@@ -69,7 +69,7 @@ module.exports = {
 							render.message = "Successfully promoted \"" + req.body.email + "\" to admin status!";
 							res.render('adminsuccess.html', render);
 						} else {
-							res.render('error.html', auth.errorRender(req, "Failed to make '" + req.body.email + "' an admin."));
+							res.render('error.html', auth.errorRender(req, "Failed to make \"" + req.body.email + "\" an admin."));
 						}
 					});
 				} else {
@@ -93,7 +93,7 @@ module.exports = {
 								render.message = "Successfully revoked the admin privileges of \"" + req.body.email + "\"!";
 								res.render('adminsuccess.html', render);
 							} else {
-								res.render('error.html', auth.errorRender(req, "Failed to remove admin privileges from '" + req.body.email + "'"));
+								res.render('error.html', auth.errorRender(req, "Failed to remove admin privileges from \"" + req.body.email + "\"."));
 							}
 						});
 					} else {
@@ -113,7 +113,7 @@ module.exports = {
 					render.message = "Successfully created the category \"" + req.body.category + "\"!";
 					res.render('adminsuccess.html', render);
 				} else {
-					res.render('error.html', auth.errorRender(req, "Failed to add category."));
+					res.render('error.html', auth.errorRender(req, "Failed to add category \"" + req.body.category + "\"."));
 				}
 			});
 		});
@@ -160,11 +160,11 @@ module.exports = {
 										render.message = "Successfully deleted the category \"" + category + "\"!";
 										res.render('adminsuccess.html', render);
 									} else {
-										res.render('error.html', auth.errorRender(req, "Failed to delete category."));
+										res.render('error.html', auth.errorRender(req, "Failed to delete category \"" + category + "\"."));
 									}
 								});
 							} else {
-								res.render('error.html', auth.errorRender(req, "Failed to remove category from posts."));
+								res.render('error.html', auth.errorRender(req, "Failed to remove category \"" + category + "\" from posts."));
 							}
 						});
 					} else {
