@@ -12,7 +12,7 @@
 /* asker metadata */
 .asker {
 	float:right;
-	background-color: #e6e6e6;
+	background-color: #e0e0e0;
 	font-size: 13px;
 	color: #4d4d4d;
 	padding: 7px;
@@ -29,6 +29,11 @@
 
 .asker > div {
 	margin-bottom: 4px;
+}
+
+.asker > img {
+	border: none;
+	border-radius: 3px;
 }
 
 /* button to see more from same category */
@@ -104,7 +109,7 @@
 
 /* comment asker metadata */
 .commentasker {
-	color: #8c8c8c;
+	color: #808080;
 }
 
 /* add comment icon */
@@ -171,7 +176,7 @@
 }
 
 .post {
-	background-color: #f5f5f5;
+	background-color: #f7f7f7;
 	padding: 15px 10px 15px 10px;
 	border-radius: 7px;
 }

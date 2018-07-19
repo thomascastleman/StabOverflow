@@ -5,10 +5,11 @@ pre {
 	background-color: #d9d9d9;
 	border: none !important;
 	overflow: auto;
-	max-height: 800px;
-
-	margin-top: 20px;
-	margin-bottom: 20px;
+	max-height: 700px;
+	margin-top: 15px;
+	margin-bottom: 15px;
+	border:none;
+	border-radius: 3px;
 }
 
 code {
