@@ -156,5 +156,22 @@ module.exports = {
 				loggedIn: req.isAuthenticated()
 			};
 		}
+	},
+
+	// generate standard render object for error page
+	errorRender: function(req, message) {
+		if (req.user && req.user.local) {
+			return {
+				loggedIn: req.isAuthenticated(),
+				username: req.user.local.display_name,
+				user_uid: req.user.local.uid,
+				message: message
+			}
+		} else {
+			return {
+				loggedIn: req.isAuthenticated(),
+				message: message
+			};
+		}
 	}
 }

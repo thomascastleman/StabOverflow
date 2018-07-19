@@ -32,11 +32,11 @@ module.exports = {
 						render = Object.assign(rows[0], render);
 						res.render('editprofile.html', render);
 					} else {
-						res.render('error.html', { message: "There was a problem accessing user information." });
+						res.render('error.html', auth.errorRender(req, "There was a problem accessing user information."));
 					}
 				});
 			} else {
-				res.render('error.html', { message: "You do not have authorization to edit this profile." });
+				res.render('error.html', auth.errorRender(req, "You do not have authorization to edit this profile."));
 			}
 		});
 
@@ -53,7 +53,7 @@ module.exports = {
 						body: mdConverter.makeHtml(rows[0].body)
 					}, render));
 				} else {
-					res.render('error.html', { message: "Unable to edit post" });
+					res.render('error.html', auth.errorRender(req, "Unable to edit post"));
 				}
 			});
 		});
@@ -74,7 +74,7 @@ module.exports = {
 							search.indexPost(rows[0][0].redirect_uid, req.body.title, req.body.body);	// index the new question
 							res.redirect('/questions/' + rows[0][0].redirect_uid);	// redirect to this question's page
 						} else {
-							res.render('error.html', { message: "Failed to post question." });
+							res.render('error.html', auth.errorRender(req, "Failed to post question."));
 						}
 					});
 
@@ -88,7 +88,7 @@ module.exports = {
 								search.indexPost(rows[0][0].answer_uid, req.body.title, req.body.body);	// index the new answer
 								res.redirect('/questions/' + req.body.parent_question);	// redirect to parent question's page
 							} else {
-								res.render('error.html', { message: "Failed to post answer." });
+								res.render('error.html', auth.errorRender(req, "Failed to post answer."));
 							}
 						});
 					} else {
@@ -114,7 +114,7 @@ module.exports = {
 					if (!err) {
 						res.redirect('/questions/' + req.body.parent_question);
 					} else {
-						res.render('error.html', { message: "Failed to post comment." });
+						res.render('error.html', auth.errorRender(req, "Failed to post comment."));
 					}
 				});
 			} else {
@@ -142,15 +142,15 @@ module.exports = {
 								// index new appendage
 								search.indexPost(req.body.uid, "", req.body.appendage);
 							} else {
-								res.render('error.html', { message: "Failed to apply edits to post" });
+								res.render('error.html', auth.errorRender(req, "Failed to apply edits to post"));
 							}
 						});
 					} else {
-						res.render('error.html', { message: "You are unable to edit this post." });
+						res.render('error.html', auth.errorRender(req, "You are unable to edit this post."));
 					}
 				});
 			} else {
-				res.render('error.html', { message: "Failed to make edits (empty appendage)" });
+				res.render('error.html', auth.errorRender(req, "Failed to make edits (empty appendage)"));
 			}
 		});
 
@@ -200,7 +200,7 @@ module.exports = {
 							// send back to updated user page
 							res.redirect('/users/' + req.user.local.uid);
 						} else {
-							res.render('error.html', { message: "Failed to change user information." });
+							res.render('error.html', auth.errorRender(req, "Failed to change user information."));
 						}
 					});
 				} else {

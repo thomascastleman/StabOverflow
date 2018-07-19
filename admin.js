@@ -46,14 +46,14 @@ module.exports = {
 								render.message = "Successfully added user \"" + req.body.name + "\" with email \"" + req.body.email + "\"!";
 								res.render('adminsuccess.html', render);
 							} else {
-								res.render('error.html', { message: "There was a problem adding the new user." });
+								res.render('error.html', auth.errorRender(req, "There was a problem adding the new user."));
 							}
 						});
 					} else {
-						res.render('error.html', { message: "\"" + req.body.email + "\" caused a conflict with an existing email." });
+						res.render('error.html', auth.errorRender(req, "\"" + req.body.email + "\" caused a conflict with an existing email."));
 					}
 				} else {
-					res.render('error.html');
+					res.render('error.html' auth.errorRender(req, undefined));
 				}
 			});
 		});
@@ -69,11 +69,11 @@ module.exports = {
 							render.message = "Successfully promoted \"" + req.body.email + "\" to admin status!";
 							res.render('adminsuccess.html', render);
 						} else {
-							res.render('error.html', { message: "Failed to make '" + req.body.email + "' an admin." });
+							res.render('error.html', auth.errorRender(req, "Failed to make '" + req.body.email + "' an admin."));
 						}
 					});
 				} else {
-					res.render('error.html', { message: "User with email \"" + req.body.email + "\" does not exist." });
+					res.render('error.html', auth.errorRender(req, "User with email \"" + req.body.email + "\" does not exist."));
 				}
 			});
 		});
@@ -93,15 +93,15 @@ module.exports = {
 								render.message = "Successfully revoked the admin privileges of \"" + req.body.email + "\"!";
 								res.render('adminsuccess.html', render);
 							} else {
-								res.render('error.html', { message: "Failed to remove admin privileges from '" + req.body.email + "'" });
+								res.render('error.html', auth.errorRender(req, "Failed to remove admin privileges from '" + req.body.email + "'"));
 							}
 						});
 					} else {
-						res.render('error.html', { message: "User with email \"" + req.body.email + "\" does not exist." });
+						res.render('error.html', auth.errorRender(req, "User with email \"" + req.body.email + "\" does not exist."));
 					}
 				});
 			} else {
-				res.render('error.html', { message: "You are unable to deauthorize yourself." });
+				res.render('error.html', auth.errorRender(req, "You are unable to deauthorize yourself."));
 			}
 		});
 
@@ -113,7 +113,7 @@ module.exports = {
 					render.message = "Successfully created the category \"" + req.body.category + "\"!";
 					res.render('adminsuccess.html', render);
 				} else {
-					res.render('error.html', { message: "Failed to add category." });
+					res.render('error.html', auth.errorRender(req, "Failed to add category."));
 				}
 			});
 		});
@@ -135,7 +135,7 @@ module.exports = {
 							res.render('adminsuccess.html', render);
 						});
 					} else {
-						res.render('error.html', { message: "Failed to archive category." });
+						res.render('error.html', auth.errorRender(req, "Failed to archive category."));
 					}
 				});
 			} else {
@@ -160,15 +160,15 @@ module.exports = {
 										render.message = "Successfully deleted the category \"" + category + "\"!";
 										res.render('adminsuccess.html', render);
 									} else {
-										res.render('error.html', { message: "Failed to delete category." });
+										res.render('error.html', auth.errorRender(req, "Failed to delete category."));
 									}
 								});
 							} else {
-								res.render('error.html', { message: "Failed to remove category from posts." });
+								res.render('error.html', auth.errorRender(req, "Failed to remove category from posts."));
 							}
 						});
 					} else {
-						res.render('error.html', { message: "Unable to delete. This category does not exist." });
+						res.render('error.html', auth.errorRender(req, "Unable to delete. This category does not exist."));
 					}
 				});
 			} else {
@@ -190,7 +190,7 @@ module.exports = {
 						con.query('DELETE FROM posts WHERE parent_question_uid = ?;', [req.body.uid], function(err, rows) {});
 					}
 				} else {
-					res.render('error.html', { message: "Failed to remove post." });
+					res.render('error.html', auth.errorRender(req, "Failed to remove post."));
 				}
 			});
 		});
@@ -201,7 +201,7 @@ module.exports = {
 				if (!err) {
 					res.redirect('/adminPortal');
 				} else {
-					res.render('error.html', { message: "Failed to delete comment." });
+					res.render('error.html', auth.errorRender(req, "Failed to delete comment."));
 				}
 			});
 		});

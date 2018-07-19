@@ -67,7 +67,7 @@ module.exports = {
 						});
 					});
 				} else {
-					res.render('error.html', { message: "User not found." });
+					res.render('error.html', auth.errorRender(req, "User not found."));
 				}
 			});
 		});
@@ -139,7 +139,7 @@ module.exports = {
 					});
 				} else {
 					// question not found, send not found page
-					res.render('error.html', { message: "Question not found." });
+					res.render('error.html', auth.errorRender(req, "Question not found."));
 				}
 			});
 		});
