@@ -11,6 +11,7 @@
 
 /* table of question links */
 table {
+	margin-top: 20px;
 	border-collapse: collapse;
 	width: 100%;
 }
@@ -57,6 +58,7 @@ td {
 	padding: 3px;
 	border: 1px solid #0066ff;
 	border-radius: 3px;
+	margin-top: 2px;
 }
 
 /* enlarged count number for upvotes / answers */

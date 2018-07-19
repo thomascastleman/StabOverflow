@@ -63,3 +63,9 @@ select {
 	font-family: 'Kanit', sans-serif;
 	font-weight: 300;
 }
+
+.preview {
+	font-size: 13px;
+	color: #595959;
+	margin-top: 5px;
+}
