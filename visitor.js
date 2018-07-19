@@ -61,6 +61,7 @@ module.exports = {
 								}
 
 								render.posts = rows;
+								render.hasPosts = true;
 							}
 
 							res.render('user.html', render);
