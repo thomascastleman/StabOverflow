@@ -1,0 +1,16 @@
+
+
+/* code formatting */
+pre {
+	background-color: #d9d9d9;
+	border: none !important;
+	overflow: auto;
+	max-height: 800px;
+
+	margin-top: 20px;
+	margin-bottom: 20px;
+}
+
+code {
+	background-color: #d9d9d9;
+}

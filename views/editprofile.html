@@ -29,53 +29,62 @@
 		</script>
 	</head>
 	<body>
-		<header>
-			<a href="/"><img src="/staboverflow.png" align="middle"/></a>
-			<div id="searchTools">
-				<ul>
-					<li>
-						<form id="searchForm" name1="search" method="POST" action="/search">
-							<input id="searchBar" name="query" type="text" placeholder="Search StabOverflow" autocomplete="off">
-							<button id="searchSubmit" type="submit" form="searchForm"><i id="searchIcon" class="fas fa-search"></i></button>
-						</form>
-					</li>
-					<li>
-						<a id="browse" href="/search">Browse Questions</a>
-					</li>
-				</ul>
-			</div>
-			<div id="authLinks">
-				<ul>
-				{{#loggedIn}}
-					<li>
-						<a href="/logout">Log Out <i class="fas fa-sign-out-alt"></i></a>
-					</li>
-					{{#user_uid}}
-					<li>
-						<a href="/users/{{user_uid}}">My Profile {{#username}}({{username}}) {{/username}}<i class="fas fa-user"></i></a>
-					</li>
-					{{/user_uid}}
-				{{/loggedIn}}
-				{{^loggedIn}}
-					<li>
-						<a href="/auth/google">Log In <i class="fas fa-sign-in-alt"></i></a>
-					</li>
-					<li>
-						<a href="/auth/google">Sign Up <i class="fas fa-user-plus"></i></a>
-					</li>
-				{{/loggedIn}}
-				</ul>
-			</div>
-		</header>
+		<div class="content">
+			<header>
+				<a href="/"><img src="/staboverflow.png" align="middle"/></a>
+				<div id="searchTools">
+					<ul>
+						<li>
+							<form id="searchForm" name1="search" method="POST" action="/search">
+								<input id="searchBar" name="query" type="text" placeholder="Search StabOverflow" autocomplete="off">
+								<button id="searchSubmit" type="submit" form="searchForm"><i id="searchIcon" class="fas fa-search"></i></button>
+							</form>
+						</li>
+						<li>
+							<a id="browse" href="/search">Browse Questions</a>
+						</li>
+					</ul>
+				</div>
+				<div id="authLinks">
+					<ul>
+					{{#loggedIn}}
+						<li>
+							<a href="/logout">Log Out <i class="fas fa-sign-out-alt"></i></a>
+						</li>
+						{{#user_uid}}
+						<li>
+							<a href="/users/{{user_uid}}">My Profile {{#username}}({{username}}) {{/username}}<i class="fas fa-user"></i></a>
+						</li>
+						{{/user_uid}}
+					{{/loggedIn}}
+					{{^loggedIn}}
+						<li>
+							<a href="/auth/google">Log In <i class="fas fa-sign-in-alt"></i></a>
+						</li>
+						<li>
+							<a href="/auth/google">Sign Up <i class="fas fa-user-plus"></i></a>
+						</li>
+					{{/loggedIn}}
+					</ul>
+				</div>
+			</header>
 
-		<div id="container">
-			<h1>Edit Your Profile</h1>
-			<form name="updates" method="POST" action="/users/update" onsubmit="return validate();">
-				<input name="uid" value="{{uid}}" hidden>
-				Display Name: <input id="displayname" name="display_name" type="text" value="{{display_name}}" maxlength="32" autocomplete="off"><br>
-				Bio:<br><textarea id="bio" name="bio" maxlength="140" rows="5">{{bio}}</textarea><br>
-				<button id="save" type="submit" onclick="window.onbeforeunload = undefined;">Save Profile</button>
-			</form>
+			<div id="container">
+				<h1>Edit Your Profile</h1>
+				<form name="updates" method="POST" action="/users/update" onsubmit="return validate();">
+					<input name="uid" value="{{uid}}" hidden>
+					Display Name: <input id="displayname" name="display_name" type="text" value="{{display_name}}" maxlength="32" autocomplete="off"><br>
+					Bio:<br><textarea id="bio" name="bio" maxlength="140" rows="5">{{bio}}</textarea><br>
+					<button id="save" type="submit" onclick="window.onbeforeunload = undefined;">Save Profile</button>
+				</form>
+			</div>
 		</div>
+
+		<footer>
+			<div>
+				<span>Stab Overflow - 2018</span><br>
+				<span>Thomas Castleman - Johnny Lindbergh</span>
+			</div>
+		</footer>
 	</body>
 </html>

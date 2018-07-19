@@ -46,6 +46,10 @@ tr:last-child {
 	border: none;
 }
 
+tr:hover {
+	background-color: #e6e6e6;
+}
+
 td {
 	padding: 5px;
 }
@@ -72,6 +76,20 @@ h4 {
 	font-size: 23px;
 }
 
+/* edit profile link colors */
 #tools > a, #tools > a:visited {
 	color: #333333 !important;
+}
+
+/* profile image */
+#container > img {
+	border-radius: 4px;
+}
+
+/* question or answer status on user posts */
+.QA {
+	text-align: center;
+	color: #0066ff;
+	background-color: #dcdcdc;
+	border-radius: 5px;
 }

@@ -127,8 +127,3 @@ blockquote {
 	font-size: 0.8em;
 	font-weight: bold;
 }
-
-pre {
-	overflow: auto;
-	max-height: 800px;
-}

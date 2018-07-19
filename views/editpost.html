@@ -16,6 +16,7 @@
         <script type="text/javascript" src="../pagedown/Markdown.Editor.js"></script>
 
         <link rel="stylesheet" type="text/css" href="/editpost.css">
+        <link rel="stylesheet" type="text/css" href="/code.css">
 
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
 
@@ -43,66 +44,76 @@
 		</script>
 	</head>
 	<body>
-		<header>
-			<a href="/"><img src="/staboverflow.png" align="middle"/></a>
-			<div id="searchTools">
-				<ul>
-					<li>
-						<form id="searchForm" name1="search" method="POST" action="/search">
-							<input id="searchBar" name="query" type="text" placeholder="Search StabOverflow" autocomplete="off">
-							<button id="searchSubmit" type="submit" form="searchForm"><i id="searchIcon" class="fas fa-search"></i></button>
-						</form>
-					</li>
-					<li>
-						<a id="browse" href="/search">Browse Questions</a>
-					</li>
-				</ul>
-			</div>
-			<div id="authLinks">
-				<ul>
-				{{#loggedIn}}
-					<li>
-						<a href="/logout">Log Out <i class="fas fa-sign-out-alt"></i></a>
-					</li>
-					{{#user_uid}}
-					<li>
-						<a href="/users/{{user_uid}}">My Profile {{#username}}({{username}}) {{/username}}<i class="fas fa-user"></i></a>
-					</li>
-					{{/user_uid}}
-				{{/loggedIn}}
-				{{^loggedIn}}
-					<li>
-						<a href="/auth/google">Log In <i class="fas fa-sign-in-alt"></i></a>
-					</li>
-					<li>
-						<a href="/auth/google">Sign Up <i class="fas fa-user-plus"></i></a>
-					</li>
-				{{/loggedIn}}
-				</ul>
-			</div>
-		</header>
+		<div class="content">
+			<header>
+				<a href="/"><img src="/staboverflow.png" align="middle"/></a>
+				<div id="searchTools">
+					<ul>
+						<li>
+							<form id="searchForm" name1="search" method="POST" action="/search">
+								<input id="searchBar" name="query" type="text" placeholder="Search StabOverflow" autocomplete="off">
+								<button id="searchSubmit" type="submit" form="searchForm"><i id="searchIcon" class="fas fa-search"></i></button>
+							</form>
+						</li>
+						<li>
+							<a id="browse" href="/search">Browse Questions</a>
+						</li>
+					</ul>
+				</div>
+				<div id="authLinks">
+					<ul>
+					{{#loggedIn}}
+						<li>
+							<a href="/logout">Log Out <i class="fas fa-sign-out-alt"></i></a>
+						</li>
+						{{#user_uid}}
+						<li>
+							<a href="/users/{{user_uid}}">My Profile {{#username}}({{username}}) {{/username}}<i class="fas fa-user"></i></a>
+						</li>
+						{{/user_uid}}
+					{{/loggedIn}}
+					{{^loggedIn}}
+						<li>
+							<a href="/auth/google">Log In <i class="fas fa-sign-in-alt"></i></a>
+						</li>
+						<li>
+							<a href="/auth/google">Sign Up <i class="fas fa-user-plus"></i></a>
+						</li>
+					{{/loggedIn}}
+					</ul>
+				</div>
+			</header>
 
-		<div id="container">
-			<h1>{{title}}</h1>
-			<hr/>
+			<div id="container">
+				<h1>{{title}}</h1>
+				<hr/>
+				<br>
+				<div>{{{body}}}</div>
+			</div>
 			<br>
-			<div>{{{body}}}</div>
+
+			<form method="POST" action="/updatePost" name="questionForm" onsubmit="return validate();">
+				<input name="uid" value="{{uid}}" hidden>
+
+				<center><h3 id="instructions">Type below to <em>add</em> to your original post.</h3></center>
+				<div class="wmd-panel">
+	                <div id="wmd-button-bar"></div>
+	                <textarea name="appendage" class="wmd-input" id="wmd-input"></textarea>
+	            </div>
+
+	            <div id="wmd-preview" class="wmd-panel wmd-preview"></div>
+
+				<center><button id="post" type="submit" onclick="window.onbeforeunload = undefined;">Post Your Updates</button></center>
+			</form>
 		</div>
-		<br>
 
-		<form method="POST" action="/updatePost" name="questionForm" onsubmit="return validate();">
-			<input name="uid" value="{{uid}}" hidden>
+		<footer>
+			<div>
+				<span>Stab Overflow - 2018</span><br>
+				<span>Thomas Castleman - Johnny Lindbergh</span>
+			</div>
+		</footer>
 
-			<center><h3 id="instructions">Type below to <em>add</em> to your original post.</h3></center>
-			<div class="wmd-panel">
-                <div id="wmd-button-bar"></div>
-                <textarea name="appendage" class="wmd-input" id="wmd-input"></textarea>
-            </div>
-
-            <div id="wmd-preview" class="wmd-panel wmd-preview"></div>
-
-			<center><button id="post" type="submit" onclick="window.onbeforeunload = undefined;">Post Your Updates</button></center>
-		</form>
 
 		<script type="text/javascript">
             (function () {

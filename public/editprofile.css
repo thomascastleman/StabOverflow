@@ -30,10 +30,12 @@
 	border: 1px solid #cccccc;
 	border-radius: 4px;
 	padding: 5px;
+	font-size: 15px;
 }
 
 /* bio input */
 #bio {
+	font-size: 15px;
 	width: 90%;
 	resize: vertical;
 	padding: 5px;
@@ -43,6 +45,7 @@
 
 /* save profile button */
 #save {
+	font-size: 15px;
 	color: white;
 	background-color: #4d88ff;
 	padding: 10px;

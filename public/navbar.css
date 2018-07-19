@@ -138,9 +138,9 @@ header > a {
 	}
 }
 
-/* FOOTER BELOW */
+/* --------------------------- FOOTER BELOW -------------------------------- */
 
-/*footer {
+footer {
 	font-family: 'Kanit', sans-serif;
 	font-weight: 300;
 	font-size: 14px;
@@ -148,11 +148,12 @@ header > a {
 	width: 100%;
 	height: 200px;
 	background-color: #262626;
-	color: #e6e6e6;
+	color: #b3b3b3;
 	padding-top: 10px;
-	margin-top: 20px;
+	margin-top: 30px;
 	vertical-align: middle;
 	display: table;
+	flex-shrink: 0;
 }
 
 footer div {
@@ -161,18 +162,13 @@ footer div {
 }
 
 html, body {
-	height: 100%;
+  height: 100%;
 }
 
 body {
   display: flex;
   flex-direction: column;
 }
-
-#container {
+.content {
   flex: 1 0 auto;
 }
-
-footer {
-  flex-shrink: 0;
-}*/

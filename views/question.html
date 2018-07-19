@@ -17,6 +17,7 @@
 
 		<link href="https://fonts.googleapis.com/css?family=Kanit:300,400" rel="stylesheet">
 		<link rel="stylesheet" type="text/css" href="/question.css">
+		<link rel="stylesheet" type="text/css" href="/code.css">
 
 		<script>
 			// confirm leaving page if data entered
@@ -89,191 +90,199 @@
         <script type="text/javascript" src="../pagedown/Markdown.Editor.js"></script>
 	</head>
 	<body>
-		<header>
-			<a href="/"><img src="/staboverflow.png" align="middle"/></a>
-			<div id="searchTools">
-				<ul>
-					<li>
-						<form id="searchForm" name1="search" method="POST" action="/search">
-							<input id="searchBar" name="query" type="text" placeholder="Search StabOverflow" autocomplete="off">
-							<button id="searchSubmit" type="submit" form="searchForm"><i id="searchIcon" class="fas fa-search"></i></button>
-						</form>
-					</li>
-					<li>
-						<a id="browse" href="/search">Browse Questions</a>
-					</li>
-				</ul>
-			</div>
-			<div id="authLinks">
-				<ul>
-				{{#loggedIn}}
-					<li>
-						<a href="/logout?returnTo=%2Fquestions%2F{{question_uid}}">Log Out <i class="fas fa-sign-out-alt"></i></a>
-					</li>
-					{{#user_uid}}
-					<li>
-						<a href="/users/{{user_uid}}">My Profile {{#username}}({{username}}) {{/username}}<i class="fas fa-user"></i></a>
-					</li>
-					{{/user_uid}}
-				{{/loggedIn}}
-				{{^loggedIn}}
-					<li>
-						<a href="/auth/google?returnTo=%2Fquestions%2F{{question_uid}}">Log In <i class="fas fa-sign-in-alt"></i></a>
-					</li>
-					<li>
-						<a href="/auth/google">Sign Up <i class="fas fa-user-plus"></i></a>
-					</li>
-				{{/loggedIn}}
-				</ul>
-			</div>
-		</header>
-		
-		<div id="container">
-			<!-- question -->
-			<div class="post">
-				<div class="postmeta">
-					<div class="upvote" onclick="upvote({{question_uid}});" title="This question was helpful"><i class="fas fa-chevron-circle-up"></i></div>
-					<div class="upvotecount" id="{{question_uid}}">{{upvotes}}</div>
-					{{#isQuestionOwner}}<div class="edit"><a href="/editPost/{{question_uid}}" title="Edit this Question"><i class="far fa-edit"></i></a></div>{{/isQuestionOwner}}
-					{{#isAdmin}}<div class="delete" onclick="deletePost({{question_uid}}, undefined);" title="Delete Question"><i class="fas fa-trash-alt"></i></div>{{/isAdmin}}
-				</div>
-
-				<div class="postbody"> 
-					<h1>{{title}}</h1>
-					{{#category}}
-					<form name="getCategory" method="POST" action="/search">
-						<input name="category" value="{{category_uid}}" hidden>
-						<input name="answeredStatus" value="All" hidden>
-						<div id="questioncategory" onclick="document.getCategory.submit()" title="See more under this category">{{category}}</div>
-					</form>
-					{{/category}}
-					<hr>
-					<br>
-					<div>{{{body}}}</div>
-					<div class="asker">
-						<div>asked at {{creation_date}}</div>
-						{{#image_url}}<img src="{{image_url}}" width="40" align="middle"/>{{/image_url}}
-						<a href="/users/{{owner_uid}}" title="{{owner_real}}">{{owner_display}}</a>
-					</div>
-				</div>
-
-				<!-- question comments -->
-				<table class="comments">
-					{{#comments}}
-					<tr>
-						<td>{{#isAdmin}}<div class="delete" onclick="deleteComment({{uid}});" title="Delete Comment"><i class="fas fa-trash-alt"></i></div>{{/isAdmin}}</td>
-						<td>{{{body}}} <span class="commentasker">- <a href="/users/{{owner_uid}}" title="{{owner_real}}">{{owner_display}}</a> at {{creation_date}}</span></td>
-					</tr>
-					{{/comments}}
-					{{#loggedIn}}
-					<tr>
-						<td><a class="addcomment" onclick="showCommentBox({{question_uid}});" title="Add a Comment"><i class="far fa-comment"></i></a></td>
-						<td>
-							<form hidden id="commentBox{{question_uid}}" method="POST" action="/newComment">
-								<input name="parent_question" value="{{question_uid}}" hidden>
-								<input name="parent_uid" value="{{question_uid}}" hidden>
-								<textarea class="commentinput" name="body" rows="3"></textarea><br>
-								<button class="postcomment" type="submit">Post Comment</button>
+		<div class="content">
+			<header>
+				<a href="/"><img src="/staboverflow.png" align="middle"/></a>
+				<div id="searchTools">
+					<ul>
+						<li>
+							<form id="searchForm" name1="search" method="POST" action="/search">
+								<input id="searchBar" name="query" type="text" placeholder="Search StabOverflow" autocomplete="off">
+								<button id="searchSubmit" type="submit" form="searchForm"><i id="searchIcon" class="fas fa-search"></i></button>
 							</form>
-						</td>
-					</tr>
+						</li>
+						<li>
+							<a id="browse" href="/search">Browse Questions</a>
+						</li>
+					</ul>
+				</div>
+				<div id="authLinks">
+					<ul>
+					{{#loggedIn}}
+						<li>
+							<a href="/logout?returnTo=%2Fquestions%2F{{question_uid}}">Log Out <i class="fas fa-sign-out-alt"></i></a>
+						</li>
+						{{#user_uid}}
+						<li>
+							<a href="/users/{{user_uid}}">My Profile {{#username}}({{username}}) {{/username}}<i class="fas fa-user"></i></a>
+						</li>
+						{{/user_uid}}
 					{{/loggedIn}}
-				</table>
-			</div>
-
-			<br> 
-			<!-- answers -->
-			<div>
-				<h2>{{answer_count}} Answers</h2><br>
-				{{#answers}}
-					<div class="post">
-						<div class="postmeta">
-							<div class="upvote" onclick="upvote({{answer_uid}});" title="This answer was helpful"><i class="fas fa-chevron-circle-up"></i></div>
-							<div class="upvotecount" id="{{answer_uid}}">{{upvotes}}</div>
-							{{#isOwner}}<div class="edit"><a href="/editPost/{{answer_uid}}" title="Edit this Answer"><i class="far fa-edit"></i></a></div>{{/isOwner}}
-							{{#isAdmin}}<div class="delete" onclick="deletePost({{answer_uid}}, {{parent_question_uid}});" title="Delete Answer"><i class="fas fa-trash-alt"></i></div>{{/isAdmin}}
-						</div>
-						<div class="postbody">
-							<div>{{{body}}}</div>
-							<div class="asker">
-								<div>answered at {{creation_date}}</div>
-								{{#image_url}}<img src="{{image_url}}" width="40" align="middle"/>{{/image_url}}
-								<a href="/users/{{owner_uid}}" title="{{owner_real}}">{{owner_display}}</a>
-							</div>
-						</div>
-
-						<!-- answer comments -->
-						<table class="comments">
-							{{#answer_comments}}
-							<tr>
-								<td>{{#isAdmin}}<div class="delete" onclick="deleteComment({{uid}});" title="Delete Comment"><i class="fas fa-trash-alt"></i></div>{{/isAdmin}}</td>
-								<td>{{{body}}} <span class="commentasker">- <a href="/users/{{owner_uid}}" title="{{owner_real}}">{{owner_display}}</a> at {{creation_date}}</span></td>
-							</tr>
-							{{/answer_comments}}
-							{{#loggedIn}}
-							<tr>
-								<td><a class="addcomment" onclick="showCommentBox({{answer_uid}});" title="Add a Comment"><i class="far fa-comment"></i></a></td>
-								<td>
-									<form hidden id="commentBox{{answer_uid}}" method="POST" action="/newComment">
-										<input name="parent_question" value="{{question_uid}}" hidden>
-										<input name="parent_uid" value="{{answer_uid}}" hidden>
-										<textarea class="commentinput" name="body" rows="3"></textarea><br>
-										<button class="postcomment" type="submit">Post Comment</button>
-									</form>
-								</td>
-							</tr>
-							{{/loggedIn}}
-						</table>
+					{{^loggedIn}}
+						<li>
+							<a href="/auth/google?returnTo=%2Fquestions%2F{{question_uid}}">Log In <i class="fas fa-sign-in-alt"></i></a>
+						</li>
+						<li>
+							<a href="/auth/google">Sign Up <i class="fas fa-user-plus"></i></a>
+						</li>
+					{{/loggedIn}}
+					</ul>
+				</div>
+			</header>
+			
+			<div id="container">
+				<!-- question -->
+				<div class="post">
+					<div class="postmeta">
+						<div class="upvote" onclick="upvote({{question_uid}});" title="This question was helpful"><i class="fas fa-chevron-circle-up"></i></div>
+						<div class="upvotecount" id="{{question_uid}}">{{upvotes}}</div>
+						{{#isQuestionOwner}}<div class="edit"><a href="/editPost/{{question_uid}}" title="Edit this Question"><i class="far fa-edit"></i></a></div>{{/isQuestionOwner}}
+						{{#isAdmin}}<div class="delete" onclick="deletePost({{question_uid}}, undefined);" title="Delete Question"><i class="fas fa-trash-alt"></i></div>{{/isAdmin}}
 					</div>
-					<br><hr/><br>
-				{{/answers}}
-			</div>
 
-			{{#loggedIn}}
-			<!-- write an answer form -->
-			<h2>Your Answer</h2>
-			<form method="POST" action="/newPost" name="answerForm" onsubmit="return validate();">
-				<input hidden name="type" value="0">
-				<input hidden name="parent_question" value="{{question_uid}}">
-				<div class="wmd-panel">
-					<div id="wmd-button-bar"></div>
-					<textarea name="body" class="wmd-input" id="wmd-input"></textarea>
+					<div class="postbody"> 
+						<h1>{{title}}</h1>
+						{{#category}}
+						<form name="getCategory" method="POST" action="/search">
+							<input name="category" value="{{category_uid}}" hidden>
+							<input name="answeredStatus" value="All" hidden>
+							<div id="questioncategory" onclick="document.getCategory.submit()" title="See more under this category">{{category}}</div>
+						</form>
+						{{/category}}
+						<hr>
+						<br>
+						<div>{{{body}}}</div>
+						<div class="asker">
+							<div>asked at {{creation_date}}</div>
+							{{#image_url}}<img src="{{image_url}}" width="40" align="middle"/>{{/image_url}}
+							<a href="/users/{{owner_uid}}" title="{{owner_real}}">{{owner_display}}</a>
+						</div>
+					</div>
+
+					<!-- question comments -->
+					<table class="comments">
+						{{#comments}}
+						<tr>
+							<td>{{#isAdmin}}<div class="delete" onclick="deleteComment({{uid}});" title="Delete Comment"><i class="fas fa-trash-alt"></i></div>{{/isAdmin}}</td>
+							<td>{{{body}}} <span class="commentasker">- <a href="/users/{{owner_uid}}" title="{{owner_real}}">{{owner_display}}</a> at {{creation_date}}</span></td>
+						</tr>
+						{{/comments}}
+						{{#loggedIn}}
+						<tr>
+							<td><a class="addcomment" onclick="showCommentBox({{question_uid}});" title="Add a Comment"><i class="far fa-comment"></i></a></td>
+							<td>
+								<form hidden id="commentBox{{question_uid}}" method="POST" action="/newComment">
+									<input name="parent_question" value="{{question_uid}}" hidden>
+									<input name="parent_uid" value="{{question_uid}}" hidden>
+									<textarea class="commentinput" name="body" rows="3"></textarea><br>
+									<button class="postcomment" type="submit">Post Comment</button>
+								</form>
+							</td>
+						</tr>
+						{{/loggedIn}}
+					</table>
 				</div>
 
-				<div id="wmd-preview" class="wmd-panel wmd-preview"></div>
-				<center><button id="postanswer" type="submit" onclick="window.onbeforeunload = undefined;">Post Your Answer</button></center>
-			</form>
+				<br> 
+				<!-- answers -->
+				<div>
+					<h2>{{answer_count}} Answers</h2><br>
+					{{#answers}}
+						<div class="post">
+							<div class="postmeta">
+								<div class="upvote" onclick="upvote({{answer_uid}});" title="This answer was helpful"><i class="fas fa-chevron-circle-up"></i></div>
+								<div class="upvotecount" id="{{answer_uid}}">{{upvotes}}</div>
+								{{#isOwner}}<div class="edit"><a href="/editPost/{{answer_uid}}" title="Edit this Answer"><i class="far fa-edit"></i></a></div>{{/isOwner}}
+								{{#isAdmin}}<div class="delete" onclick="deletePost({{answer_uid}}, {{parent_question_uid}});" title="Delete Answer"><i class="fas fa-trash-alt"></i></div>{{/isAdmin}}
+							</div>
+							<div class="postbody">
+								<div>{{{body}}}</div>
+								<div class="asker">
+									<div>answered at {{creation_date}}</div>
+									{{#image_url}}<img src="{{image_url}}" width="40" align="middle"/>{{/image_url}}
+									<a href="/users/{{owner_uid}}" title="{{owner_real}}">{{owner_display}}</a>
+								</div>
+							</div>
 
-			<script type="text/javascript">
-				(function () {
-					var converter = Markdown.getSanitizingConverter();
-					var editor = new Markdown.Editor(converter);
-					editor.run();
-				})();
+							<!-- answer comments -->
+							<table class="comments">
+								{{#answer_comments}}
+								<tr>
+									<td>{{#isAdmin}}<div class="delete" onclick="deleteComment({{uid}});" title="Delete Comment"><i class="fas fa-trash-alt"></i></div>{{/isAdmin}}</td>
+									<td>{{{body}}} <span class="commentasker">- <a href="/users/{{owner_uid}}" title="{{owner_real}}">{{owner_display}}</a> at {{creation_date}}</span></td>
+								</tr>
+								{{/answer_comments}}
+								{{#loggedIn}}
+								<tr>
+									<td><a class="addcomment" onclick="showCommentBox({{answer_uid}});" title="Add a Comment"><i class="far fa-comment"></i></a></td>
+									<td>
+										<form hidden id="commentBox{{answer_uid}}" method="POST" action="/newComment">
+											<input name="parent_question" value="{{question_uid}}" hidden>
+											<input name="parent_uid" value="{{answer_uid}}" hidden>
+											<textarea class="commentinput" name="body" rows="3"></textarea><br>
+											<button class="postcomment" type="submit">Post Comment</button>
+										</form>
+									</td>
+								</tr>
+								{{/loggedIn}}
+							</table>
+						</div>
+						<br><hr/><br>
+					{{/answers}}
+				</div>
 
-				var $input = $('#wmd-input');
+				{{#loggedIn}}
+				<!-- write an answer form -->
+				<h2>Your Answer</h2>
+				<form method="POST" action="/newPost" name="answerForm" onsubmit="return validate();">
+					<input hidden name="type" value="0">
+					<input hidden name="parent_question" value="{{question_uid}}">
+					<div class="wmd-panel">
+						<div id="wmd-button-bar"></div>
+						<textarea name="body" class="wmd-input" id="wmd-input"></textarea>
+					</div>
 
-				// override tab from redirecting focus
-				$input.keydown(function(event) {
-					if (event.keyCode == 9) {
-						event.preventDefault();	// prevent refocus
-					    var cursorPos = $input.prop('selectionStart');
-					    var v = $input.val();
-					    var textBefore = v.substring(0,  cursorPos);
-					    var textAfter  = v.substring(cursorPos, v.length);
-					    $input.val(textBefore + "\t" + textAfter);
-					    document.answerForm.body.setSelectionRange(cursorPos + 1, cursorPos + 1);
-					}
-				});
-	        </script>
-	        {{/loggedIn}}
+					<div id="wmd-preview" class="wmd-panel wmd-preview"></div>
+					<center><button id="postanswer" type="submit" onclick="window.onbeforeunload = undefined;">Post Your Answer</button></center>
+				</form>
 
-			<script>
-				// syntax highlight all <pre>'s and <code>'s 
-				$('pre').attr('class', 'prettyprint');
-				$('code').attr('class', 'prettyprint');
-			</script>
+				<script type="text/javascript">
+					(function () {
+						var converter = Markdown.getSanitizingConverter();
+						var editor = new Markdown.Editor(converter);
+						editor.run();
+					})();
+
+					var $input = $('#wmd-input');
+
+					// override tab from redirecting focus
+					$input.keydown(function(event) {
+						if (event.keyCode == 9) {
+							event.preventDefault();	// prevent refocus
+						    var cursorPos = $input.prop('selectionStart');
+						    var v = $input.val();
+						    var textBefore = v.substring(0,  cursorPos);
+						    var textAfter  = v.substring(cursorPos, v.length);
+						    $input.val(textBefore + "\t" + textAfter);
+						    document.answerForm.body.setSelectionRange(cursorPos + 1, cursorPos + 1);
+						}
+					});
+		        </script>
+		        {{/loggedIn}}
+
+				<script>
+					// syntax highlight all <pre>'s and <code>'s 
+					$('pre').attr('class', 'prettyprint');
+					$('code').attr('class', 'prettyprint');
+				</script>
 		</div>
+
+		<footer>
+			<div>
+				<span>Stab Overflow - 2018</span><br>
+				<span>Thomas Castleman - Johnny Lindbergh</span>
+			</div>
+		</footer>
 
 	</body>
 </html>

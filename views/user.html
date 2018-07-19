@@ -12,74 +12,84 @@
 		<link rel="stylesheet" type="text/css" href="/user.css">
 	</head>
 	<body>
-		<header>
-			<a href="/"><img src="/staboverflow.png" align="middle"/></a>
-			<div id="searchTools">
-				<ul>
-					<li>
-						<form id="searchForm" name1="search" method="POST" action="/search">
-							<input id="searchBar" name="query" type="text" placeholder="Search StabOverflow" autocomplete="off">
-							<button id="searchSubmit" type="submit" form="searchForm"><i id="searchIcon" class="fas fa-search"></i></button>
-						</form>
-					</li>
-					<li>
-						<a id="browse" href="/search">Browse Questions</a>
-					</li>
-				</ul>
-			</div>
-			<div id="authLinks">
-				<ul>
-				{{#loggedIn}}
-					<li>
-						<a href="/logout?returnTo=%2Fusers%2F{{uid}}">Log Out <i class="fas fa-sign-out-alt"></i></a>
-					</li>
-					{{#user_uid}}
-					<li>
-						<a href="/users/{{user_uid}}">My Profile {{#username}}({{username}}) {{/username}}<i class="fas fa-user"></i></a>
-					</li>
-					{{/user_uid}}
-				{{/loggedIn}}
-				{{^loggedIn}}
-					<li>
-						<a href="/auth/google?returnTo=%2Fusers%2F{{uid}}">Log In <i class="fas fa-sign-in-alt"></i></a>
-					</li>
-					<li>
-						<a href="/auth/google">Sign Up <i class="fas fa-user-plus"></i></a>
-					</li>
-				{{/loggedIn}}
-				</ul>
-			</div>
-		</header>
 
-		<div id="container">
-			<div id="tools">
-			{{#ownProfile}}
-				<a id="edit" title="Edit Profile" href="/users/edit/{{uid}}"><i class="fas fa-user-edit"></i></a>
-				{{#is_admin}}<a id="admin" title="Administrator Portal" href="/adminPortal"><i class="fas fa-unlock-alt"></i></a>{{/is_admin}}
-			{{/ownProfile}}
+		<div class="content">
+			<header>
+				<a href="/"><img src="/staboverflow.png" align="middle"/></a>
+				<div id="searchTools">
+					<ul>
+						<li>
+							<form id="searchForm" name1="search" method="POST" action="/search">
+								<input id="searchBar" name="query" type="text" placeholder="Search StabOverflow" autocomplete="off">
+								<button id="searchSubmit" type="submit" form="searchForm"><i id="searchIcon" class="fas fa-search"></i></button>
+							</form>
+						</li>
+						<li>
+							<a id="browse" href="/search">Browse Questions</a>
+						</li>
+					</ul>
+				</div>
+				<div id="authLinks">
+					<ul>
+					{{#loggedIn}}
+						<li>
+							<a href="/logout?returnTo=%2Fusers%2F{{uid}}">Log Out <i class="fas fa-sign-out-alt"></i></a>
+						</li>
+						{{#user_uid}}
+						<li>
+							<a href="/users/{{user_uid}}">My Profile {{#username}}({{username}}) {{/username}}<i class="fas fa-user"></i></a>
+						</li>
+						{{/user_uid}}
+					{{/loggedIn}}
+					{{^loggedIn}}
+						<li>
+							<a href="/auth/google?returnTo=%2Fusers%2F{{uid}}">Log In <i class="fas fa-sign-in-alt"></i></a>
+						</li>
+						<li>
+							<a href="/auth/google">Sign Up <i class="fas fa-user-plus"></i></a>
+						</li>
+					{{/loggedIn}}
+					</ul>
+				</div>
+			</header>
+
+			<div id="container">
+				<div id="tools">
+				{{#ownProfile}}
+					<a id="edit" title="Edit Profile" href="/users/edit/{{uid}}"><i class="fas fa-user-edit"></i></a>
+					{{#is_admin}}<a id="admin" title="Administrator Portal" href="/adminPortal"><i class="fas fa-unlock-alt"></i></a>{{/is_admin}}
+				{{/ownProfile}}
+				</div>
+
+				{{#image_url}}<img src="{{image_url}}" width="170"/>{{/image_url}}
+				<h1>{{display_name}}</h1>
+				<h4>{{real_name}}{{#is_admin}} <em>(Administrator)</em>{{/is_admin}}</h4>
+				<p>{{{bio}}}</p><br>
+
+				<div>
+					<span class="bignumber">{{questions_asked}}</span> questions asked<br>
+					<span class="bignumber">{{answers_given}}</span> answers given
+				</div>
+				<br>
+
+				<h3>Recent Posts:</h3>
+				<table>
+					{{#posts}}
+						<tr>
+							<td class="QA">{{#isQuestion}}Q{{/isQuestion}}{{^isQuestion}}A{{/isQuestion}}</td>
+							<td><a href="/questions/{{redirect_uid}}">{{title}}</a></td>
+							<td>{{date}}</td>
+						</tr>
+					{{/posts}}
+				</table>
 			</div>
-
-			{{#image_url}}<img src="{{image_url}}" width="170"/>{{/image_url}}
-			<h1>{{display_name}}</h1>
-			<h4>{{real_name}}{{#is_admin}} <em>(Administrator)</em>{{/is_admin}}</h4>
-			<p>{{{bio}}}</p><br>
-
-			<div>
-				<span class="bignumber">{{questions_asked}}</span> questions asked<br>
-				<span class="bignumber">{{answers_given}}</span> answers given
-			</div>
-			<br>
-
-			<h3>Recent Posts:</h3>
-			<table>
-				{{#posts}}
-					<tr>
-						<td>{{#isQuestion}}Q:{{/isQuestion}}{{^isQuestion}}A:{{/isQuestion}}</td>
-						<td><a href="/questions/{{redirect_uid}}">{{title}}</a></td>
-						<td>{{date}}</td>
-					</tr>
-				{{/posts}}
-			</table>
 		</div>
+
+		<footer>
+			<div>
+				<span>Stab Overflow - 2018</span><br>
+				<span>Thomas Castleman - Johnny Lindbergh</span>
+			</div>
+		</footer>
 	</body>
 </html>

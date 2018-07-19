@@ -130,7 +130,7 @@ module.exports = {
 				con.query('SELECT type, parent_question_uid FROM posts WHERE uid = ? AND owner_uid = ?;', [req.body.uid, req.user.local.uid], function(err, rows) {
 					if (!err && rows !== undefined && rows.length > 0) {
 
-						var editMessage = '<br><br>*Edited ' + moment().format('h:mm A M/D/YYYY') + ':*<br><br>';
+						var editMessage = '\n\n<br>*Edited ' + moment().format('h:mm A M/D/YYYY') + ':*\n\n';
 
 						// apply edits
 						con.query('UPDATE posts SET body = concat(body, ?) WHERE uid = ?;', [editMessage + req.body.appendage, req.body.uid], function(err, rows2) {
