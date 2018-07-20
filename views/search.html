@@ -4,6 +4,8 @@
 		<meta charset="UTF-8">
 		<title>Stab Overflow</title>
 
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
+
 		<!-- navbar style -->
 		<link rel="stylesheet" type="text/css" href="/navbar.css">
 		<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.1.0/css/all.css" integrity="sha384-lKuwvrZot6UHsBSfcMvOkWwlCMgc0TaWr+30HWe3a4ltaBwTZhyTEggF5tJv8tbt" crossorigin="anonymous">
@@ -58,11 +60,11 @@
 
 				<div id="searchFilters">
 					<form name="secondarySearch" method="POST" action="/search">
-						<input id="query" name="query" type="text" value="{{query}}" autocomplete="off">
-						<input id="search" type="submit" value="Search"><br>
+						<input id="query" name="query" type="text" value="{{query}}" autocomplete="off" onchange="document.secondarySearch.page.value = 1;">
+						<input id="search" type="submit" value="Search" onclick="document.secondarySearch.page.value = 1;"><br>
 
 						Filter by Category
-						<select name="category" onchange="document.secondarySearch.submit();">
+						<select name="category" onchange="document.secondarySearch.page.value = 1; document.secondarySearch.submit();">
 							<option value="0">All</option>
 							{{#categories}}
 								<option {{#isSelected}}selected="selected" {{/isSelected}}value="{{uid}}">{{name}}</option>
@@ -70,11 +72,20 @@
 						</select>
 
 						Filter by Answers
-						<select name="answeredStatus" onchange="document.secondarySearch.submit();">
+						<select name="answeredStatus" onchange="document.secondarySearch.page.value = 1; document.secondarySearch.submit();">
 							<option {{#All}}selected="selected" {{/All}}value="All">All</option>
 							<option {{#Unanswered}}selected="selected" {{/Unanswered}}value="Unanswered">Unanswered</option>
 							<option {{#Answered}}selected="selected" {{/Answered}}value="Answered">Answered</option>
 						</select>
+
+						<input name="page" value="{{page}}" hidden>
+						<div>
+							{{#prevPage}}<button onclick="document.secondarySearch.page.value = {{prevPage}};"><i class="fas fa-chevron-left"></i></button>{{/prevPage}}
+							{{#pages}}
+							<button id="{{.}}" onclick="document.secondarySearch.page.value = {{.}};">{{.}}</button>
+							{{/pages}}
+							{{#nextPage}}<button onclick="document.secondarySearch.page.value = {{nextPage}};"><i class="fas fa-chevron-right"></i></button>{{/nextPage}}
+						</div>
 					</form>
 				</div>
 
@@ -115,5 +126,9 @@
 				<span>Thomas Castleman - Johnny Lindbergh</span>
 			</div>
 		</footer>
+
+		<script>
+			$('#{{page}}').attr("class", "selectedPage");
+		</script>
 	</body>
 </html>

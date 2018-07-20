@@ -15,17 +15,6 @@ module.exports = {
 		// post search query, render results
 		app.post('/search', function(req, res) {
 
-
-			// ---------------------------------- DEBUG
-
-
-			req.body.page = 1;
-
-
-			// -------------------------------------
-
-
-
 			// generate SQL to filter by category and answer status
 			var catFilter = module.exports.categoryFilter(req.body.category);
 			var ansFilter = module.exports.answerFilter(req.body.answeredStatus);
@@ -38,12 +27,12 @@ module.exports = {
 			var page = parseInt(req.body.page, 10);
 			if (isNaN(page) || page < 1) page = 1;
 
+			// add page info to render object
+			render.page = page;
+			if (page - 1 > 0) render.prevPage = page - 1;
+
 			// calculate starting index for retrieving posts for this page
 			var startIndex = (page - 1) * settings.resultsPerPage;
-
-			// debug
-			console.log("START: " + startIndex);
-			console.log("PAGE: " + page);
 
 			// pull question categories
 			con.query('SELECT * FROM categories;', function(err, categories) {
@@ -66,14 +55,10 @@ module.exports = {
 					var query = module.exports.parseQuery(req.body.query);	// parse query into correct format
 
 					// get relevant posts
-					con.query('CALL query(?, ?, ?, ?, ?);', [query, catFilter, ansFilter, startIndex, settings.resultsPerPage], function(err, rows) {
+					con.query('CALL query(?, ?, ?);', [query, catFilter, ansFilter], function(err, rows) {
 						if (!err && rows !== undefined && rows.length > 0 && rows[0].length > 0) {
-							render.results = rows[0];
-						} else {
-							console.log(err);
+							module.exports.prepRender(render, rows[0], startIndex, settings.resultsPerPage);
 						}
-
-						console.log(render.results);	// debug
 
 						res.render('search.html', render);
 					});
@@ -82,15 +67,10 @@ module.exports = {
 				} else if (req.body.category && req.body.answeredStatus) {
 					
 					// get posts meeting constraints
-					con.query('CALL noquery(?, ?, ?, ?);', [catFilter, ansFilter, startIndex, settings.resultsPerPage], function(err, rows) {
+					con.query('CALL noquery(?, ?);', [catFilter, ansFilter], function(err, rows) {
 						if (!err && rows !== undefined && rows.length > 0 && rows[0].length > 0) {
-							render.results = rows[0];
-						} else {
-							//debug
-							console.log(err);
+							module.exports.prepRender(render, rows[0], startIndex, settings.resultsPerPage);
 						}
-
-						console.log(render.results);
 
 						res.render('search.html', render);	
 					});
@@ -104,6 +84,9 @@ module.exports = {
 		// render search page with recent questions
 		app.get('/search', function(req, res) {
 			var render = auth.defaultRender(req);
+
+			render.page = 1;	// default to first page
+
 			// get categories for filters
 			con.query('SELECT * FROM categories;', function(err, categories) {
 				if (!err && categories !== undefined && categories.length > 0) {
@@ -111,9 +94,9 @@ module.exports = {
 				}
 
 				// get recent posts
-				con.query('CALL noquery("", "", 0, ?);', [settings.resultsPerPage], function(err, rows) {
+				con.query('CALL noquery("", "");', function(err, rows) {
 					if (!err && rows !== undefined && rows.length > 0 && rows[0].length > 0) {
-						render.results = rows[0];
+						module.exports.prepRender(render, rows[0], 0, settings.resultsPerPage);
 					}
 
 					res.render('search.html', render);
@@ -122,6 +105,21 @@ module.exports = {
 		});
 
 		return module.exports;
+	},
+
+	// calculate page info and extract single page of search results
+	prepRender: function(render, fullResults, start, perPage) {
+		// calculate number of pages for full results
+		var totalPages = Math.ceil(fullResults.length / perPage);
+
+		// generate array of possible pages for this search
+		render.pages = Array.apply(null, {length: totalPages + 1}).map(Function.call, Number);
+		render.pages.shift();
+
+		if (render.page < render.pages.length) render.nextPage = render.page + 1;
+
+		// extract single page
+		render.results = fullResults.slice(start, start + perPage);
 	},
 
 	// make post accessible to search engine

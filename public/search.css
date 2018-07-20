@@ -69,3 +69,7 @@ select {
 	color: #595959;
 	margin-top: 5px;
 }
+
+.selectedPage {
+	background-color: red;
+}
