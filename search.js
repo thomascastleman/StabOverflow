@@ -120,6 +120,11 @@ module.exports = {
 
 		// extract single page
 		render.results = fullResults.slice(start, start + perPage);
+
+		// send count of results showing on this page
+		render.onThisPage = render.results.length;
+
+		if (render.results.length > 0) render.hasResults = true;
 	},
 
 	// make post accessible to search engine

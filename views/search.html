@@ -77,19 +77,24 @@
 							<option {{#Unanswered}}selected="selected" {{/Unanswered}}value="Unanswered">Unanswered</option>
 							<option {{#Answered}}selected="selected" {{/Answered}}value="Answered">Answered</option>
 						</select>
+						<br>
 
 						<input name="page" value="{{page}}" hidden>
-						<div>
+
+						{{#hasResults}}
+						<div class="pageButtons">
 							{{#prevPage}}<button onclick="document.secondarySearch.page.value = {{prevPage}};"><i class="fas fa-chevron-left"></i></button>{{/prevPage}}
 							{{#pages}}
-							<button id="{{.}}" onclick="document.secondarySearch.page.value = {{.}};">{{.}}</button>
+							<button class="page{{.}}" onclick="document.secondarySearch.page.value = {{.}};">{{.}}</button>
 							{{/pages}}
 							{{#nextPage}}<button onclick="document.secondarySearch.page.value = {{nextPage}};"><i class="fas fa-chevron-right"></i></button>{{/nextPage}}
 						</div>
+						{{/hasResults}}
 					</form>
 				</div>
 
 				<h2>Search Results{{#query}} for "{{query}}"{{/query}}</h2>
+				{{#hasResults}}<h3>Page {{page}} showing {{onThisPage}} results.</h3>{{/hasResults}}
 
 				<table>
 					{{#results}}
@@ -117,6 +122,18 @@
 					<span id="noresults">No results found!</span>
 					{{/results}}
 				</table>
+
+				{{#hasResults}}
+				<center>
+					<div class="pageButtons">
+						{{#prevPage}}<button onclick="document.secondarySearch.page.value = {{prevPage}}; document.secondarySearch.submit();"><i class="fas fa-chevron-left"></i></button>{{/prevPage}}
+						{{#pages}}
+						<button class="page{{.}}" onclick="document.secondarySearch.page.value = {{.}}; document.secondarySearch.submit();">{{.}}</button>
+						{{/pages}}
+						{{#nextPage}}<button onclick="document.secondarySearch.page.value = {{nextPage}}; document.secondarySearch.submit();"><i class="fas fa-chevron-right"></i></button>{{/nextPage}}
+					</div>
+				</center>
+				{{/hasResults}}
 			</div>
 		</div>
 
@@ -128,7 +145,7 @@
 		</footer>
 
 		<script>
-			$('#{{page}}').attr("class", "selectedPage");
+			$('.page{{page}}').attr("class", "selectedPage");
 		</script>
 	</body>
 </html>
