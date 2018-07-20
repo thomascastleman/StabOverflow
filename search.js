@@ -7,13 +7,43 @@ var con = require('./database.js').connection;
 module.exports = {
 	init: function(app) {
 
+		// some constants regarding search functionality
+		var settings = {
+			resultsPerPage: 2
+		};
+
 		// post search query, render results
 		app.post('/search', function(req, res) {
+
+
+			// ---------------------------------- DEBUG
+
+
+			req.body.page = 1;
+
+
+			// -------------------------------------
+
+
+
+			// generate SQL to filter by category and answer status
 			var catFilter = module.exports.categoryFilter(req.body.category);
 			var ansFilter = module.exports.answerFilter(req.body.answeredStatus);
 
+			// get default render object and add query to template
 			var render = auth.defaultRender(req);
 			render.query = req.body.query;
+
+			// parse page number
+			var page = parseInt(req.body.page, 10);
+			if (isNaN(page) || page < 1) page = 1;
+
+			// calculate starting index for retrieving posts for this page
+			var startIndex = (page - 1) * settings.resultsPerPage;
+
+			// debug
+			console.log("START: " + startIndex);
+			console.log("PAGE: " + page);
 
 			// pull question categories
 			con.query('SELECT * FROM categories;', function(err, categories) {
@@ -29,17 +59,21 @@ module.exports = {
 					}
 				}
 
-				render[req.body.answeredStatus] = true;	// register which answer filter used
+				render[req.body.answeredStatus] = true;	// register which answer filter was used
 
 				// search by query if possible
 				if (req.body.query) {
-					var query = module.exports.parseQuery(req.body.query);
+					var query = module.exports.parseQuery(req.body.query);	// parse query into correct format
 
 					// get relevant posts
-					con.query('CALL query(?, ?, ?);', [query, catFilter, ansFilter], function(err, rows) {
+					con.query('CALL query(?, ?, ?, ?, ?);', [query, catFilter, ansFilter, startIndex, settings.resultsPerPage], function(err, rows) {
 						if (!err && rows !== undefined && rows.length > 0 && rows[0].length > 0) {
 							render.results = rows[0];
+						} else {
+							console.log(err);
 						}
+
+						console.log(render.results);	// debug
 
 						res.render('search.html', render);
 					});
@@ -48,10 +82,15 @@ module.exports = {
 				} else if (req.body.category && req.body.answeredStatus) {
 					
 					// get posts meeting constraints
-					con.query('CALL noquery(?, ?);', [catFilter, ansFilter], function(err, rows) {
+					con.query('CALL noquery(?, ?, ?, ?);', [catFilter, ansFilter, startIndex, settings.resultsPerPage], function(err, rows) {
 						if (!err && rows !== undefined && rows.length > 0 && rows[0].length > 0) {
 							render.results = rows[0];
+						} else {
+							//debug
+							console.log(err);
 						}
+
+						console.log(render.results);
 
 						res.render('search.html', render);	
 					});
@@ -72,7 +111,7 @@ module.exports = {
 				}
 
 				// get recent posts
-				con.query('CALL noquery("", "");', function(err, rows) {
+				con.query('CALL noquery("", "", 0, ?);', [settings.resultsPerPage], function(err, rows) {
 					if (!err && rows !== undefined && rows.length > 0 && rows[0].length > 0) {
 						render.results = rows[0];
 					}

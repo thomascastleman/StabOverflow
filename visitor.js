@@ -10,7 +10,7 @@ module.exports = {
 		var settings = {
 			numQuestionsOnLanding: 50,		// number of recent questions shown on the landing page
 			numPostsOnUserPage: 20			// number of posts shown on user page
-		}
+		};
 
 		// get landing page
 		app.get('/', function(req, res) {
