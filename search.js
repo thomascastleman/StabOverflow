@@ -97,7 +97,7 @@ module.exports = {
 				}
 
 				// get recent posts
-				con.query('CALL noquery("", "");', function(err, rows) {
+				con.query('CALL noquery("", "", "");', function(err, rows) {
 					if (!err && rows !== undefined && rows.length > 0 && rows[0].length > 0) {
 						module.exports.prepRender(render, rows[0], 0, settings.resultsPerPage);
 					}
