@@ -45,12 +45,3 @@ app.get('/test', function(req, res) {
 app.get('*', function(req, res) {
 	res.redirect('/');
 });
-
-
-
-
-// --------- DEBUG ---------------
-
-search.parseQuery("user:testing this is a test query", function(data) {
-	console.log(data);
-});

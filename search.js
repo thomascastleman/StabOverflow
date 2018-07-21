@@ -49,34 +49,38 @@ module.exports = {
 
 				render[req.body.answeredStatus] = true;	// register which answer filter was used
 
-				// search by query if possible
-				if (req.body.query) {
-					var query = module.exports.parseQuery(req.body.query);	// parse query into correct format
+				var userConstraint, query;
+				module.exports.parseUserConstraint(req.body.query, function(data) {
+					query = data.query;
+					userConstraint = data.userConstraint;
 
-					// get relevant posts
-					con.query('CALL query(?, ?, ?);', [query, catFilter, ansFilter], function(err, rows) {
-						if (!err && rows !== undefined && rows.length > 0 && rows[0].length > 0) {
-							module.exports.prepRender(render, rows[0], startIndex, settings.resultsPerPage);
-						}
+					// search by query if possible
+					if (query) {
+						// parse query into correct format
+						query = module.exports.parseQuery(query);
 
-						res.render('search.html', render);
-					});
+						// get relevant posts
+						con.query('CALL query(?, ?, ?, ?);', [query, catFilter, ansFilter, userConstraint], function(err, rows) {
+							if (!err && rows !== undefined && rows.length > 0 && rows[0].length > 0) {
+								module.exports.prepRender(render, rows[0], startIndex, settings.resultsPerPage);
+							}
 
-				// search only by constraints if they exist
-				} else if (req.body.category && req.body.answeredStatus) {
-					
-					// get posts meeting constraints
-					con.query('CALL noquery(?, ?);', [catFilter, ansFilter], function(err, rows) {
-						if (!err && rows !== undefined && rows.length > 0 && rows[0].length > 0) {
-							module.exports.prepRender(render, rows[0], startIndex, settings.resultsPerPage);
-						}
+							res.render('search.html', render);
+						});
 
-						res.render('search.html', render);	
-					});
-				// fallback
-				} else {
-					res.redirect('/search');
-				}
+					// search only by constraints if they exist
+					} else {
+						// get posts meeting constraints
+						con.query('CALL noquery(?, ?, ?);', [catFilter, ansFilter, userConstraint], function(err, rows) {
+							if (!err && rows !== undefined && rows.length > 0 && rows[0].length > 0) {
+								module.exports.prepRender(render, rows[0], startIndex, settings.resultsPerPage);
+							}
+
+							res.render('search.html', render);	
+						});
+					}
+
+				});
 			});
 		});
 
@@ -175,14 +179,12 @@ module.exports = {
 	},
 
 	// given free text query, strip of stop words, etc, and format for SQL query
-	parseQuery: function(q, callback) {
-		// regex to match all non-alphabetic chars and to match user constraint syntax
-		var re = /[^a-zA-Z ]/g, userRe = /user:([0-9]+)/g;
-		var query = [], userConstraint;
+	// also extract a SQL-formatted user constraint if found in query
+	parseQuery: function(q) {
+		// regex to match all non-alphabetic chars
+		var re = /[^a-zA-Z ]/g;
+		var query = [];
 
-		var userUID = userRe.exec(q);	// check for user constraint in query
-
-		q = q.replace(userRe, '');	// strip query of user constraint text
 		var words = q.replace(re, '');	// strip of non-alphabetic punctuation / symbols
 		words = words.toLowerCase().split(" ");	// bring to lower case and split into words
 
@@ -192,6 +194,16 @@ module.exports = {
 				query.push('"' + porterStemmer.stem(words[i]) + '"');
 			}
 		}
+
+		return query.join(',');
+	},
+
+	parseUserConstraint: function(q, callback) {
+		var userRe = /user:([0-9]+)/g;	// regex to match user constraint syntax
+		var userConstraint;
+
+		var userUID = userRe.exec(q);	// check for user constraint in query
+		q = q.replace(userRe, '');	// strip query of user constraint text
 
 		// if user constraint was found
 		if (userUID) {
@@ -208,14 +220,14 @@ module.exports = {
 
 				// return formatted query and formatted user constraint
 				callback({
-					query: query.join(','),
+					query: q,
 					userConstraint: userConstraint
 				});
 			});
 		} else {
 			// apply no user constraint
 			callback({
-				query: query.join(','),
+				query: q,
 				userConstraint: ""
 			});
 		}
