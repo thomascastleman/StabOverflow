@@ -29,7 +29,6 @@ module.exports = {
 
 			// add page info to render object
 			render.page = page;
-			if (page - 1 > 0) render.prevPage = page - 1;
 
 			// calculate starting index for retrieving posts for this page
 			var startIndex = (page - 1) * settings.resultsPerPage;
@@ -116,7 +115,9 @@ module.exports = {
 		render.pages = Array.apply(null, {length: totalPages + 1}).map(Function.call, Number);
 		render.pages.shift();
 
+		// get references to previous and following page numbers
 		if (render.page < render.pages.length) render.nextPage = render.page + 1;
+		if (render.page - 1 > 0) render.prevPage = render.page - 1;
 
 		// extract single page
 		render.results = fullResults.slice(start, start + perPage);
@@ -174,11 +175,16 @@ module.exports = {
 	},
 
 	// given free text query, strip of stop words, etc, and format for SQL query
-	parseQuery: function(q) {
-		// query preprocessing
-		var re = new RegExp(/[^a-zA-Z ]/, 'g'), query = [];
-		var words = q.replace(re, '');
-		words = words.toLowerCase().split(" ");
+	parseQuery: function(q, callback) {
+		// regex to match all non-alphabetic chars and to match user constraint syntax
+		var re = /[^a-zA-Z ]/g, userRe = /user:([0-9]+)/g;
+		var query = [], userConstraint;
+
+		var userUID = userRe.exec(q);	// check for user constraint in query
+
+		q = q.replace(userRe, '');	// strip query of user constraint text
+		var words = q.replace(re, '');	// strip of non-alphabetic punctuation / symbols
+		words = words.toLowerCase().split(" ");	// bring to lower case and split into words
 
 		// filter out stop words, stem query terms
 		for (var i = 0; i < words.length; i++) {
@@ -187,7 +193,32 @@ module.exports = {
 			}
 		}
 
-		return query.join(',');
+		// if user constraint was found
+		if (userUID) {
+			userUID = userUID[1];	// get the first group of the match, just the uid
+
+			// check if user exists
+			con.query('SELECT COUNT(*) AS count FROM users WHERE uid = ?;', [userUID], function(err, rows) {
+				// if legitimate user, format mysql query constraint
+				if (!err && rows !== undefined && rows.length > 0 && rows[0].count == 1) {
+					userConstraint = " AND q.owner_uid = " + userUID;
+				} else {
+					userConstraint = "";
+				}
+
+				// return formatted query and formatted user constraint
+				callback({
+					query: query.join(','),
+					userConstraint: userConstraint
+				});
+			});
+		} else {
+			// apply no user constraint
+			callback({
+				query: query.join(','),
+				userConstraint: ""
+			});
+		}
 	},
 
 	// generate SQL to apply answer status constraint
