@@ -203,7 +203,7 @@ module.exports = {
 		var userConstraint;
 
 		var userUID = userRe.exec(q);	// check for user constraint in query
-		q = q.replace(userRe, '');	// strip query of user constraint text
+		if (q) q = q.replace(userRe, '');	// strip query of user constraint text
 
 		// if user constraint was found
 		if (userUID) {
