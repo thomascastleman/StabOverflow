@@ -28,7 +28,7 @@ CREATE TABLE categories (
 CREATE TABLE posts (
 	uid INT NOT NULL AUTO_INCREMENT,
 	parent_question_uid INT,
-	type TINYINT(1),	-- currently implicitly "is question" (0 --> answer, 1 --> question)
+	type TINYINT(1),	-- implicitly "is question" (0 --> answer, 1 --> question)
 	category_uid INT,
 	owner_uid INT,
 	creation_date DATETIME DEFAULT NOW(),
@@ -55,7 +55,7 @@ CREATE TABLE comments (
 	FOREIGN KEY (owner_uid) REFERENCES users(uid)
 );
 
--- which users have upvoted which posts
+-- which users have upvoted which posts (prevent double-counting upvotes)
 CREATE TABLE upvotes (
 	uid INT NOT NULL AUTO_INCREMENT,
 	post_uid INT,
@@ -65,14 +65,14 @@ CREATE TABLE upvotes (
 	FOREIGN KEY (user_uid) REFERENCES users(uid)
 );
 
--- word stems from posts
+-- word stems from posts (search engine)
 CREATE TABLE stems (
 	uid INT NOT NULL AUTO_INCREMENT,
 	stem VARCHAR(16) UNIQUE,
 	PRIMARY KEY (uid)
 );
 
--- stem scoring with posts
+-- stem scoring with posts (search engine)
 CREATE TABLE scores (
 	uid INT NOT NULL AUTO_INCREMENT,
 	stem_uid INT,
@@ -83,7 +83,7 @@ CREATE TABLE scores (
 	FOREIGN KEY (post_uid) REFERENCES posts(uid) ON DELETE CASCADE
 );
 
--- add new user and get their information
+-- add new user and return their information
 DELIMITER //;
 CREATE PROCEDURE create_user (IN user_email VARCHAR(45), IN user_name VARCHAR(32), IN image VARCHAR(500))
 BEGIN
@@ -92,7 +92,7 @@ BEGIN
 END;
 //;
 
--- create new question and get its uid
+-- create new question and get its uid for redirection
 DELIMITER //;
 CREATE PROCEDURE create_question (IN category_uid INT, IN owner_uid INT, IN title TEXT, IN body TEXT)
 BEGIN
@@ -101,7 +101,7 @@ BEGIN
 END;
 //;
 
--- create new answer update answer_count of parent
+-- create new answer update answer_count of parent, return uid
 DELIMITER //;
 CREATE PROCEDURE create_answer (IN parent_question_uid INT, IN owner_uid INT, IN body TEXT)
 BEGIN
@@ -147,7 +147,7 @@ BEGIN
 END //
 
 
--- search posts without query; only filter by category and/or answered status
+-- search posts without a query; only filter by category and/or answered status
 DELIMITER //
 CREATE PROCEDURE noquery(IN category_filter VARCHAR(65535), IN answer_filter VARCHAR(65535), IN user_constraint VARCHAR(65535))
 BEGIN
