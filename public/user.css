@@ -28,6 +28,7 @@
 
 /* table of question links */
 table {
+	margin-top: 15px;
 	border-collapse: collapse;
 	width: 100%;
 }
@@ -52,6 +53,7 @@ tr:hover {
 
 td {
 	padding: 5px;
+	color: #666666;
 }
 
 /* usernames */
@@ -89,9 +91,6 @@ h4 {
 /* question or answer status on user posts */
 .QA {
 	text-align: center;
-	color: #0066ff;
-	background-color: #dcdcdc;
-	border-radius: 5px;
 }
 
 .seemoreposts {
