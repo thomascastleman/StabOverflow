@@ -1,4 +1,8 @@
 
+/* 
+	user.js: Routes for any functionality restricted to authenticated users only
+*/
+
 var moment = require('moment');
 var auth = require('./auth.js');
 var con = require('./database.js').connection;
@@ -6,12 +10,14 @@ var search = require('./search.js');
 
 module.exports = {
 
+	// set up routes
 	init: function(app, mdConverter) {
+
 		// ask a question page, restricted
 		app.get('/ask', auth.restrictAuth, function(req, res) {
 			var render = auth.defaultRender(req);
 
-			// get all un-archived categories
+			// get all unarchived categories to allow them to post under
 			con.query('SELECT * FROM categories WHERE is_archived = 0;', function(err, rows) {
 				if (!err && rows !== undefined && rows.length > 0) {
 					render.categories = rows;
@@ -47,6 +53,8 @@ module.exports = {
 			// ensure editing own post
 			con.query('SELECT title, body FROM posts WHERE uid = ? AND owner_uid = ?;', [req.params.id, req.user.local.uid], function(err, rows) {
 				if (!err && rows !== undefined && rows.length > 0) {
+
+					// render post data
 					res.render('editpost.html', Object.assign({
 						uid: req.params.id,
 						title: rows[0].title,
@@ -62,9 +70,9 @@ module.exports = {
 		app.post('/newPost', auth.isAuthenticated, function(req, res) {
 			// check for empty request
 			if (req.body.body != '' && (req.body.title != '' || req.body.type == 0)) {
-				// if question
+				// if post is question
 				if (req.body.type == 1) {
-					// check uncategorized (id == 0)
+					// check uncategorized (id == 0 or null)
 					req.body.category_uid = parseInt(req.body.category_uid, 10);
 					if (isNaN(req.body.category_uid)) req.body.category_uid = null;
 
@@ -78,10 +86,10 @@ module.exports = {
 						}
 					});
 
-				// if answer
+				// if post is answer
 				} else if (req.body.type == 0) {
 					// if legitimate parent question id
-					if (req.body.parent_question != undefined && !isNaN(parseInt(req.body.parent_question, 10))) {
+					if (!isNaN(parseInt(req.body.parent_question, 10))) {
 						// insert answer into posts
 						con.query('CALL create_answer(?, ?, ?);', [req.body.parent_question, req.user.local.uid, req.body.body], function(err, rows) {
 							if (!err && rows !== undefined && rows.length > 0 && rows[0].length > 0) {
@@ -92,13 +100,13 @@ module.exports = {
 							}
 						});
 					} else {
-						res.redirect('/');
+						res.render('error.html', auth.errorRender(req, "Unable to add post: invalid parent question information."));
 					}
 				} else {
-					res.redirect('/');
+					res.render('error.html', auth.errorRender(req, "Unable to add post: post not marked as question or answer."));
 				}
 			} else {
-				res.redirect('/');
+				res.render('error.html', auth.errorRender(req, "Unable to add empty post."));
 			}
 		});
 
@@ -110,7 +118,7 @@ module.exports = {
 				con.query('INSERT INTO comments (parent_uid, parent_question_uid, body, owner_uid) VALUES (?, ?, ?, ?);',
 					[req.body.parent_uid, req.body.parent_question, req.body.body, req.user.local.uid], function(err, rows) {
 
-					// direct to relevant question page
+					// redirect to relevant question page
 					if (!err) {
 						res.redirect('/questions/' + req.body.parent_question);
 					} else {
@@ -130,6 +138,7 @@ module.exports = {
 				con.query('SELECT type, parent_question_uid FROM posts WHERE uid = ? AND owner_uid = ?;', [req.body.uid, req.user.local.uid], function(err, rows) {
 					if (!err && rows !== undefined && rows.length > 0) {
 
+						// format editing message to record time of edit
 						var editMessage = '\n\n<br>*Edited ' + moment().format('h:mm A M/D/YYYY') + ':*\n\n';
 
 						// apply edits
@@ -169,17 +178,21 @@ module.exports = {
 									con.query('INSERT INTO upvotes (user_uid, post_uid) VALUES (?, ?);', [req.user.local.uid, req.body.uid], function(err, rows) {});
 									res.send({ delta: 1 });
 								} else {
+									// no change in upvotes
 									res.send({ delta: 0 });
 								}
 							});
 						} else {
+							// no change in upvotes
 							res.send({ delta: 0 });
 						}
 					} else {
+						// no change in upvotes
 						res.send({ delta: 0 });
 					}
 				});
 			} else {
+				// no change in upvotes
 				res.send({ delta: 0 });
 			}
 		});
@@ -188,6 +201,7 @@ module.exports = {
 		app.post('/users/update', auth.isAuthenticated, function(req, res) {
 			var uid = req.body.uid, name = req.body.display_name, bio = req.body.bio;
 
+			// check uid is legitimate and name is non-empty
 			if (!isNaN(parseInt(uid, 10)) && name != "") {
 				// if user is authorized to make edits
 				if (uid == req.user.local.uid) {
@@ -204,10 +218,10 @@ module.exports = {
 						}
 					});
 				} else {
-					res.redirect('/users/' + uid);
+					res.render('error.html', auth.errorRender(req, "You are not allowed to edit this user's information."));
 				}
 			} else {
-				res.redirect('/');
+				res.render('error.html', auth.errorRender(req, "Unable to edit user information: invalid request information."));
 			}
 		});
 
