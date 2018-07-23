@@ -60,7 +60,7 @@
 
 				<div id="searchFilters">
 					<form name="secondarySearch" method="POST" action="/search">
-						<input id="query" name="query" type="text" value="{{query}}" autocomplete="off" onchange="document.secondarySearch.page.value = 1;">
+						<input id="query" name="query" type="text" value="{{query}}" autocomplete="off" placeholder="Search StabOverflow" onchange="document.secondarySearch.page.value = 1;">
 						<input id="search" type="submit" value="Search" onclick="document.secondarySearch.page.value = 1;"><br>
 
 						Filter by Category
@@ -83,11 +83,11 @@
 
 						{{#hasResults}}
 						<div class="pageButtons">
-							{{#prevPage}}<button onclick="document.secondarySearch.page.value = {{prevPage}};"><i class="fas fa-chevron-left"></i></button>{{/prevPage}}
+							{{#prevPage}}<button onclick="document.secondarySearch.page.value = {{prevPage}};" title="To Previous Page"><i class="fas fa-chevron-left"></i></button>{{/prevPage}}
 							{{#pages}}
 							<button class="page{{.}}" onclick="document.secondarySearch.page.value = {{.}};">{{.}}</button>
 							{{/pages}}
-							{{#nextPage}}<button onclick="document.secondarySearch.page.value = {{nextPage}};"><i class="fas fa-chevron-right"></i></button>{{/nextPage}}
+							{{#nextPage}}<button onclick="document.secondarySearch.page.value = {{nextPage}};" title="To Next Page"><i class="fas fa-chevron-right"></i></button>{{/nextPage}}
 						</div>
 						{{/hasResults}}
 					</form>
