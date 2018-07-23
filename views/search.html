@@ -13,6 +13,14 @@
 
 		<link rel="stylesheet" type="text/css" href="/questionlinks.css">
 		<link rel="stylesheet" type="text/css" href="/search.css">
+
+		<script>
+			// move to a new page of results
+			function pageTo(n) {
+				document.secondarySearch.page.value = n;
+				document.secondarySearch.submit();
+			}
+		</script>
 	</head>
 	<body>
 		<div class="content">
@@ -61,33 +69,37 @@
 				<div id="searchFilters">
 					<form name="secondarySearch" method="POST" action="/search">
 						<input id="query" name="query" type="text" value="{{query}}" autocomplete="off" placeholder="Search StabOverflow" onchange="document.secondarySearch.page.value = 1;">
-						<input id="search" type="submit" value="Search" onclick="document.secondarySearch.page.value = 1;"><br>
+						<input id="search" type="submit" value="Search" onclick="pageTo(1);"><br>
 
-						Filter by Category
-						<select name="category" onchange="document.secondarySearch.page.value = 1; document.secondarySearch.submit();">
-							<option value="0">All</option>
-							{{#categories}}
-								<option {{#isSelected}}selected="selected" {{/isSelected}}value="{{uid}}">{{name}}</option>
-							{{/categories}}
-						</select>
+						<ul id="filters">
+							<li class="filter">
+									<span>Filter by Category</span>
+									<select name="category" onchange="pageTo(1);">
+										<option value="0">All</option>
+										{{#categories}}
+											<option {{#isSelected}}selected="selected" {{/isSelected}}value="{{uid}}">{{name}}</option>
+										{{/categories}}
+									</select>
+							</li>
 
-						Filter by Answers
-						<select name="answeredStatus" onchange="document.secondarySearch.page.value = 1; document.secondarySearch.submit();">
-							<option {{#All}}selected="selected" {{/All}}value="All">All</option>
-							<option {{#Unanswered}}selected="selected" {{/Unanswered}}value="Unanswered">Unanswered</option>
-							<option {{#Answered}}selected="selected" {{/Answered}}value="Answered">Answered</option>
-						</select>
-						<br>
-
+							<li class="filter">
+									<span>Filter by Answers</span>
+									<select name="answeredStatus" onchange="pageTo(1);">
+										<option {{#All}}selected="selected" {{/All}}value="All">All</option>
+										<option {{#Unanswered}}selected="selected" {{/Unanswered}}value="Unanswered">Unanswered</option>
+										<option {{#Answered}}selected="selected" {{/Answered}}value="Answered">Answered</option>
+									</select>
+							</li>
+						</ul>
 						<input name="page" value="{{page}}" hidden>
 
 						{{#hasResults}}
 						<div class="pageButtons">
-							{{#prevPage}}<button onclick="document.secondarySearch.page.value = {{prevPage}};" title="To Previous Page"><i class="fas fa-chevron-left"></i></button>{{/prevPage}}
+							{{#prevPage}}<button onclick="pageTo({{prevPage}});" title="To Previous Page"><i class="fas fa-chevron-left"></i></button>{{/prevPage}}
 							{{#pages}}
-							<button class="page{{.}}" onclick="document.secondarySearch.page.value = {{.}};">{{.}}</button>
+							<button class="page{{.}}" onclick="pageTo({{.}});">{{.}}</button>
 							{{/pages}}
-							{{#nextPage}}<button onclick="document.secondarySearch.page.value = {{nextPage}};" title="To Next Page"><i class="fas fa-chevron-right"></i></button>{{/nextPage}}
+							{{#nextPage}}<button onclick="pageTo({{nextPage}});" title="To Next Page"><i class="fas fa-chevron-right"></i></button>{{/nextPage}}
 						</div>
 						{{/hasResults}}
 					</form>
@@ -126,11 +138,11 @@
 				{{#hasResults}}
 				<center>
 					<div class="pageButtons">
-						{{#prevPage}}<button onclick="document.secondarySearch.page.value = {{prevPage}}; document.secondarySearch.submit();"><i class="fas fa-chevron-left"></i></button>{{/prevPage}}
+						{{#prevPage}}<button onclick="pageTo({{prevPage}});"><i class="fas fa-chevron-left"></i></button>{{/prevPage}}
 						{{#pages}}
-						<button class="page{{.}}" onclick="document.secondarySearch.page.value = {{.}}; document.secondarySearch.submit();">{{.}}</button>
+						<button class="page{{.}}" onclick="pageTo({{.}});">{{.}}</button>
 						{{/pages}}
-						{{#nextPage}}<button onclick="document.secondarySearch.page.value = {{nextPage}}; document.secondarySearch.submit();"><i class="fas fa-chevron-right"></i></button>{{/nextPage}}
+						{{#nextPage}}<button onclick="pageTo({{nextPage}});"><i class="fas fa-chevron-right"></i></button>{{/nextPage}}
 					</div>
 				</center>
 				{{/hasResults}}

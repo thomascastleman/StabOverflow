@@ -16,6 +16,7 @@ h2 {
 	margin-top: 15px;
 }
 
+/* "Page n showing m results" header */
 h3 {
 	font-family: 'Kanit', sans-serif;
 	font-weight: 300;
@@ -24,17 +25,15 @@ h3 {
 
 /* selects for filters */
 select {
-	background-color: #d9d9d9;
+	background-color: #bfbfbf;
 	font-family: 'Kanit', sans-serif;
 	font-weight: 300;
 	font-size: 14px;
 	border: none;
 	padding: 5px;
 	border-radius: 3px;
-	margin-top: 10px;
-	margin-left: 20px;
-	margin-right: 20px;
 	cursor:pointer;
+	margin-left: 10px;
 }
 
 /* secondary search bar */
@@ -74,6 +73,7 @@ select {
 	font-weight: 300;
 }
 
+/* preview of post content */
 .preview {
 	font-size: 13px;
 	color: #595959;
@@ -112,4 +112,23 @@ select {
 .pageButtons > button:hover {
 	cursor:pointer;
 	background-color: #f2f2f2;
+}
+
+/* container for filter dropdowns */
+#filters {
+	margin-top: 10px;
+	font-size: 14px;
+	text-align: center;
+}
+
+/* container for category, answer filter dropdown */
+.filter {
+	display: inline-block;
+	background-color: #d9d9d9;
+	color: black;
+	padding: 10px;
+	border: none;
+	border-radius: 3px;
+	margin-top: 5px;
+	text-align: center;
 }
