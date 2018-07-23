@@ -177,7 +177,15 @@
 }
 
 .post {
-	background-color: #f7f7f7;
+	background-color: #fafafa;
 	padding: 15px 10px 15px 10px;
-	border-radius: 7px;
+	border-radius: 4px;
+}
+
+hr {
+	background-color:  #999999;
+	color:  #999999;
+	border-color:  #999999;
+	margin-top: 5px;
+	margin-bottom: 5px;
 }
