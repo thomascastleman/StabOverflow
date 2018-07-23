@@ -1,4 +1,5 @@
 
+/* container for title input, category input, and submit button*/
 .container {
 	font-family: 'Kanit', sans-serif;
 	width: 60%;
@@ -8,17 +9,20 @@
 	margin-right: auto;
 }
 
+/* "Ask A Question" header */
 h1 {
 	font-family: 'Kanit', sans-serif;
 	font-weight: 400;
 }
 
+/* span wrapper for title input */
 #title {
 	font-family: 'Kanit', sans-serif;
 	font-weight: 300;
 	font-size: 22px;
 }
 
+/* title input element */
 #titleinput {
 	width: 60%;
 	height: 25px;
@@ -27,7 +31,7 @@ h1 {
 	padding: 5px;
 }
 
-/* ask a question link */
+/* post question button */
 #post {
 	color: white;
 	background-color: #4d88ff;
@@ -38,11 +42,13 @@ h1 {
 	margin-bottom: 250px;
 }
 
+/* hover on post button */
 #post:hover {
 	background-color: #6699ff;
 	cursor: pointer;
 }
 
+/* select element for category choice */
 #category {
 	border: none;
 	padding: 5px;

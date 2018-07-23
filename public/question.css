@@ -20,6 +20,7 @@
 	border-radius: 3px;
 }
 
+/* links in asker div */
 .asker > a, .asker a:visited {
 	text-decoration: none;
 	outline: none;
@@ -27,10 +28,12 @@
 	font-size: 15px;
 }
 
+/* div container for date asked */
 .asker > div {
 	margin-bottom: 4px;
 }
 
+/* asker profile image */
 .asker > img {
 	border: none;
 	border-radius: 3px;
@@ -48,17 +51,20 @@
 	margin-bottom: 10px;
 }
 
+/* hover on category button */
 #questioncategory:hover {
 	cursor: pointer;
 	background-color: #cce6ff;
 }
 
+/* righthand container for post title / body / asker info */
 .postbody {
 	width: 90%;
 	float:right;
 	font-size: 16px;
 }
 
+/* lefthand container for upvoting / editing / deleting*/
 .postmeta {
 	float:left;
 	width: 10%;
@@ -68,6 +74,7 @@
 	line-height: 35px;
 }
 
+/* lefthand upvote / edit / delete links */
 .postmeta a, .postmeta a:visited {
 	color: black;
 }
@@ -89,14 +96,12 @@
 	border-color: #d9d9d9;
 }
 
-.comments tr:first-child {
+/* prevent first and last comment from having line above or below, respectively */
+.comments tr:first-child, .comments tr:last-child {
 	border: none;
 }
 
-.comments tr:last-child {
-	border: none;
-}
-
+/* padding for comment table elements */
 .comments td {
 	padding: 7px;
 }
@@ -139,28 +144,33 @@
 	border-radius: 4px;
 }
 
+/* hover on post comment button */
 .postcomment:hover {
 	background-color: #6699ff;
 	cursor: pointer;
 }
 
+/* upvote icon */
 .upvote {
 	font-size: 30px;
 	color: #0066ff;
 	cursor: pointer;
 }
 
+/* number of upvotes */
 .upvotecount {
 	font-family: 'Kanit', sans-serif;
 	font-weight: 300;
 	font-size: 30px;
 }
 
+/* delete post icon */
 .delete {
 	cursor: pointer;
 	color: #4d4d4d;
 }
 
+/* submit button for answer */
 #postanswer {
 	color: white;
 	background-color: #4d88ff;
@@ -171,17 +181,20 @@
 	margin-bottom: 210px;
 }
 
+/* hover on submit button for answer */
 #postanswer:hover {
 	background-color: #6699ff;
 	cursor: pointer;
 }
 
+/* top-level container for post data */
 .post {
 	background-color: #fafafa;
 	padding: 15px 10px 15px 10px;
 	border-radius: 4px;
 }
 
+/* divider line between answers */
 hr {
 	background-color:  #999999;
 	color:  #999999;

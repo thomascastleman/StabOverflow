@@ -1,14 +1,4 @@
 
-
-#container * {
-	font-family: 'Kanit', sans-serif;
-	font-weight: 300;
-}
-
-#container h1 {
-	font-weight: 400;
-}
-
 /* container for page content */
 #container {
 	font-family: 'Kanit', sans-serif;
@@ -21,6 +11,17 @@
 	padding: 20px;
 	border-radius: 5px;
 	line-height: 50px;
+}
+
+/* every element in container */
+#container * {
+	font-family: 'Kanit', sans-serif;
+	font-weight: 300;
+}
+
+/* "Edit Your Profile" header */
+#container h1 {
+	font-weight: 400;
 }
 
 /* display name input */
@@ -53,6 +54,7 @@
 	border-radius: 4px;
 }
 
+/* hover on save profile button */
 #save:hover {
 	background-color: #6699ff;
 	cursor: pointer;

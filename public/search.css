@@ -62,6 +62,7 @@ select {
 	border-radius: 4px;
 }
 
+/* hover on secondary search button */
 #search:hover {
 	background-color: #6699ff;
 	cursor: pointer;
@@ -109,6 +110,7 @@ select {
 	background-color: white;
 }
 
+/* hover over page buttons */
 .pageButtons > button:hover {
 	cursor:pointer;
 	background-color: #f2f2f2;

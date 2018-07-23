@@ -5,9 +5,9 @@
 	padding: 0;
 }
 
-/* --------------------------- NAVBAR BELOW -------------------------------- */
+/* --------------------------- NAVBAR -------------------------------- */
 
-/* navbar container div */
+/* navbar container */
 header {
 	background-color: #f2f2f2;
 	position: sticky;
@@ -21,29 +21,29 @@ header {
 	z-index: 1;
 }
 
-header input {
-	font-weight: 300;
-}
-
 /* all elements within navbar */
 header * {
 	display: inline-block;
 	height: 100%;
 }
 
+/* list of links in navbar */
 header ul {
 	line-height: 55px;
 }
 
+/* individual link container elements in navbar */
 header ul li {
 	display: inline;
 	height: 100%;
 }
 
+/* links in navbar list */
 header ul li a {
 	padding-left: 7px;
 	padding-right: 7px;
 }
+
 /* all links in header */
 header a {
 	text-decoration: none;
@@ -51,6 +51,7 @@ header a {
 	color: #404040;
 }
 
+/* hover on links in header */
 header a:hover {
 	background-color: #e6e6e6;
 }
@@ -64,8 +65,8 @@ header a:hover {
 
 /* search bar input element */
 #searchBar {
+	font-weight: 300;
 	height: 70%;
-	/*width: 300px;*/
 	width: 20vw;
 	min-width: 70px;
 	font-size: 15px;
@@ -96,12 +97,13 @@ header a:hover {
 	text-decoration: none;
 }
 
+/* hover on search submit button */
 #searchSubmit:hover {
 	background-color: #6699ff;
 	cursor: pointer;
 }
 
-/* FA search icon */
+/* FA search icon in search button */
 #searchIcon {
 	font-size: 18px;
 	color: white;
@@ -114,7 +116,7 @@ header a:hover {
 	height: 55px;
 }
 
-/* header logo */
+/* staboverflow logo */
 header img {
 	position: sticky;
 	left: 0px;
@@ -124,24 +126,28 @@ header img {
 	margin-left: 5px;
 }
 
+/* logo image link */
 header > a {
 	margin-left: 20px;
 }
 
+/* get rid of browse button at certain window width */
 @media (max-width: 68em) {
 	#browse {
 		display: none;
 	}
 }
 
+/* get rid of search submit button at certain window width */
 @media (max-width: 53em) {
 	#searchSubmit {
 		display: none;
 	}
 }
 
-/* --------------------------- FOOTER BELOW -------------------------------- */
+/* --------------------------- FOOTER -------------------------------- */
 
+/* parent footer element */
 footer {
 	font-family: 'Kanit', sans-serif;
 	font-weight: 300;
@@ -158,19 +164,24 @@ footer {
 	flex-shrink: 0;
 }
 
+/* container div inside footer for alignment reasons */
 footer div {
 	display: table-cell;
 	vertical-align: middle;
 }
 
+/* page formatting to ensure footer stays on the bottom */
 html, body {
   height: 100%;
 }
 
+/* using flexbox to keep footer at bottom */
 body {
   display: flex;
   flex-direction: column;
 }
+
+/* content div that contains all other page content */
 .content {
   flex: 1 0 auto;
 }

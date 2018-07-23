@@ -22,6 +22,7 @@
 	outline: none;
 }
 
+/* hover over any links in container */
 #container a:hover {
 	color: #4d94ff;
 }
@@ -39,18 +40,17 @@ tr {
 	border-color: #d9d9d9;
 }
 
-tr:first-child {
+/* prevent first and last element in recent posts table from having extra border lines */
+tr:first-child, tr:last-child {
 	border: none;
 }
 
-tr:last-child {
-	border: none;
-}
-
+/* background change on hover for questions in recent posts */
 tr:hover {
 	background-color: #e6e6e6;
 }
 
+/* table elements */
 td {
 	padding: 5px;
 	color: #666666;
@@ -93,6 +93,7 @@ h4 {
 	text-align: center;
 }
 
+/* button to post to search under this user */
 .seemoreposts {
 	float:right;
 	font-family: 'Kanit', sans-serif;
@@ -107,6 +108,7 @@ h4 {
 	border-radius: 4px;
 }
 
+/* hover on see more button */
 .seemoreposts:hover {
 	background-color: #6699ff;
 	cursor: pointer;

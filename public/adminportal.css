@@ -22,7 +22,7 @@
 	margin-top: 5px;
 }
 
-/* ask a question link */
+/* all form submission buttons */
 #container button {
 	color: white;
 	background-color: #4d88ff;
@@ -45,20 +45,24 @@
 	padding: 5px;
 }
 
+/* container for left half of portal elements */
 #left {
 	float:left;
 	width: 50%;
 }
 
+/* container for right half of portal (user search results) */
 #right {
 	float:right;
 	width: 50%;
 }
 
+/* user search input */
 #right input {
 	width: 75%;
 }
 
+/* element to push the background container to cover to the bottom of the page*/
 #buffer {
 	clear:both;
 }

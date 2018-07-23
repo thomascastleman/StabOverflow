@@ -22,6 +22,7 @@
 	outline: none;
 }
 
+/* hover links */
 #container a:hover {
 	color: #4d94ff;
 }

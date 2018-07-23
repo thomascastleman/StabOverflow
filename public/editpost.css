@@ -1,5 +1,5 @@
 
-/* container for post */
+/* container for post to be edited */
 #container {
 	font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 	width: 55%;
@@ -12,11 +12,13 @@
 	border-radius: 7px;
 }
 
+/* "Type below..." header */
 #instructions {
 	font-family: 'Kanit', sans-serif;
 	font-weight: 400;
 }
 
+/* post updates button */
 #post {
 	color: white;
 	background-color: #4d88ff;
@@ -27,6 +29,7 @@
 	margin-bottom: 250px;
 }
 
+/* hover on post updates button */
 #post:hover {
 	background-color: #6699ff;
 	cursor: pointer;
