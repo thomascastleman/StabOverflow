@@ -1,14 +1,20 @@
 
+/* 
+	admin.js: Routes for administrator portal and any special administrator functionality 
+*/
+
 var auth = require('./auth.js');
 var con = require('./database.js').connection;
 
 module.exports = {
+
+	// set up admin routes
 	init: function(app) {
-		// allow admin to make special changes
+		// render interface for admin to make special changes
 		app.get('/adminPortal', auth.restrictAdmin, function(req, res) {
 			var render = auth.defaultRender(req);
 
-			// get all categories (for delete)
+			// get all categories (for deletion)
 			con.query('SELECT * FROM categories;', function(err, categories) {
 				if (!err && categories !== undefined && categories.length > 0) {
 					render.categories = categories;
@@ -34,15 +40,19 @@ module.exports = {
 			});
 		});
 
-		// admin: add account to system manually
+		// manually add account to system
 		app.post('/addAccount', auth.isAdmin, function(req, res) {
 			var render = auth.defaultRender(req);
+
+			// check for an email conflict with an existing user
 			con.query('SELECT COUNT(*) AS count FROM users WHERE email = ?;', [req.body.email], function(err, rows) {
 				if (!err && rows !== undefined && rows.length > 0) {
+					// if no conflict found
 					if (rows[0].count == 0) {
-						// insert new user into table
+						// insert new user into system
 						con.query('INSERT INTO users (email, display_name) VALUES (?, ?);', [req.body.email, req.body.name], function(err, rows) {
 							if (!err) {
+								// report success back to administrator
 								render.message = "Successfully added user \"" + req.body.name + "\" with email \"" + req.body.email + "\"!";
 								res.render('adminsuccess.html', render);
 							} else {
@@ -58,14 +68,17 @@ module.exports = {
 			});
 		});
 
-		// admin: make user admin by posting email
+		// make user admin by posting email
 		app.post('/makeAdmin', auth.isAdmin, function(req, res) {
 			var render = auth.defaultRender(req);
+
+			// check if user with this email exists
 			con.query('SELECT * FROM users WHERE email = ?;', [req.body.email], function(err, rows) {
 				if (!err && rows !== undefined && rows.length > 0) {
-					// apply updated privileges
+					// apply updated privileges by uid from previous query
 					con.query('UPDATE users SET is_admin = 1 WHERE uid = ?;', [rows[0].uid], function(err, rows) {
 						if (!err) {
+							// report success back to administrator
 							render.message = "Successfully promoted \"" + req.body.email + "\" to admin status!";
 							res.render('adminsuccess.html', render);
 						} else {
@@ -78,7 +91,7 @@ module.exports = {
 			});
 		});
 
-		// admin: remove user's admin privileges
+		// remove user's admin privileges by posting email
 		app.post('/removeAdmin', auth.isAdmin, function(req, res) {
 			// safety: prevent admin from removing themself
 			if (req.body.email != req.user.local.email) {
@@ -90,6 +103,7 @@ module.exports = {
 						// apply demotion
 						con.query('UPDATE users SET is_admin = 0 WHERE uid = ?;', [rows[0].uid], function(err, rows) {
 							if (!err) {
+								// report success back to administrator
 								render.message = "Successfully revoked the admin privileges of \"" + req.body.email + "\"!";
 								res.render('adminsuccess.html', render);
 							} else {
@@ -105,11 +119,14 @@ module.exports = {
 			}
 		});
 
-		// admin: create a new category
+		// create a new category
 		app.post('/newCategory', auth.isAdmin, function(req, res) {
 			var render = auth.defaultRender(req);
+
+			// add new category
 			con.query('INSERT INTO categories (name) VALUES (?);', [req.body.category], function(err, rows) {
 				if (!err) {
+					// report success
 					render.message = "Successfully created the category \"" + req.body.category + "\"!";
 					res.render('adminsuccess.html', render);
 				} else {
@@ -118,7 +135,7 @@ module.exports = {
 			});
 		});
 
-		// admin: archive an existing category by uid
+		// archive an existing category by uid
 		app.post('/archiveCategory', auth.isAdmin, function(req, res) {
 			if (req.body.uid) {
 				var render = auth.defaultRender(req);
@@ -126,12 +143,14 @@ module.exports = {
 				// archive category
 				con.query('UPDATE categories SET is_archived = 1 WHERE uid = ?;', [req.body.uid], function(err, rows) {
 					if (!err) {
+						// get name of archived category to report back
 						con.query('SELECT * FROM categories WHERE uid = ?;', [req.body.uid], function(err, rows) {
 							if (!err && rows !== undefined && rows.length > 0) {
 								render.message = "Successfully archived the category \"" + rows[0].name + "\"!";
 							} else {
 								render.message = "Successfully archived category."
 							}
+
 							res.render('adminsuccess.html', render);
 						});
 					} else {
@@ -143,20 +162,23 @@ module.exports = {
 			}
 		});
 
-		// admin: fully delete an existing category
+		// fully delete an existing category
 		app.post('/deleteCategory', auth.isAdmin, function(req, res) {
 			if (req.body.uid) {
 				var render = auth.defaultRender(req), category;
+
+				// get category name
 				con.query('SELECT * FROM categories WHERE uid = ?;', [req.body.uid], function(err, rows) {
 					if (!err && rows !== undefined && rows.length > 0) {
 						category = rows[0].name;
 
-						// flush all posts with this category
+						// reset category to null of all posts with this category
 						con.query('UPDATE posts SET category_uid = NULL WHERE category_uid = ?;', [req.body.uid], function(err, rows) {
 							if (!err) {
-								// full delete actual category
+								// full delete category
 								con.query('DELETE FROM categories WHERE uid = ?;', [req.body.uid], function(err, rows) {
 									if (!err) {
+										// report success
 										render.message = "Successfully deleted the category \"" + category + "\"!";
 										res.render('adminsuccess.html', render);
 									} else {
@@ -176,17 +198,18 @@ module.exports = {
 			}
 		});
 
-		// admin: remove a post
+		// remove a post
 		app.post('/deletePost', auth.isAdmin, function(req, res) {
+			// remove post from system (ON DELETE CASCADE will remove most child data)
 			con.query('DELETE FROM posts WHERE uid = ?;', [req.body.uid], function(err, rows) {
 				if (!err) {
 					res.redirect('/adminPortal');
 
 					if (req.body.parent_question_uid) {
-						// update answer count if answer
+						// if deleted post was answer, update parent question's answer count
 						con.query('UPDATE posts SET answer_count = CASE WHEN answer_count > 0 THEN answer_count - 1 ELSE 0 END WHERE uid = ?;', [req.body.parent_question_uid], function(err, rows) {});
 					} else {
-						// delete child answer posts
+						// delete child answer posts (not handled by delete cascade)
 						con.query('DELETE FROM posts WHERE parent_question_uid = ?;', [req.body.uid], function(err, rows) {});
 					}
 				} else {
@@ -195,8 +218,9 @@ module.exports = {
 			});
 		});
 
-		// admin: remove a comment
+		// remove a comment
 		app.post('/deleteComment', auth.isAdmin, function(req, res) {
+			// delete comment by uid
 			con.query('DELETE FROM comments WHERE uid = ?;', [req.body.uid], function(err, rows) {
 				if (!err) {
 					res.redirect('/adminPortal');
