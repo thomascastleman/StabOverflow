@@ -1,4 +1,8 @@
 
+/* 
+	auth.js: Authentication routes / configurations and middleware for restricting pages / requests to various levels of authentication
+*/
+
 var GoogleStrategy = require('passport-google-oauth2').Strategy;
 var querystring = require('querystring');
 var con = require('./database.js').connection;
@@ -6,8 +10,10 @@ var creds = require('./credentials.js');
 
 module.exports = {
 
+	// set up routes and configure authentication settings
 	init: function(app, passport) {
 
+		// cache user info from our system into their session
 		passport.serializeUser(function(user, done) {
 			// lookup user in system
 			con.query('SELECT * FROM users WHERE email = ?;', [user.email], function(err, rows) {
@@ -30,11 +36,12 @@ module.exports = {
 
 					done(null, user);
 
-				// if email domain legitimate
+				// if not existing user but email domain legitimate
 				} else if (/.+?@(students\.)?stab\.org/.test(user.email)) {
 					// create new user
 					con.query('CALL create_user(?, ?, ?);', [user.email, user.displayName, module.exports.stripImageURL(user._json.image.url)], function(err, rows) {
 						if (!err && rows !== undefined && rows.length > 0 && rows[0].length > 0) {
+							// update their cached info in session
 							user.local = rows[0][0];
 							done(null, user);
 						} else {
@@ -51,6 +58,7 @@ module.exports = {
 			done(null, user);
 		});
 
+		// Google OAuth2 config with passport
 		passport.use(new GoogleStrategy({
 				clientID:		creds.GOOGLE_CLIENT_ID,
 				clientSecret:	creds.GOOGLE_CLIENT_SECRET,
@@ -67,22 +75,26 @@ module.exports = {
 		app.use(passport.initialize());
 		app.use(passport.session());
 
+		// authentication with google endpoint
 		app.get('/auth/google', module.exports.checkReturnTo, passport.authenticate('google', { scope: [
 				'https://www.googleapis.com/auth/userinfo.profile',
 				'https://www.googleapis.com/auth/userinfo.email'
 			]
 		}));
 
+		// callback for google auth
 		app.get('/auth/google/callback',
 			passport.authenticate('google', {
 				successReturnToOrRedirect: '/',
 				failureRedirect: '/failure'
 		}));
 
+		// handler for failure to authenticate
 		app.get('/failure', function(req, res) {
 			res.render('error.html', { message: "Unable to authenticate." });
 		});
 
+		// logout handler
 		app.get('/logout', module.exports.checkReturnTo, function(req, res){
 			req.logout();
 			res.redirect(req.session.returnTo || '/');
@@ -97,6 +109,7 @@ module.exports = {
 		return patt.exec(url);
 	},
 
+	// middleware to check for a URL to return to after authenticating
 	checkReturnTo: function(req, res, next) {
 		var returnTo = req.query['returnTo'];
 		if (returnTo) {
@@ -108,13 +121,19 @@ module.exports = {
 
 	// middleware to restrict pages to authenticated users
 	restrictAuth: function(req, res, next) {
-		if (req.isAuthenticated() && req.user.local) return next();
-		else res.redirect('/auth/google?returnTo=' + querystring.escape(req.url));
+		// if authenticated and has session data from our system
+		if (req.isAuthenticated() && req.user.local) {
+			return next();
+		} else {
+			res.redirect('/auth/google?returnTo=' + querystring.escape(req.url));
+		}
 	},
 
 	// middleware to restrict pages to admin users
 	restrictAdmin: function(req, res, next) {
+		// if authenticated and has session data
 		if (req.isAuthenticated() && req.user.local) {
+			// if administrator, allow
 			if (req.user.local.is_admin) {
 				return next();
 			} else {
@@ -125,7 +144,7 @@ module.exports = {
 		}
 	},
 
-	// middleware (mainly for POST reqs) to check if auth'd
+	// middleware (for POST reqs) to check if auth'd
 	isAuthenticated: function(req, res, next) {
 		if (req.isAuthenticated() && req.user.local) {
 			return next();
@@ -143,7 +162,7 @@ module.exports = {
 		}
 	},
 
-	// generate render object for most pages
+	// generate render object for most pages (authentication info for navbar)
 	defaultRender: function(req) {
 		if (req.user && req.user.local) {
 			return {
@@ -158,7 +177,7 @@ module.exports = {
 		}
 	},
 
-	// generate standard render object for error page
+	// generate standard render object for error page (auth info + error message)
 	errorRender: function(req, message) {
 		if (req.user && req.user.local) {
 			return {
