@@ -18,6 +18,7 @@ app.set('views', __dirname + '/views');
 app.use(express.static(__dirname + '/public'));
 app.use(express.static(__dirname + '/views'));
 
+// configure session
 app.use(session({ 
 	secret: creds.SESSION_SECRET,
 	name: 'session',
@@ -25,21 +26,17 @@ app.use(session({
 	saveUninitialized: true
 }));
 
+// import local modules for routes / all other functionality
 var auth = require('./auth.js').init(app, passport);
 var visitors = require('./visitor.js').init(app, mdConverter);
 var user = require('./user.js').init(app, mdConverter);
 var search = require('./search.js').init(app);
 var admin = require('./admin.js').init(app);
 
+// start server
 var server = app.listen(8080, function() {
 	console.log('StabOverflow server listening on port %d', server.address().port);
 });
-
-// ------------------- TESTING --------------
-app.get('/test', function(req, res) {
-	res.send(req.user);
-});
-// --------------------------------
 
 // fallback redirection to landing page
 app.get('*', function(req, res) {

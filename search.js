@@ -1,10 +1,16 @@
 
+/* 
+	search.js: Search page routes and all search engine functionality including indexing and querying
+*/
+
 var porterStemmer = require('./porterstemmer.js');
 var chunk = require('lodash.chunk');
 var auth = require('./auth.js');
 var con = require('./database.js').connection;
 
 module.exports = {
+
+	// set up routes
 	init: function(app) {
 
 		// some constants regarding search functionality
@@ -33,12 +39,12 @@ module.exports = {
 			// calculate starting index for retrieving posts for this page
 			var startIndex = (page - 1) * settings.resultsPerPage;
 
-			// pull question categories
+			// pull question categories for rendering search filters
 			con.query('SELECT * FROM categories;', function(err, categories) {
 				if (!err && categories !== undefined && categories.length > 0) {
 					render.categories = categories;
 
-					// register which category was filtered
+					// register which category filter was last applied (if any)
 					for (var i = 0; i < categories.length; i++) {
 						if (categories[i].uid == req.body.category) {
 							categories[i].isSelected = true;
@@ -50,6 +56,8 @@ module.exports = {
 				render[req.body.answeredStatus] = true;	// register which answer filter was used
 
 				var userConstraint, query;
+
+				// check query for user constraint ("user:uid"), and extract if found
 				module.exports.parseUserConstraint(req.body.query, function(data) {
 					query = data.query;
 					userConstraint = data.userConstraint;
@@ -62,6 +70,7 @@ module.exports = {
 						// get relevant posts
 						con.query('CALL query(?, ?, ?, ?);', [query, catFilter, ansFilter, userConstraint], function(err, rows) {
 							if (!err && rows !== undefined && rows.length > 0 && rows[0].length > 0) {
+								// prepare page render object
 								module.exports.prepRender(render, rows[0], startIndex, settings.resultsPerPage);
 							}
 
@@ -73,6 +82,7 @@ module.exports = {
 						// get posts meeting constraints
 						con.query('CALL noquery(?, ?, ?);', [catFilter, ansFilter, userConstraint], function(err, rows) {
 							if (!err && rows !== undefined && rows.length > 0 && rows[0].length > 0) {
+								// prepare page render object
 								module.exports.prepRender(render, rows[0], startIndex, settings.resultsPerPage);
 							}
 
@@ -88,7 +98,7 @@ module.exports = {
 		app.get('/search', function(req, res) {
 			var render = auth.defaultRender(req);
 
-			render.page = 1;	// default to first page
+			render.page = 1;	// default to first page of results
 
 			// get categories for filters
 			con.query('SELECT * FROM categories;', function(err, categories) {
@@ -96,9 +106,10 @@ module.exports = {
 					render.categories = categories;
 				}
 
-				// get recent posts
+				// get recent posts (just call noquery with no constraints)
 				con.query('CALL noquery("", "", "");', function(err, rows) {
 					if (!err && rows !== undefined && rows.length > 0 && rows[0].length > 0) {
+						// prepare page render object
 						module.exports.prepRender(render, rows[0], 0, settings.resultsPerPage);
 					}
 
@@ -129,13 +140,14 @@ module.exports = {
 		// send count of results showing on this page
 		render.onThisPage = render.results.length;
 
+		// register that results exist if any found
 		if (render.results.length > 0) render.hasResults = true;
 	},
 
-	// make post accessible to search engine
+	// make post accessible to search engine by scoring its relevance to the terms it contains
 	indexPost: function(uid, title, body) {
 		var re = new RegExp(/[^a-zA-Z ]/, 'g');
-		var words = (title + '\n' + body).toLowerCase().split(/\s/);
+		var words = (title + '\n' + body).toLowerCase().split(/\s/);	// concatenate title and body into one long post string, split into terms
 		var stems = [], scores = {}, max;
 
 		// for each term in post
@@ -144,11 +156,16 @@ module.exports = {
 
 			// if relevant, add stem
 			if (!module.exports.isStopWord(words[i])) {
+				// stem word
 				var stem = porterStemmer.stem(words[i]);
-				stems.push(stem);
 
-				// update frequency
-				if (!scores[stem]) scores[stem] = 0;
+				// if stem not yet seen
+				if (!scores[stem]) {
+					scores[stem] = 0;	// default score
+					stems.push(stem);	// add to list of all stems
+				}
+
+				// increment stem frequency
 				scores[stem]++;
 
 				// update maximum frequency
@@ -158,13 +175,13 @@ module.exports = {
 			}
 		}
 
-		// record stems in db
+		// record stems in db, ignore duplicates
 		con.query('INSERT IGNORE INTO stems (stem) VALUES ?;', [chunk(stems, 1)], function(err, rows) {
 			if (!err) {
 				// get uid's
 				con.query('SELECT uid, stem FROM stems WHERE FIND_IN_SET(stem, ?);', [stems.join(',')], function(err, rows) {
 					if (!err && rows !== undefined && rows.length > 0) {
-						// finalize scores
+						// finalize scores (divide by max frequency in post)
 						var insertScores = [];
 						for (var i = 0; i < rows.length; i++) {
 							insertScores.push([rows[i].uid, uid, scores[rows[i].stem] / max]);
@@ -179,9 +196,8 @@ module.exports = {
 	},
 
 	// given free text query, strip of stop words, etc, and format for SQL query
-	// also extract a SQL-formatted user constraint if found in query
 	parseQuery: function(q) {
-		// regex to match all non-alphabetic chars
+		// regex to match non-alphabetic and non-space chars
 		var re = /[^a-zA-Z ]/g;
 		var query = [];
 
@@ -195,9 +211,11 @@ module.exports = {
 			}
 		}
 
+		// join into acceptable SQL format by concatenating together with commas
 		return query.join(',');
 	},
 
+	// given free text query, extract user constraint ("user:uid") if exists, and strip query of this constraint
 	parseUserConstraint: function(q, callback) {
 		var userRe = /user:([0-9]+)/g;	// regex to match user constraint syntax
 		var userConstraint;
@@ -233,7 +251,7 @@ module.exports = {
 		}
 	},
 
-	// generate SQL to apply answer status constraint
+	// generate SQL to apply answer status constraint (see query and noquery functions in create_db.sql)
 	answerFilter: function(status) {
 		if (status == "Unanswered") {
 			return " AND q.answer_count = 0";
@@ -244,10 +262,11 @@ module.exports = {
 		}
 	},
 
-	// generate SQL to apply category constraint
+	// generate SQL to apply category constraint (see query and noquery functions in create_db.sql)
 	categoryFilter: function(uid) {
 		uid = parseInt(uid, 10);
 
+		// if no uid default to no constraint
 		if (!uid || uid == 0) {
 			return "";
 		} else {
