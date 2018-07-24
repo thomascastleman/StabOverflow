@@ -42,3 +42,21 @@ Special administrator accounts have access to a host of features unavailable to 
 - deleting questions, answers, comments
 
 Using these tools, administrators are able to manage and monitor the site even as time progresses and the curriculum and faculty change.
+
+
+## Installation
+
+Project dependencies can be installed by running `npm install` in the repository directory. 
+
+Before `server.js` can be run, we must configure the database. To do this, log in to MySQL and run the command
+ ```sql
+SOURCE create_db.sql;
+ ```
+ This will configure the database. Now, you may run `server.js` to start the system using the command
+ ```
+ node server.js
+ ```
+ The console should display something similar to 
+ ```
+ StabOverflow server listening on port 8080
+ ```
