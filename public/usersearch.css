@@ -46,7 +46,8 @@ tr:hover {
 
 /* padding for individual table elements */
 td {
-	padding: 8px;
+	padding: 6px;
+	font-size: 15px;
 }
 
 /* links to user pages */
@@ -63,17 +64,23 @@ td {
 
 /* buttons to search under users */
 .searchUnder {
-	cursor: pointer;
+	font-size: 14px;
+	color: white;
+	background-color: #4d88ff;
+	padding: 10px;
+	border:none;
+	border-radius: 4px;
 }
 
-/* span wrapping user display name */
-.displayName {
-
+/* hover on "search under" button */
+.searchUnder:hover {
+	background-color: #6699ff;
+	cursor: pointer;
 }
 
 /* span wrapping user real name */
 .realName {
-
+	color: #999999 !important;
 }
 
 /* user profile images */

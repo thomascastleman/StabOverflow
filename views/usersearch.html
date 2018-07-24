@@ -103,9 +103,9 @@
 				<table>
 					{{#results}}
 						<tr>	
-							<td><a href="/users/{{uid}}"><img src="{{image_url}}" width="70" class="profileImg"></a></td>
+							<td><center><a href="/users/{{uid}}"><img src="{{image_url}}" width="50" class="profileImg"></a></center></td>
 							<td><a href="/users/{{uid}}"><span class="displayName">{{display_name}}</span> - <span class="realName"><em>{{real_name}}</em></span></a></td>
-							<td><button class="searchUnder" onclick="searchUnder({{uid}});" title="Search for questions by this user"><i class="fas fa-search"></i></button></td>
+							<td><button class="searchUnder" onclick="searchUnder({{uid}});" title="Search for questions by {{display_name}}"><i class="fas fa-search"></i></button></td>
 						</tr>
 					{{/results}}
 					{{^results}}

@@ -14,7 +14,7 @@ module.exports = {
 
 		// important constants
 		var settings = {
-			usersPerPage: 2,	// number of results per page
+			usersPerPage: 4,	// number of results per page
 			maxNumResults: 300	// maximum number of results yielded for a user search
 		}
 
