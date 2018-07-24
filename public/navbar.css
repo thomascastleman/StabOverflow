@@ -145,6 +145,20 @@ header > a {
 	}
 }
 
+/* profile image link to profile page */
+#navProfileImage {
+	height: 75%;
+	border-radius: 4px;
+	vertical-align: middle;
+}
+
+/* hide top right display name in small windows */
+@media (max-width: 46em) {
+	#navDisplayName {
+		display: none;
+	}
+}
+
 /* --------------------------- FOOTER -------------------------------- */
 
 /* parent footer element */

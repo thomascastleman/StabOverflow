@@ -36,7 +36,11 @@
 						</li>
 						{{#user_uid}}
 						<li>
-							<a href="/users/{{user_uid}}">My Profile {{#username}}({{username}}) {{/username}}<i class="fas fa-user"></i></a>
+							<a href="/users/{{user_uid}}">
+								{{#username}}<span id="navDisplayName">{{username}}</span> {{/username}}
+								{{#myProfileImg}}<img id="navProfileImage" src="{{myProfileImg}}" align="top">{{/myProfileImg}}
+								{{^myProfileImg}}<i class="fas fa-user"></i>{{/myProfileImg}}
+							</a>
 						</li>
 						{{/user_uid}}
 					{{/loggedIn}}

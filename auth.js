@@ -168,7 +168,8 @@ module.exports = {
 			return {
 				loggedIn: req.isAuthenticated(),
 				username: req.user.local.display_name,
-				user_uid: req.user.local.uid
+				user_uid: req.user.local.uid,
+				myProfileImg: req.user.local.image_url
 			}
 		} else {
 			return {
@@ -184,6 +185,7 @@ module.exports = {
 				loggedIn: req.isAuthenticated(),
 				username: req.user.local.display_name,
 				user_uid: req.user.local.uid,
+				myProfileImg: req.user.local.image_url,
 				message: message
 			}
 		} else {
