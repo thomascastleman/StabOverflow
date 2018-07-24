@@ -31,7 +31,7 @@
 					<ul>
 					{{#loggedIn}}
 						<li>
-							<a href="/logout">Log Out <i class="fas fa-sign-out-alt"></i></a>
+							<a href="/logout?returnTo=%2F">Log Out <i class="fas fa-sign-out-alt"></i></a>
 						</li>
 						{{#user_uid}}
 						<li>
@@ -45,10 +45,10 @@
 					{{/loggedIn}}
 					{{^loggedIn}}
 						<li>
-							<a href="/auth/google">Log In <i class="fas fa-sign-in-alt"></i></a>
+							<a href="/auth/google?returnTo=%2F">Log In <i class="fas fa-sign-in-alt"></i></a>
 						</li>
 						<li>
-							<a href="/auth/google">Sign Up <i class="fas fa-user-plus"></i></a>
+							<a href="/auth/google?returnTo=%2F">Sign Up <i class="fas fa-user-plus"></i></a>
 						</li>
 					{{/loggedIn}}
 					</ul>
