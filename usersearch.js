@@ -14,10 +14,11 @@ module.exports = {
 
 		// important constants
 		var settings = {
-			usersPerPage: 2,
-			maxNumResults: 300
+			usersPerPage: 2,	// number of results per page
+			maxNumResults: 300	// maximum number of results yielded for a user search
 		}
 
+		// field get request to user search page
 		app.get('/search/users', function(req, res) {
 			var render = auth.defaultRender(req);	// default render object
 

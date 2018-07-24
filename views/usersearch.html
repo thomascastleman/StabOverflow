@@ -3,9 +3,13 @@
 	<head>
 		<meta charset="UTF-8">
 		<title>Stab Overflow</title>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
 		<link rel="stylesheet" type="text/css" href="/navbar.css">
 		<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.1.0/css/all.css" integrity="sha384-lKuwvrZot6UHsBSfcMvOkWwlCMgc0TaWr+30HWe3a4ltaBwTZhyTEggF5tJv8tbt" crossorigin="anonymous">
 		<link href="https://fonts.googleapis.com/css?family=Kanit:300,400" rel="stylesheet">
+
+		<link rel="stylesheet" type="text/css" href="/search.css">
+		<link rel="stylesheet" type="text/css" href="/usersearch.css">
 
 		<script>
 			// move to a new page of results
@@ -70,51 +74,57 @@
 				<input name="query">
 			</form>
 
-			<form method="POST" action="/search/users" name="userSearch">
-				<input name="query" type="text" value="{{query}}" onchange="document.userSearch.page.value = 1;">
-				<input type="submit" value="Search">
-				<input name="page" value="{{page}}" hidden>
+			<div id="container">
+
+				<div id="searchBox">
+					<form method="POST" action="/search/users" name="userSearch">
+						<input id="query" name="query" type="text" value="{{query}}" autocomplete="off" placeholder="Search Users" onchange="document.userSearch.page.value = 1;">
+						<input id="search" type="submit" value="Search">
+						<input name="page" value="{{page}}" hidden>
+						<br>
+
+						{{#hasResults}}
+						<center>
+							<div class="pageButtons">
+								{{#prevPage}}<button onclick="pageTo({{prevPage}});" title="To Previous Page"><i class="fas fa-chevron-left"></i></button>{{/prevPage}}
+								{{#pages}}
+								<button class="page{{.}}" onclick="pageTo({{.}});">{{.}}</button>
+								{{/pages}}
+								{{#nextPage}}<button onclick="pageTo({{nextPage}});" title="To Next Page"><i class="fas fa-chevron-right"></i></button>{{/nextPage}}
+							</div>
+						</center>
+						{{/hasResults}}
+					</form>
+				</div>
+
+				<h2>User Search Results{{#query}} for "{{query}}"{{/query}}</h2>
+				{{#hasResults}}<h3>Page {{page}} showing {{onThisPage}} results.</h3>{{/hasResults}}
+
+				<table>
+					{{#results}}
+						<tr>	
+							<td><a href="/users/{{uid}}"><img src="{{image_url}}" width="70" class="profileImg"></a></td>
+							<td><a href="/users/{{uid}}"><span class="displayName">{{display_name}}</span> - <span class="realName"><em>{{real_name}}</em></span></a></td>
+							<td><button class="searchUnder" onclick="searchUnder({{uid}});" title="Search for questions by this user"><i class="fas fa-search"></i></button></td>
+						</tr>
+					{{/results}}
+					{{^results}}
+					<span id="noresults">No results found!</span>
+					{{/results}}
+				</table>
 
 				{{#hasResults}}
-				<div class="pageButtons">
-					{{#prevPage}}<button onclick="pageTo({{prevPage}});" title="To Previous Page"><i class="fas fa-chevron-left"></i></button>{{/prevPage}}
-					{{#pages}}
-					<button class="page{{.}}" onclick="pageTo({{.}});">{{.}}</button>
-					{{/pages}}
-					{{#nextPage}}<button onclick="pageTo({{nextPage}});" title="To Next Page"><i class="fas fa-chevron-right"></i></button>{{/nextPage}}
-				</div>
+				<center>
+					<div class="pageButtons">
+						{{#prevPage}}<button onclick="pageTo({{prevPage}});"><i class="fas fa-chevron-left"></i></button>{{/prevPage}}
+						{{#pages}}
+						<button class="page{{.}}" onclick="pageTo({{.}});">{{.}}</button>
+						{{/pages}}
+						{{#nextPage}}<button onclick="pageTo({{nextPage}});"><i class="fas fa-chevron-right"></i></button>{{/nextPage}}
+					</div>
+				</center>
 				{{/hasResults}}
-			</form>
-
-
-			<h2>User Search Results{{#query}} for "{{query}}"{{/query}}</h2>
-			{{#hasResults}}<h3>Page {{page}} showing {{onThisPage}} results.</h3>{{/hasResults}}
-
-			<table>
-				{{#results}}
-					<tr>	
-						<td><a href="/users/{{uid}}"><img src="{{image_url}}" width="70"></a></td>
-						<td><a href="/users/{{uid}}">{{display_name}}</a></td>
-						<td><a href="/users/{{uid}}">{{real_name}}</a></td>
-						<td><button onclick="searchUnder({{uid}});">Search</button></td>
-					</tr>
-				{{/results}}
-				{{^results}}
-				<span id="noresults">No results found!</span>
-				{{/results}}
-			</table>
-
-			{{#hasResults}}
-			<center>
-				<div class="pageButtons">
-					{{#prevPage}}<button onclick="pageTo({{prevPage}});"><i class="fas fa-chevron-left"></i></button>{{/prevPage}}
-					{{#pages}}
-					<button class="page{{.}}" onclick="pageTo({{.}});">{{.}}</button>
-					{{/pages}}
-					{{#nextPage}}<button onclick="pageTo({{nextPage}});"><i class="fas fa-chevron-right"></i></button>{{/nextPage}}
-				</div>
-			</center>
-			{{/hasResults}}
+			</div>
 		</div>
 
 		<footer>
