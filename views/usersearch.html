@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>Stab Overflow</title>
+		<link rel="stylesheet" type="text/css" href="/navbar.css">
+		<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.1.0/css/all.css" integrity="sha384-lKuwvrZot6UHsBSfcMvOkWwlCMgc0TaWr+30HWe3a4ltaBwTZhyTEggF5tJv8tbt" crossorigin="anonymous">
+		<link href="https://fonts.googleapis.com/css?family=Kanit:300,400" rel="stylesheet">
+
+		<script>
+			// move to a new page of results
+			function pageTo(n) {
+				document.userSearch.page.value = n;
+				document.userSearch.submit();
+			}
+
+			// search with a user constraint given by uid
+			function searchUnder(uid) {
+				document.searchUnderUser.query.value = "user:" + uid;
+				document.searchUnderUser.submit();
+			}
+		</script>
+	</head>
+	<body>
+		<div class="content">
+			<header>
+				<a href="/"><img src="/staboverflow.png" align="middle"/></a>
+				<div id="searchTools">
+					<ul>
+						<li>
+							<form id="searchForm" name1="search" method="POST" action="/search">
+								<input id="searchBar" name="query" type="text" placeholder="Search StabOverflow" autocomplete="off">
+								<button id="searchSubmit" type="submit" form="searchForm"><i id="searchIcon" class="fas fa-search"></i></button>
+							</form>
+						</li>
+						<li>
+							<a id="browse" href="/search">Browse Questions</a>
+						</li>
+					</ul>
+				</div>
+				<div id="authLinks">
+					<ul>
+					{{#loggedIn}}
+						<li>
+							<a href="/logout?returnTo=%2Fsearch%2Fusers">Log Out <i class="fas fa-sign-out-alt"></i></a>
+						</li>
+						{{#user_uid}}
+						<li>
+							<a href="/users/{{user_uid}}">
+								{{#username}}<span id="navDisplayName">{{username}}</span> {{/username}}
+								{{#myProfileImg}}<img id="navProfileImage" src="{{myProfileImg}}" align="top">{{/myProfileImg}}
+								{{^myProfileImg}}<i class="fas fa-user"></i>{{/myProfileImg}}
+							</a>
+						</li>
+						{{/user_uid}}
+					{{/loggedIn}}
+					{{^loggedIn}}
+						<li>
+							<a href="/auth/google?returnTo=%2Fsearch%2Fusers">Log In <i class="fas fa-sign-in-alt"></i></a>
+						</li>
+						<li>
+							<a href="/auth/google?returnTo=%2Fsearch%2Fusers">Sign Up <i class="fas fa-user-plus"></i></a>
+						</li>
+					{{/loggedIn}}
+					</ul>
+				</div>
+			</header>
+
+			<form method="POST" action="/search" name="searchUnderUser" hidden>
+				<input name="query">
+			</form>
+
+			<form method="POST" action="/search/users" name="userSearch">
+				<input name="query" type="text" value="{{query}}" onchange="document.userSearch.page.value = 1;">
+				<input type="submit" value="Search">
+				<input name="page" value="{{page}}" hidden>
+
+				{{#hasResults}}
+				<div class="pageButtons">
+					{{#prevPage}}<button onclick="pageTo({{prevPage}});" title="To Previous Page"><i class="fas fa-chevron-left"></i></button>{{/prevPage}}
+					{{#pages}}
+					<button class="page{{.}}" onclick="pageTo({{.}});">{{.}}</button>
+					{{/pages}}
+					{{#nextPage}}<button onclick="pageTo({{nextPage}});" title="To Next Page"><i class="fas fa-chevron-right"></i></button>{{/nextPage}}
+				</div>
+				{{/hasResults}}
+			</form>
+
+
+			<h2>User Search Results{{#query}} for "{{query}}"{{/query}}</h2>
+			{{#hasResults}}<h3>Page {{page}} showing {{onThisPage}} results.</h3>{{/hasResults}}
+
+			<table>
+				{{#results}}
+					<tr>	
+						<td><a href="/users/{{uid}}"><img src="{{image_url}}" width="70"></a></td>
+						<td><a href="/users/{{uid}}">{{display_name}}</a></td>
+						<td><a href="/users/{{uid}}">{{real_name}}</a></td>
+						<td><button onclick="searchUnder({{uid}});">Search</button></td>
+					</tr>
+				{{/results}}
+				{{^results}}
+				<span id="noresults">No results found!</span>
+				{{/results}}
+			</table>
+
+			{{#hasResults}}
+			<center>
+				<div class="pageButtons">
+					{{#prevPage}}<button onclick="pageTo({{prevPage}});"><i class="fas fa-chevron-left"></i></button>{{/prevPage}}
+					{{#pages}}
+					<button class="page{{.}}" onclick="pageTo({{.}});">{{.}}</button>
+					{{/pages}}
+					{{#nextPage}}<button onclick="pageTo({{nextPage}});"><i class="fas fa-chevron-right"></i></button>{{/nextPage}}
+				</div>
+			</center>
+			{{/hasResults}}
+		</div>
+
+		<footer>
+			<div>
+				<span>Stab Overflow - 2018</span><br>
+				<span>Thomas Castleman - Johnny Lindbergh</span>
+			</div>
+		</footer>
+
+		<script>
+			$('.page{{page}}').attr("class", "selectedPage");
+		</script>
+	</body>
+</html>

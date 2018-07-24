@@ -15,7 +15,8 @@ module.exports = {
 
 		// some constants regarding search functionality
 		var settings = {
-			resultsPerPage: 2
+			resultsPerPage: 2,
+			maxNumResults: 300		// maximum number of results yielded by a search request
 		};
 
 		// post search query, render results
@@ -68,7 +69,7 @@ module.exports = {
 						query = module.exports.parseQuery(query);
 
 						// get relevant posts
-						con.query('CALL query(?, ?, ?, ?);', [query, catFilter, ansFilter, userConstraint], function(err, rows) {
+						con.query('CALL query(?, ?, ?, ?, ?);', [query, catFilter, ansFilter, userConstraint, settings.maxNumResults], function(err, rows) {
 							if (!err && rows !== undefined && rows.length > 0 && rows[0].length > 0) {
 								// prepare page render object
 								module.exports.prepRender(render, rows[0], startIndex, settings.resultsPerPage);
@@ -80,7 +81,7 @@ module.exports = {
 					// search only by constraints if they exist
 					} else {
 						// get posts meeting constraints
-						con.query('CALL noquery(?, ?, ?);', [catFilter, ansFilter, userConstraint], function(err, rows) {
+						con.query('CALL noquery(?, ?, ?, ?);', [catFilter, ansFilter, userConstraint, settings.maxNumResults], function(err, rows) {
 							if (!err && rows !== undefined && rows.length > 0 && rows[0].length > 0) {
 								// prepare page render object
 								module.exports.prepRender(render, rows[0], startIndex, settings.resultsPerPage);
@@ -107,7 +108,7 @@ module.exports = {
 				}
 
 				// get recent posts (just call noquery with no constraints)
-				con.query('CALL noquery("", "", "");', function(err, rows) {
+				con.query('CALL noquery("", "", "", ?);', [settings.maxNumResults], function(err, rows) {
 					if (!err && rows !== undefined && rows.length > 0 && rows[0].length > 0) {
 						// prepare page render object
 						module.exports.prepRender(render, rows[0], 0, settings.resultsPerPage);

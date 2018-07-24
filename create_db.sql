@@ -113,7 +113,7 @@ END;
 
 -- get posts relevant to query ordered by score
 DELIMITER //
-CREATE PROCEDURE query(IN q VARCHAR(65535), IN category_filter VARCHAR(65535), IN answer_filter VARCHAR(65535), IN user_constraint VARCHAR(65535))
+CREATE PROCEDURE query(IN q VARCHAR(65535), IN category_filter VARCHAR(65535), IN answer_filter VARCHAR(65535), IN user_constraint VARCHAR(65535), IN num_results INT)
 BEGIN
     SET @query = CONCAT ("
     	SELECT redirect_uid, SUM(score) AS score, title, preview, owner_uid, owner_real, owner_display, image_url, creation_date, answer_count, upvotes, category FROM (
@@ -140,7 +140,7 @@ BEGIN
 					stems.stem IN (", q, ")", category_filter, answer_filter, user_constraint, ") AS results 
 		GROUP BY redirect_uid 
 		ORDER BY score DESC
-		LIMIT 300;");
+		LIMIT ", num_results, ";");
 	PREPARE stmt FROM @query;
     EXECUTE stmt;
     DEALLOCATE PREPARE stmt;
@@ -149,7 +149,7 @@ END //
 
 -- search posts without a query; only filter by category and/or answered status
 DELIMITER //
-CREATE PROCEDURE noquery(IN category_filter VARCHAR(65535), IN answer_filter VARCHAR(65535), IN user_constraint VARCHAR(65535))
+CREATE PROCEDURE noquery(IN category_filter VARCHAR(65535), IN answer_filter VARCHAR(65535), IN user_constraint VARCHAR(65535), IN num_results INT)
 BEGIN
 	SET @query = CONCAT("
 		SELECT 
@@ -169,7 +169,7 @@ BEGIN
 			JOIN users ON q.owner_uid = users.uid
 		WHERE q.type = 1", category_filter, answer_filter, user_constraint, " 
 		ORDER BY q.uid DESC
-		LIMIT 300;");
+		LIMIT ", num_results, ";");
 	PREPARE stmt FROM @query;
 	EXECUTE stmt;
 	DEALLOCATE PREPARE stmt;
