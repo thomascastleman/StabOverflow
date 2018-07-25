@@ -2,6 +2,7 @@
 Online Q&A community for the St. Anne's-Belfield CS Department.
 
 **Created by [Thomas Castleman](https://github.com/thomascastleman) and [Johnny Lindbergh](https://github.com/johnnylindbergh).**
+
 ![StabOverflow Logo](./public/staboverflow.png)
 
 ## Introduction
@@ -33,7 +34,9 @@ Only users who hold accounts in the system may participate in the posting of que
 
 ## Identity Integrity
 
-While users are allowed certain degrees of freedom in customizing their display name and optionally writing a profile description, their full name according to Google is kept on record and available, in most cases, by simply hovering over their display name. Their email is also available to administrators. 
+While users are allowed certain degrees of freedom in customizing their display name and optionally writing a profile description, their full name according to Google is kept on record and available, in most cases, by simply hovering over their display name. Their email is also available to administrators.
+
+![Demonstration of identity preservation](./readme/identity.png)
 
 This immutable link is designed to prevent the potential troubles of anonymity as well as identity theft.
 
