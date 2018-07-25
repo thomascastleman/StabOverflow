@@ -3,7 +3,7 @@ Online Q&A community for the St. Anne's-Belfield CS Department.
 
 **Created by [Thomas Castleman](https://github.com/thomascastleman) and [Johnny Lindbergh](https://github.com/johnnylindbergh).**
 
-![StabOverflow Logo](./public/staboverflow.png)
+![StabOverflow Logo](./readme/readme_logo.png)
 
 ## Introduction
 
