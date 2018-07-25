@@ -138,7 +138,7 @@
 				<!-- question -->
 				<div class="post">
 					<div class="postmeta">
-						<div class="upvote" onclick="upvote({{question_uid}});" {{#loggedIn}}title="This question was helpful"{{/loggedIn}}{{^loggedIn}}title="You must be logged in to upvote"{{/loggedIn}}><i class="fas fa-chevron-circle-up"></i></div>
+						<div class="upvote" {{#loggedIn}}onclick="upvote({{question_uid}});" title="This question was helpful"{{/loggedIn}}{{^loggedIn}}title="You must be logged in to upvote"{{/loggedIn}}><i class="fas fa-chevron-circle-up"></i></div>
 						<div class="upvotecount" id="{{question_uid}}">{{upvotes}}</div>
 						{{#isQuestionOwner}}<div class="edit"><a href="/editPost/{{question_uid}}" title="Edit this Question"><i class="far fa-edit"></i></a></div>{{/isQuestionOwner}}
 						{{#isAdmin}}<div class="delete" onclick="deletePost({{question_uid}}, undefined);" title="Delete Question"><i class="fas fa-trash-alt"></i></div>{{/isAdmin}}
@@ -194,7 +194,7 @@
 					{{#answers}}
 						<div class="post">
 							<div class="postmeta">
-								<div class="upvote" onclick="upvote({{answer_uid}});" {{#loggedIn}}title="This answer was helpful"{{/loggedIn}}{{^loggedIn}}title="You must be logged in to upvote"{{/loggedIn}}><i class="fas fa-chevron-circle-up"></i></div>
+								<div class="upvote" {{#loggedIn}}onclick="upvote({{answer_uid}});" title="This answer was helpful"{{/loggedIn}}{{^loggedIn}}title="You must be logged in to upvote"{{/loggedIn}}><i class="fas fa-chevron-circle-up"></i></div>
 								<div class="upvotecount" id="{{answer_uid}}">{{upvotes}}</div>
 								{{#isOwner}}<div class="edit"><a href="/editPost/{{answer_uid}}" title="Edit this Answer"><i class="far fa-edit"></i></a></div>{{/isOwner}}
 								{{#isAdmin}}<div class="delete" onclick="deletePost({{answer_uid}}, {{parent_question_uid}});" title="Delete Answer"><i class="fas fa-trash-alt"></i></div>{{/isAdmin}}
