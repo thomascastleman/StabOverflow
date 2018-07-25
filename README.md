@@ -1,12 +1,16 @@
 # StabOverflow
 Online Q&A community for the St. Anne's-Belfield CS Department.
 
-**Created by Thomas Castleman and Johnny Lindbergh.**
-![StabOverflow Logo](http://tcastleman.com/overflow.png)
+**Created by [Thomas Castleman](https://github.com/thomascastleman) and [Johnny Lindbergh](https://github.com/johnnylindbergh).**
+![StabOverflow Logo](./public/staboverflow.png)
 
 ## Introduction
 
-StabOverflow was created as a platform for the exchange of knowledge within the CS department. The objective was to give students more of an opportunity for their questions to be heard and answered not only by faculty but also by their peers.
+Stab Overflow is a [Stack Exchange](https://stackexchange.com/)-like question-and-answer forum built specifically for the St. Anne's-Belfield CS Department, designed to promote positive inquiry and the exchange of ideas.
+
+It allows students to direct questions towards a community of peers and faculty, all the while growing as a cumulative resource for future CS students.
+
+While Stab Overflow was designed with computer science in mind, it has potential to be forked for use in other fields.
 
 ## Features
 
@@ -14,8 +18,9 @@ The current functionality of StabOverflow includes:
 - [markdown editors](https://code.google.com/archive/p/pagedown/wikis/PageDown.wiki) for questions and answers (clean formatting, [syntax highlighting](https://github.com/google/code-prettify) with code)
 - classification of questions based on adminstrator-determined categories
 - an upvoting system to move the best answers to the top
-- a fully-featured search engine with options to narrow results based on category, user, and number of answers
 - user profiles
+- a fully-featured search engine with options to narrow results based on category, user, and number of answers
+- user search tools
 - authentication system to limit certain functionality to students only
 
 ## Authentication
