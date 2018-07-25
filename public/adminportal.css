@@ -66,3 +66,32 @@
 #buffer {
 	clear:both;
 }
+
+/* table of users */
+table {
+	margin-top: 20px;
+	border-collapse: collapse;
+	width: 100%;
+}
+
+/* rows in table of users */
+tr {
+	border: solid;
+	border-width: 1px 0;
+	border-color: #d9d9d9;
+}
+
+/* prevent first and last rows from having line above or below */
+tr:first-child, tr:last-child {
+	border: none;
+}
+
+/* background change for hover on question row */
+tr:hover {
+	background-color: #f8f8f8;
+}
+
+/* padding for individual table elements */
+td {
+	padding: 3px;
+}

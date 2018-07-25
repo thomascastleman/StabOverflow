@@ -12,9 +12,12 @@
 		<link rel="stylesheet" type="text/css" href="/editprofile.css">
 
 		<script>
-			// confirm leaving page if data entered
-			window.onbeforeunload = function() {
-				return "Are you sure you want to leave the page? Data entered will not be saved.";
+			// activate confirmed exit if any field's value changes
+			function confirmExit() {
+				// confirm leaving page if data entered
+				window.onbeforeunload = function() {
+					return "Are you sure you want to leave the page? Data entered will not be saved.";
+				}
 			}
 
 			// validate that non-empty appendage is being submitted
@@ -77,8 +80,8 @@
 				<h1>Edit Your Profile</h1>
 				<form name="updates" method="POST" action="/users/update" onsubmit="return validate();">
 					<input name="uid" value="{{uid}}" hidden>
-					Display Name: <input id="displayname" name="display_name" type="text" value="{{display_name}}" maxlength="32" autocomplete="off"><br>
-					Bio:<br><textarea id="bio" name="bio" maxlength="140" rows="5">{{bio}}</textarea><br>
+					Display Name: <input id="displayname" name="display_name" type="text" value="{{display_name}}" maxlength="32" autocomplete="off" onchange="confirmExit();"><br>
+					Bio:<br><textarea id="bio" name="bio" maxlength="140" rows="5" onchange="confirmExit();">{{bio}}</textarea><br>
 					<button id="save" type="submit" onclick="window.onbeforeunload = undefined;">Save Profile</button>
 				</form>
 			</div>

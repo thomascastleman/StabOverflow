@@ -127,6 +127,10 @@
 					User Search:<br>
 					<input id="userSearch" type="text" autocomplete="off" placeholder="Search for a user" oninput="renderMatches($(this).val());">
 					<div id="emailMatches"></div>
+
+					<table id="matches">
+
+					</table>
 				</div>
 
 				<div id="buffer"></div>
@@ -148,7 +152,7 @@
 			{{/users}}
 		];
 
-		$matches = $('#emailMatches');
+		$matches = $('#matches');
 
 		// render users whose info matches that of the search fragment
 		function renderMatches(fragment, title) {
@@ -157,19 +161,19 @@
 
 			if (fragment != "") {
 				if (!title) title = "Possible User Matches:";
-				$matches.append("<strong>" + title + "</strong><br>");
+				$matches.append("<tr><th colspan=\"3\"><strong>" + title + "</strong></th></tr>");
 
 				var found, admin;
 				for (var i = 0; i < users.length; i++) {
 					if ((users[i].email.toLowerCase().includes(fragment) || users[i].name.toLowerCase().includes(fragment))) {
 						admin = users[i].is_admin ? "Admin" : ""
-						$matches.append("<span>" + users[i].name + " (" + users[i].email + ") <em>" + admin + "</em></span><br>");
+						$matches.append("<tr><td>" + users[i].name + "</td><td>(" + users[i].email + ")</td><td><em>" + admin + "</em></td></tr>");
 						found = true;
 					}
 				}
 
 				if (!found) {
-					$matches.append("<span>No matches for \"" + fragment + "\" found!</span>")
+					$matches.append("<tr><th colspan=\"3\">No matches for \"" + fragment + "\" found!</th></tr>")
 				}
 			}
 		}
