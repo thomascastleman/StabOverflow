@@ -6,17 +6,12 @@
 var moment = require('moment');
 var auth = require('./auth.js');
 var con = require('./database.js').connection;
+var settings = require('./settings.js').visitor;
 
 module.exports = {
 
 	// set up routes
 	init: function(app, mdConverter) {
-
-		// important constants
-		var settings = {
-			numQuestionsOnLanding: 50,		// number of recent questions shown on the landing page
-			numPostsOnUserPage: 20			// number of posts shown in the "Recent Posts" section of each user page
-		};
 
 		// get landing page
 		app.get('/', function(req, res) {

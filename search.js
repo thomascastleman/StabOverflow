@@ -7,17 +7,12 @@ var porterStemmer = require('./porterstemmer.js');
 var chunk = require('lodash.chunk');
 var auth = require('./auth.js');
 var con = require('./database.js').connection;
+var settings = require('./settings.js').search;
 
 module.exports = {
 
 	// set up routes
 	init: function(app) {
-
-		// some constants regarding search functionality
-		var settings = {
-			resultsPerPage: 2,
-			maxNumResults: 300		// maximum number of results yielded by a search request
-		};
 
 		// post search query, render results
 		app.post('/search', function(req, res) {

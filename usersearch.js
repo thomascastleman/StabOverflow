@@ -6,17 +6,12 @@
 var auth = require('./auth.js');
 var con = require('./database.js').connection;
 var search = require('./search.js');
+var settings = require('./settings.js').userSearch;
 
 module.exports = {
 
 	// set up routes
 	init: function(app) {
-
-		// important constants
-		var settings = {
-			usersPerPage: 4,	// number of results per page
-			maxNumResults: 300	// maximum number of results yielded for a user search
-		}
 
 		// field get request to user search page
 		app.get('/search/users', function(req, res) {
