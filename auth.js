@@ -30,16 +30,18 @@ module.exports = {
 
 					// ensure real name recorded
 					if (user.local.real_name == undefined) {
-						user.local.real_name = user.displayName;
-						con.query('UPDATE users SET real_name = ? WHERE uid = ?;', [user.displayName, user.local.uid], function(err, rows) {});
+						user.local.real_name = module.exports.getRealName(user);
+						con.query('UPDATE users SET real_name = ? WHERE uid = ?;', [user.local.real_name, user.local.uid], function(err, rows) {});
 					}
 
 					done(null, user);
 
 				// if not existing user but email domain legitimate
 				} else if (/.+?@(students\.)?stab\.org/.test(user.email)) {
+					var real = module.exports.getRealName(user);
+
 					// create new user
-					con.query('CALL create_user(?, ?, ?);', [user.email, user.displayName, module.exports.stripImageURL(user._json.image.url)], function(err, rows) {
+					con.query('CALL create_user(?, ?, ?);', [user.email, real, module.exports.stripImageURL(user._json.image.url)], function(err, rows) {
 						if (!err && rows !== undefined && rows.length > 0 && rows[0].length > 0) {
 							// update their cached info in session
 							user.local = rows[0][0];
@@ -101,6 +103,10 @@ module.exports = {
 		});
 
 		return module.exports;
+	},
+
+	getRealName: function(user) {
+		return user.name.givenName + ' ' + user.name.familyName[0];
 	},
 
 	// get image URL without ?sz=50 (size format)
