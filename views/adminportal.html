@@ -148,7 +148,7 @@
 	<script>
 		var users = [
 			{{#users}}
-				{ name: "{{{name}}}", email: "{{{email}}}", is_admin: {{{is_admin}}} },
+				{ uid: {{uid}}, name: "{{{name}}}", email: "{{{email}}}", is_admin: {{{is_admin}}} },
 			{{/users}}
 		];
 
@@ -167,7 +167,7 @@
 				for (var i = 0; i < users.length; i++) {
 					if ((users[i].email.toLowerCase().includes(fragment) || users[i].name.toLowerCase().includes(fragment))) {
 						admin = users[i].is_admin ? "Admin" : ""
-						$matches.append("<tr><td>" + users[i].name + "</td><td>(" + users[i].email + ")</td><td><em>" + admin + "</em></td></tr>");
+						$matches.append("<tr><td><a href='/users/" + users[i].uid + "'>" + users[i].name + "</a></td><td>(" + users[i].email + ")</td><td><em>" + admin + "</em></td></tr>");
 						found = true;
 					}
 				}

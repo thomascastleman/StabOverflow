@@ -29,7 +29,7 @@ module.exports = {
 					}
 
 					// get user info (for authorizing / deauthorizing admins)
-					con.query('SELECT email, is_admin, IFNULL(real_name, display_name) AS name FROM users;', function(err, rows) {
+					con.query('SELECT uid, email, is_admin, IFNULL(real_name, display_name) AS name FROM users;', function(err, rows) {
 						if (!err && rows !== undefined && rows.length > 0) {
 							render.users = rows;
 						}
