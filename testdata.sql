@@ -17,16 +17,16 @@ INSERT INTO categories (name) VALUES
 
 INSERT INTO posts (parent_question_uid, type, category_uid, owner_uid, creation_date, title, body, upvotes, answer_count) VALUES
 	-- a question and two answers
-	(NULL, 1, 2, 2, NOW(), "How do I ask a test question?", "This is a test question for testing purposes", 15, 2),
+	(NULL, 1, 2, 2, NOW(), "This is a test question?", "This is a test question for testing purposes", 15, 2),
 	(1, 0, NULL, 3, NOW(), NULL, "Here is the answer to your question.", 0, NULL),
 	(1, 0, NULL, 4, NOW(), NULL, "I also have an answer to question 1.", 2, NULL),
 
-	(NULL, 1, 1, 5, NOW(), "How do I ask a second question?", "I am having trouble asking a question.", 6, 3),
+	(NULL, 1, 1, 5, NOW(), "How do I ask a question?", "I am having trouble asking a question.", 6, 3),
 	(4, 0, NULL, 1, NOW(), NULL, "This is how you answer your question", 10, NULL),
 	(4, 0, NULL, 3, NOW(), NULL, "This is user 3 answering your question.", 0, NULL),
 	(4, 0, NULL, 4, NOW(), NULL, "Here's a third answer to your question.", 0, NULL),
 
-	(NULL, 1, NULL, 1, NOW(), "Question?", "Here's another question.", 3, 0);
+	(NULL, 1, NULL, 1, NOW(), "I have a question about a thing?", "Here's another question.", 3, 0);
 
 INSERT INTO comments (parent_uid, parent_question_uid, owner_uid, creation_date, body) VALUES
 	(2, 1, 2, NOW(), "I think this is an interesting answer to the question"),
