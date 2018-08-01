@@ -25,6 +25,7 @@
     "moment": "^2.22.2",
     "mustache-express": "^1.2.6",
     "mysql": "^2.15.0",
+    "nodemailer": "^4.6.7",
     "pagedown": "^1.1.0",
     "passport": "^0.4.0",
     "passport-google-oauth2": "^0.1.6",

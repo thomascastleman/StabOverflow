@@ -33,6 +33,7 @@ var user = require('./user.js').init(app, mdConverter);
 var search = require('./search.js').init(app);
 var userSearch = require('./usersearch.js').init(app);
 var admin = require('./admin.js').init(app);
+var mailer = require('./mailing.js');
 
 // start server
 var server = app.listen(8080, function() {
