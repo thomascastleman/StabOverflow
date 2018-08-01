@@ -83,6 +83,26 @@ CREATE TABLE scores (
 	FOREIGN KEY (post_uid) REFERENCES posts(uid) ON DELETE CASCADE
 );
 
+-- relation between users and categories: user subscribes to category
+CREATE TABLE category_subs (
+	uid INT NOT NULL AUTO_INCREMENT,
+	category_uid INT,
+	user_uid INT,
+	PRIMARY KEY(uid),
+	FOREIGN KEY (category_uid) REFERENCES categories(uid) ON DELETE CASCADE,
+	FOREIGN KEY (user_uid) REFERENCES users(uid)
+);
+
+-- relation between users and questions: user subscribes to notifications about this question
+CREATE TABLE question_subs (
+	uid INT NOT NULL AUTO_INCREMENT,
+	question_uid INT,
+	user_uid INT,
+	PRIMARY KEY (uid),
+	FOREIGN KEY (question_uid) REFERENCES posts(uid) ON DELETE CASCADE,
+	FOREIGN KEY (user_uid) REFERENCES users(uid)
+);
+
 -- add new user and return their information
 DELIMITER //;
 CREATE PROCEDURE create_user (IN user_email VARCHAR(45), IN user_name VARCHAR(32), IN image VARCHAR(500))

@@ -93,7 +93,7 @@ module.exports = {
 						// insert answer into posts
 						con.query('CALL create_answer(?, ?, ?);', [req.body.parent_question, req.user.local.uid, req.body.body], function(err, rows) {
 							if (!err && rows !== undefined && rows.length > 0 && rows[0].length > 0) {
-								search.indexPost(rows[0][0].answer_uid, req.body.title, req.body.body);	// index the new answer
+								search.indexPost(rows[0][0].answer_uid, "", req.body.body);	// index the new answer
 								res.redirect('/questions/' + req.body.parent_question);	// redirect to parent question's page
 							} else {
 								res.render('error.html', auth.errorRender(req, "Failed to post answer."));
