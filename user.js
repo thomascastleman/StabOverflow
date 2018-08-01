@@ -7,6 +7,7 @@ var moment = require('moment');
 var auth = require('./auth.js');
 var con = require('./database.js').connection;
 var search = require('./search.js');
+var mail = require('./mailing.js');
 
 module.exports = {
 
@@ -94,6 +95,10 @@ module.exports = {
 						con.query('CALL create_answer(?, ?, ?);', [req.body.parent_question, req.user.local.uid, req.body.body], function(err, rows) {
 							if (!err && rows !== undefined && rows.length > 0 && rows[0].length > 0) {
 								search.indexPost(rows[0][0].answer_uid, "", req.body.body);	// index the new answer
+
+								// send bulk mail updating subscribers of this question that a new answer is available
+								mail.updateQuestionSubscribers(req.body.parent_question, req.user.local.uid, req.body.body);
+
 								res.redirect('/questions/' + req.body.parent_question);	// redirect to parent question's page
 							} else {
 								res.render('error.html', auth.errorRender(req, "Failed to post answer."));

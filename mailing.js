@@ -6,6 +6,8 @@
 var creds = require('./credentials.js');
 var con = require('./database.js').connection;
 var nodemailer = require('nodemailer');
+var mustache = require('mustache');
+var fs = require('fs');
 
 // create gmail mail-sender 
 var transporter = nodemailer.createTransport({
@@ -13,6 +15,13 @@ var transporter = nodemailer.createTransport({
 	auth: {
 		user: creds.emailUsername,
 		pass: creds.emailPassword
+	}
+});
+
+var questionSubEmail;
+fs.readFile('./views/questionsubemail.html', 'UTF8', function(err, data) {
+	if (!err) {
+		questionSubEmail = data;
 	}
 });
 
@@ -51,16 +60,25 @@ module.exports = {
 
 	// send group mail to question subscribers updating that activity has occurred on a question
 	updateQuestionSubscribers: function(questionUID, answererUID, answerBody) {
+		// prep render object
+		var render = {
+			questionUID: questionUID,
+			answererUID: answererUID,
+			answerBody: answerBody.substring(0, 200),
+			domain: creds.domain
+		};
+
 		// get original post info
 		con.query('SELECT posts.title AS title, users.display_name AS username, users.uid AS uid FROM posts JOIN users ON posts.owner_uid = users.uid WHERE posts.uid = ?;', [questionUID], function(err, rows) {
 			if (!err && rows !== undefined && rows.length > 0) {
-				var questionTitle = rows[0].title;
-				var askerName = rows[0].username;
-				var askerUID = rows[0].uid;
+				render.questionTitle = rows[0].title;
+				render.askerName = rows[0].username;
+				render.askerUID = rows[0].uid;
 
+				// get answerer name
 				con.query('SELECT display_name FROM users WHERE uid = ?;', [answererUID], function(err, rows) {
 					if (!err & rows !== undefined && rows.length > 0) {
-						var answererName = rows[0].display_name;
+						render.answererName = rows[0].display_name;
 
 						// get emails of all users who subscribe to this question
 						con.query('SELECT users.email FROM users JOIN question_subs ON users.uid = question_subs.user_uid WHERE question_subs.question_uid = ?;', [questionUID], function(err, rows) {
@@ -71,15 +89,17 @@ module.exports = {
 									subscribers.push(rows[i].email);
 								}
 
-								// configure subscription message
-								var options = {
-									subject: "[Question Subscription] " + questionTitle,
-									text: "",
-									html: "<h1><a href='" + creds.domain + "/questions/" + questionUID + "'>" + questionTitle + "</a></h1><h2>asked by <a href='" + creds.domain + "/users/" + askerUID + "'>" + askerName + "</a></h2><p>A new answer from <a href='" + creds.domain + "/users/" + answererUID + "'>" + answererName + "</a> has been posted:</p><p>" + answerBody.substring(0, 200) + "...</p>"
-								}
+								if (questionSubEmail) {
+									// configure subscription message
+									var options = {
+										subject: "[Question Subscription] " + render.questionTitle,
+										text: "",
+										html: mustache.render(questionSubEmail, render)
+									}
 
-								// send group mail notification
-								module.exports.sendGroupMail(subscribers, options);
+									// send group mail notification
+									module.exports.sendGroupMail(subscribers, options);
+								}
 							}
 						});
 					}
