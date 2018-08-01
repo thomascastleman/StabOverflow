@@ -3,6 +3,7 @@
 	mailing.js: Handles all emailing functionality
 */
 
+var auth = require('./auth.js');
 var creds = require('./credentials.js');
 var con = require('./database.js').connection;
 var nodemailer = require('nodemailer');
@@ -26,6 +27,51 @@ fs.readFile('./views/questionsubemail.html', 'UTF8', function(err, data) {
 });
 
 module.exports = {
+	// set up routes
+	init: function(app) {
+		// add a new user subscription to a question
+		app.post('/subscribeToQuestion', auth.isAuthenticated, function(req, res) {
+			if (req.body.userUID == req.user.local.uid && req.body.questionUID) {
+				con.query('INSERT INTO question_subs (user_uid, question_uid) VALUES (?, ?);', [req.body.userUID, req.body.questionUID], function(err, rows) {
+					if (!err) {
+						res.send({ success: 1 });
+					} else {
+						res.send({ success: 0 });
+					}
+				});
+			}
+		});
+
+		// unsubscribe a user from a question
+		app.post('/unsubscribeToQuestion', auth.isAuthenticated, function(req, res) {
+			if (req.body.userUID == req.user.local.uid && req.body.questionUID) {
+				con.query('DELETE FROM question_subs WHERE user_uid = ? AND question_uid = ?;', [req.body.userUID, req.body.questionUID], function(err, rows) {
+					if (!err) {
+						res.send({ success: 1 });
+					} else {
+						res.send({ success: 0 });
+					}
+				});
+			}
+		});
+
+		// add a new user subscription to a category
+		app.post('/subscribeToCategory', auth.isAuthenticated, function(req, res) {
+			if (req.body.userUID == req.user.local.uid) {
+				
+			}
+		});
+
+		// unsubscribe a user from a category
+		app.post('/unsubscribeToCategory', auth.isAuthenticated, function(req, res) {
+			if (req.body.userUID == req.user.local.uid) {
+				
+			}
+		});
+
+		return module.exports;
+	}
+
 	// send a message to an individual account
 	sendMail: function(options) {
 		// set up message info (options should use: to (recipient address), subject (email subject), text (plaintext message), html (formatted message))
