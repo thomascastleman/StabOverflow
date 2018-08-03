@@ -20,9 +20,12 @@ var transporter = nodemailer.createTransport({
 });
 
 var questionSubEmail;
-fs.readFile('./views/questionsubemail.html', 'UTF8', function(err, data) {
+fs.readFile('./mail-templates/questionsubemail.html', 'UTF8', function(err, data) {
 	if (!err) {
 		questionSubEmail = data;
+
+
+		// ahh debug
 	}
 });
 
@@ -57,20 +60,38 @@ module.exports = {
 
 		// add a new user subscription to a category
 		app.post('/subscribeToCategory', auth.isAuthenticated, function(req, res) {
-			if (req.body.userUID == req.user.local.uid) {
-				
+			if (req.body.userUID == req.user.local.uid && req.body.categoryUID) {
+				con.query('INSERT INTO category_subs (user_uid, category_uid) VALUES (?, ?);', [req.body.userUID, req.body.categoryUID], function(err, rows) {
+					if (!err) {
+						res.send({ success: 1 });
+
+						// send email confirming successful subscription
+						module.exports.confirmCategorySub(req.body.userUID, req.body.categoryUID);
+					} else {
+						res.send({ success: 0 });
+					}
+				});
 			}
 		});
 
 		// unsubscribe a user from a category
 		app.post('/unsubscribeToCategory', auth.isAuthenticated, function(req, res) {
 			if (req.body.userUID == req.user.local.uid) {
-				
+				con.query('DELETE FROM category_subs WHERE user_uid = ? AND category_uid = ?;', [req.body.userUID, req.body.categoryUID], function(err, rows) {
+					if (!err) {
+						res.send({ success: 1 });
+
+						// send email confirming successful unsubscription
+						module.exports.confirmCategoryUnsub(req.body.userUID, req.body.categoryUID);
+					} else {
+						res.send({ success: 0 });
+					}
+				});
 			}
 		});
 
 		return module.exports;
-	}
+	},
 
 	// send a message to an individual account
 	sendMail: function(options) {
@@ -148,6 +169,62 @@ module.exports = {
 								}
 							}
 						});
+					}
+				});
+			}
+		});
+	},
+
+	// send email updating user that they have successfully been subscribed to a category
+	confirmCategorySub: function(userUID, categoryUID) {
+		// get user's email
+		con.query('SELECT email FROM users WHERE uid = ?;', [userUID], function(err, rows) {
+			if (!err && rows !== undefined && rows.length > 0) {
+				var email = rows[0].email;
+
+				// get category name by ID
+				con.query('SELECT name FROM categories WHERE uid = ?;', [categoryUID], function(err, rows) {
+					if (!err && rows !== undefined && rows.length > 0) {
+						// configure message settings / content
+						var options = {
+							to: email,
+							subject: "Successfully subscribed to " + rows[0].name + "!",
+							text: "",
+							html: mustache.render(newCatSub, {
+								category: rows[0].name
+							})
+						};
+
+						// send confirmation email
+						module.exports.sendMail(options);
+					}
+				});
+			}
+		});
+	},
+
+	// send email updating user that they have successfully been unsubscribed from a category
+	confirmCategoryUnsub: function(userUID, categoryUID) {
+		// get user's email
+		con.query('SELECT email FROM users WHERE uid = ?;', [userUID], function(err, rows) {
+			if (!err && rows !== undefined && rows.length > 0) {
+				var email = rows[0].email;
+
+				// get category name by ID
+				con.query('SELECT name FROM categories WHERE uid = ?;', [categoryUID], function(err, rows) {
+					if (!err && rows !== undefined && rows.length > 0) {
+						// configure message settings / content
+						var options = {
+							to: email,
+							subject: "Successfully unsubscribed from " + rows[0].name + "!",
+							text: "",
+							html: mustache.render(catUnsub, {
+								category: rows[0].name
+							})
+						};
+
+						// send confirmation email
+						module.exports.sendMail(options);
 					}
 				});
 			}
