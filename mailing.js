@@ -7,7 +7,9 @@ var auth = require('./auth.js');
 var creds = require('./credentials.js');
 var con = require('./database.js').connection;
 var nodemailer = require('nodemailer');
+var nodeschedule = require('node-schedule');
 var mustache = require('mustache');
+var moment = require('moment');
 var fs = require('fs');
 
 // create gmail mail-sender 
@@ -30,7 +32,8 @@ fs.readFile('./views/mailingtemplates.html', 'UTF8', function(err, data) {
 		templates = {
 			questionSubEmail: data[0],
 			categorySubSuccess: data[1],
-			categoryUnsubSuccess: data[2]
+			categoryUnsubSuccess: data[2],
+			categoryDigest: data[3]
 		};
 	}
 });
@@ -186,7 +189,7 @@ module.exports = {
 									subscribers.push(rows[i].email);
 								}
 
-								if (questionSubEmail) {
+								if (templates.questionSubEmail) {
 									// configure subscription message
 									var options = {
 										subject: "[Question Subscription] " + render.questionTitle,
@@ -215,18 +218,21 @@ module.exports = {
 				// get category name by ID
 				con.query('SELECT name FROM categories WHERE uid = ?;', [categoryUID], function(err, rows) {
 					if (!err && rows !== undefined && rows.length > 0) {
-						// configure message settings / content
-						var options = {
-							to: email,
-							subject: "Successfully subscribed to " + rows[0].name + "!",
-							text: "",
-							html: mustache.render(templates.categorySubSuccess, {
-								category: rows[0].name
-							})
-						};
 
-						// send confirmation email
-						module.exports.sendMail(options);
+						if (templates.categorySubSuccess) {
+							// configure message settings / content
+							var options = {
+								to: email,
+								subject: "Successfully subscribed to " + rows[0].name + "!",
+								text: "",
+								html: mustache.render(templates.categorySubSuccess, {
+									category: rows[0].name
+								})
+							};
+
+							// send confirmation email
+							module.exports.sendMail(options);
+						}
 					}
 				});
 			}
@@ -243,21 +249,101 @@ module.exports = {
 				// get category name by ID
 				con.query('SELECT name FROM categories WHERE uid = ?;', [categoryUID], function(err, rows) {
 					if (!err && rows !== undefined && rows.length > 0) {
-						// configure message settings / content
-						var options = {
-							to: email,
-							subject: "Successfully unsubscribed from " + rows[0].name + "!",
-							text: "",
-							html: mustache.render(templates.categoryUnsubSuccess, {
-								category: rows[0].name
-							})
-						};
 
-						// send confirmation email
-						module.exports.sendMail(options);
+						if (templates.categoryUnsubSuccess) {
+							// configure message settings / content
+							var options = {
+								to: email,
+								subject: "Successfully unsubscribed from " + rows[0].name + "!",
+								text: "",
+								html: mustache.render(templates.categoryUnsubSuccess, {
+									category: rows[0].name
+								})
+							};
+
+							// send confirmation email
+							module.exports.sendMail(options);
+						}
 					}
 				});
 			}
 		});
+	},
+
+	// send category digests to all category subscribers
+	sendAllCategoryDigests: function() {
+		// object to map category uid's to info / emails / posts
+		var categories = {};
+
+		// get all category subscription links
+		con.query('SELECT users.email, categories.name AS category_name, category_subs.category_uid FROM category_subs JOIN users ON category_subs.user_uid = users.uid JOIN categories ON category_subs.category_uid = categories.uid;', function(err, rows) {
+			if (!err && rows !== undefined && rows.length > 0) {
+
+				// construct objects for each category containing cat name, and list of subscriber objects
+				for (var i = 0; i < rows.length; i++) {
+					if (!categories[rows[i].category_uid]) {
+						categories[rows[i].category_uid] = {
+							uid: rows[i].category_uid,
+							name: rows[i].category_name,
+							emails: [rows[i].email],
+						};
+					} else {
+						categories[rows[i].category_uid].emails.push(rows[i].email);
+					}
+				}
+
+				// calculate date one day ago
+				var cutoff = moment().subtract(1, 'days').format('YYYY-MM-DD HH:mm');
+
+				// get all posts posted in the past day
+				con.query('SELECT * FROM posts WHERE creation_date > ?;', cutoff, function(err, rows) {
+					if (!err && rows !== undefined && rows.length > 0) {
+						// for each post
+						for (var i = 0; i < rows.length; i++) {
+							// if relevant category to subscriptions
+							if (rows[i].category_uid in categories) {
+								if (!categories[rows[i].category_uid].posts) {
+									categories[rows[i].category_uid].posts = [rows[i]];
+								} else {
+									categories[rows[i].category_uid].posts.push(rows[i])
+								}
+							}
+						}
+
+						// send each category's digest using the relevant posts
+						for (var uid in categories) {
+							if (categories.hasOwnProperty(uid)) {
+								module.exports.sendDigest(categories[uid]);
+							}
+						}
+					}
+				});
+			}
+		});
+	},
+
+	// send group email for a category subscription
+	sendDigest(categoryInfo) {
+		if (templates.categoryDigest && categoryInfo.posts) {
+			categoryInfo.domain = creds.domain;
+
+			// configure subscription message
+			var options = {
+				subject: "[" + categoryInfo.name + "] New questions available from " + categoryInfo.name + "!",
+				text: "",
+				html: mustache.render(templates.categoryDigest, categoryInfo)
+			}
+
+			// send group mail notification
+			module.exports.sendGroupMail(categoryInfo.emails, options);
+		}
 	}
 }
+
+// every morning at 4 AM, send category digests
+nodeschedule.scheduleJob('0 0 4 * * *', module.exports.sendAllCategoryDigests);
+
+
+
+// debug
+module.exports.sendAllCategoryDigests();
