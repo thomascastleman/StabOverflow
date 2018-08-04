@@ -19,13 +19,19 @@ var transporter = nodemailer.createTransport({
 	}
 });
 
-var questionSubEmail;
-fs.readFile('./mail-templates/questionsubemail.html', 'UTF8', function(err, data) {
+var templates = {};
+
+// read email templates
+fs.readFile('./views/mailingtemplates.html', 'UTF8', function(err, data) {
 	if (!err) {
-		questionSubEmail = data;
+		data = data.split('~');
 
-
-		// ahh debug
+		// extract email templates for different messages
+		templates = {
+			questionSubEmail: data[0],
+			categorySubSuccess: data[1],
+			categoryUnsubSuccess: data[2]
+		};
 	}
 });
 
@@ -35,13 +41,23 @@ module.exports = {
 		// add a new user subscription to a question
 		app.post('/subscribeToQuestion', auth.isAuthenticated, function(req, res) {
 			if (req.body.userUID == req.user.local.uid && req.body.questionUID) {
-				con.query('INSERT INTO question_subs (user_uid, question_uid) VALUES (?, ?);', [req.body.userUID, req.body.questionUID], function(err, rows) {
-					if (!err) {
-						res.send({ success: 1 });
+				// ensure question exists
+				con.query('SELECT COUNT(*) AS count FROM posts WHERE uid = ?;', [req.body.questionUID], function(err, rows) {
+					if (!err && rows !== undefined && rows.length > 0 && rows[0].count == 1) {
+						// add new subscription to db
+						con.query('INSERT INTO question_subs (user_uid, question_uid) VALUES (?, ?);', [req.body.userUID, req.body.questionUID], function(err, rows) {
+							if (!err) {
+								res.send({ success: 1 });
+							} else {
+								res.send({ success: 0 });
+							}
+						});
 					} else {
 						res.send({ success: 0 });
 					}
-				});
+				})
+			} else {
+				res.send({ success: 0 });
 			}
 		});
 
@@ -55,22 +71,34 @@ module.exports = {
 						res.send({ success: 0 });
 					}
 				});
+			} else {
+				res.send({ success: 0 });
 			}
 		});
 
 		// add a new user subscription to a category
 		app.post('/subscribeToCategory', auth.isAuthenticated, function(req, res) {
 			if (req.body.userUID == req.user.local.uid && req.body.categoryUID) {
-				con.query('INSERT INTO category_subs (user_uid, category_uid) VALUES (?, ?);', [req.body.userUID, req.body.categoryUID], function(err, rows) {
-					if (!err) {
-						res.send({ success: 1 });
+				// ensure that category exists
+				con.query('SELECT COUNT(*) AS count FROM categories WHERE uid = ?;', [req.body.categoryUID], function(err, rows) {
+					if (!err && rows !== undefined && rows.length > 0 && rows[0].count == 1) {
+						// add new category subscription to db
+						con.query('INSERT INTO category_subs (user_uid, category_uid) VALUES (?, ?);', [req.body.userUID, req.body.categoryUID], function(err, rows) {
+							if (!err) {
+								res.send({ success: 1 });
 
-						// send email confirming successful subscription
-						module.exports.confirmCategorySub(req.body.userUID, req.body.categoryUID);
+								// send email confirming successful subscription
+								module.exports.confirmCategorySub(req.body.userUID, req.body.categoryUID);
+							} else {
+								res.send({ success: 0 });
+							}
+						});
 					} else {
 						res.send({ success: 0 });
 					}
 				});
+			} else {
+				res.send({ success: 0 });
 			}
 		});
 
@@ -87,6 +115,8 @@ module.exports = {
 						res.send({ success: 0 });
 					}
 				});
+			} else {
+				res.send({ success: 0 });
 			}
 		});
 
@@ -161,7 +191,7 @@ module.exports = {
 									var options = {
 										subject: "[Question Subscription] " + render.questionTitle,
 										text: "",
-										html: mustache.render(questionSubEmail, render)
+										html: mustache.render(templates.questionSubEmail, render)
 									}
 
 									// send group mail notification
@@ -190,7 +220,7 @@ module.exports = {
 							to: email,
 							subject: "Successfully subscribed to " + rows[0].name + "!",
 							text: "",
-							html: mustache.render(newCatSub, {
+							html: mustache.render(templates.categorySubSuccess, {
 								category: rows[0].name
 							})
 						};
@@ -218,7 +248,7 @@ module.exports = {
 							to: email,
 							subject: "Successfully unsubscribed from " + rows[0].name + "!",
 							text: "",
-							html: mustache.render(catUnsub, {
+							html: mustache.render(templates.categoryUnsubSuccess, {
 								category: rows[0].name
 							})
 						};

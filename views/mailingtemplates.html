@@ -1,0 +1,37 @@
+<!-- Question subscription notification email -->
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+</head>
+<body>
+	<h1><a href="{{domain}}/questions/{{questionUID}}">{{questionTitle}}</a></h1>
+	<h2>asked by <a href='{{domain}}/users/{{askerUID}}'>{{askerName}}</a></h2>
+	<p>A new answer from <a href='{{domain}}/users/{{answererUID}}'>{{answererName}}</a> has been posted:</p>
+	<p>{{answerBody}}...</p>
+</body>
+</html>
+~
+<!-- Confirmation email on successful subscription to a category -->
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+</head>
+<body>
+	<h2>You have successfully subscribed to the category {{category}}!</h2>
+	<p>You will now receive emails with new content posted under this category.</p>
+</body>
+</html>
+~
+<!-- Confirmation email on successful unsubscription from a category -->
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+</head>
+<body>
+	<h2>You have successfully unsubscribed from the category {{category}}!</h2>
+	<p>You will no longer receive emails regarding new content from this category.</p>
+</body>
+</html>
