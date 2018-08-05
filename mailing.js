@@ -296,12 +296,17 @@ module.exports = {
 				var cutoff = moment().subtract(1, 'days').format('YYYY-MM-DD HH:mm');
 
 				// get all posts posted in the past day
-				con.query('SELECT * FROM posts WHERE creation_date > ?;', cutoff, function(err, rows) {
+				con.query('SELECT posts.*, users.display_name AS owner_name FROM posts JOIN users ON posts.owner_uid = users.uid WHERE posts.creation_date > ?;', cutoff, function(err, rows) {
 					if (!err && rows !== undefined && rows.length > 0) {
 						// for each post
 						for (var i = 0; i < rows.length; i++) {
 							// if relevant category to subscriptions
 							if (rows[i].category_uid in categories) {
+								// format creation date 
+								rows[i].creation_date = moment(rows[i].creation_date).fromNow();
+								// trim post body to use as preview
+								rows[i].body = rows[i].body.substring(0, 200);
+
 								if (!categories[rows[i].category_uid].posts) {
 									categories[rows[i].category_uid].posts = [rows[i]];
 								} else {
@@ -327,9 +332,11 @@ module.exports = {
 		if (templates.categoryDigest && categoryInfo.posts) {
 			categoryInfo.domain = creds.domain;
 
+			var date = moment().format('M/D/YY');
+
 			// configure subscription message
 			var options = {
-				subject: "[" + categoryInfo.name + "] New questions available from " + categoryInfo.name + "!",
+				subject: "[" + categoryInfo.name + " " + date + "] New questions from " + categoryInfo.name + "!",
 				text: "",
 				html: mustache.render(templates.categoryDigest, categoryInfo)
 			}
@@ -342,8 +349,3 @@ module.exports = {
 
 // every morning at 4 AM, send category digests
 nodeschedule.scheduleJob('0 0 4 * * *', module.exports.sendAllCategoryDigests);
-
-
-
-// debug
-module.exports.sendAllCategoryDigests();
