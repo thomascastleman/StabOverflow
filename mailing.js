@@ -138,6 +138,19 @@ module.exports = {
 			}
 		});
 
+		// get subscription management page for this user
+		app.get('/subscriptions', auth.restrictAuth, function(req, res) {
+			var render = auth.defaultRender(req);
+
+			// select all categories, noting which ones the user is currently subscribed to
+			con.query('SELECT categories.name, categories.uid, CASE WHEN category_subs.uid IS NULL THEN NULL ELSE 1 END AS isSubscribed FROM categories LEFT JOIN category_subs ON categories.uid = category_subs.category_uid AND category_subs.user_uid = ? WHERE categories.is_archived = 0;', [req.user.local.uid], function(err, rows) {
+				if (!err && rows !== undefined && rows.length > 0) {
+					render.categories = rows;
+				}
+				res.render('subscriptions.html', render);
+			});
+		});
+
 		return module.exports;
 	},
 

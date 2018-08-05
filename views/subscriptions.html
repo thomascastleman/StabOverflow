@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>Stab Overflow</title>
+
+		<!-- navbar style -->
+		<link rel="stylesheet" type="text/css" href="/navbar.css">
+		<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.1.0/css/all.css" integrity="sha384-lKuwvrZot6UHsBSfcMvOkWwlCMgc0TaWr+30HWe3a4ltaBwTZhyTEggF5tJv8tbt" crossorigin="anonymous">
+		<link href="https://fonts.googleapis.com/css?family=Kanit:300,400" rel="stylesheet">
+
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
+
+		<link rel="stylesheet" type="text/css" href="/subscriptions.css">
+	</head>
+	<body>
+		<div class="content">
+			<header>
+				<a href="/"><img src="/staboverflow.png" align="middle"/></a>
+				<div id="searchTools">
+					<ul>
+						<li>
+							<form id="searchForm" name1="search" method="POST" action="/search">
+								<input id="searchBar" name="query" type="text" placeholder="Search StabOverflow" autocomplete="off">
+								<button id="searchSubmit" type="submit" form="searchForm"><i id="searchIcon" class="fas fa-search"></i></button>
+							</form>
+						</li>
+						<li>
+							<a id="browse" href="/search">Browse Questions</a>
+						</li>
+					</ul>
+				</div>
+				<div id="authLinks">
+					<ul>
+					{{#loggedIn}}
+						<li>
+							<a href="/logout">Log Out <i class="fas fa-sign-out-alt"></i></a>
+						</li>
+						{{#user_uid}}
+						<li>
+							<a href="/users/{{user_uid}}">
+								{{#username}}<span id="navDisplayName">{{username}}</span> {{/username}}
+								{{#myProfileImg}}<img id="navProfileImage" src="{{myProfileImg}}" align="top">{{/myProfileImg}}
+								{{^myProfileImg}}<i class="fas fa-user"></i>{{/myProfileImg}}
+							</a>
+						</li>
+						{{/user_uid}}
+					{{/loggedIn}}
+					{{^loggedIn}}
+						<li>
+							<a href="/auth/google">Log In <i class="fas fa-sign-in-alt"></i></a>
+						</li>
+						<li>
+							<a href="/auth/google">Sign Up <i class="fas fa-user-plus"></i></a>
+						</li>
+					{{/loggedIn}}
+					</ul>
+				</div>
+			</header>
+
+			<div id="container">
+				<h1>Manage Your Subscriptions</h1>
+				<h3>Categories</h3>
+				<p id="categoryMessage" hidden></p>
+				{{#categories}}
+					<input type="checkbox" value="{{uid}}" onclick="toggleCategorySub(this, {{uid}}, '{{name}}');" {{#isSubscribed}}checked{{/isSubscribed}}> {{name}}<br>
+				{{/categories}}
+			</div>
+
+		</div>
+
+		<footer>
+			<div>
+				<span>Stab Overflow - 2018</span><br>
+				<span>Thomas Castleman - Johnny Lindbergh</span>
+			</div>
+		</footer>
+	</body>
+
+	<script>
+
+		var $categoryMessage = $('#categoryMessage');
+
+		function displayCategoryMessage(subscribed, name, success) {
+			if (success) {
+				$categoryMessage.text('Successfully ' + (subscribed ? 'subscribed to' : 'unsubscribed from') + ' ' + name + '!');
+			} else {
+				$categoryMessage.text('Failed to ' + (subscribed ? 'subscribe to' : 'unsubscribe from') + ' ' + name + '!');
+			}
+
+			$categoryMessage.show().delay(3000).fadeOut();
+		}
+
+		// subscribe or unsubscribe to a category
+		function toggleCategorySub(el, uid, name) {
+			if (el.checked) {
+				$.post('/subscribeToCategory', { categoryUID: uid })
+					.done(function(data) {
+						el.checked = data.success;
+						displayCategoryMessage(true, name, data.success);
+					});
+			} else {
+				$.post('/unsubscribeToCategory', { categoryUID: uid })
+					.done(function(data) {
+						el.checked = !data.success;
+						displayCategoryMessage(false, name, data.success);
+					});
+			}
+
+			el.checked = true;
+		}
+	</script>
+</html>
