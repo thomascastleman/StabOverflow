@@ -56,6 +56,33 @@
 			function showCommentBox(id) {
 				$('#commentBox' + id).toggle();
 			}
+
+			// subscribe or unsubscribe to this question
+			function toggleSubscription() {
+				if (isSubscribed) {
+					$.post('/unsubscribeToQuestion', { questionUID: {{question_uid}} })
+						.done(function(data) {
+							if (data.success) {
+								alert("Successfully unsubscribed from this question!");
+								isSubscribed = false;
+								colorSubButton();
+							} else {
+								alert("Unable to subscribe (either you are already subscribed, or an error occurred)");
+							}
+						});
+				} else {
+					$.post('/subscribeToQuestion', { questionUID: {{question_uid}} })
+						.done(function(data) {
+							if (data.success) {
+								alert("Successfully subscribed to this question!");
+								isSubscribed = true;
+								colorSubButton();
+							} else {
+								alert("Unable to subscribe (either you are already subscribed, or an error occurred)");
+							}
+						});
+				}
+			}
 			{{/loggedIn}}
 
 			{{#isAdmin}}
@@ -140,6 +167,7 @@
 					<div class="postmeta">
 						<div class="upvote" {{#loggedIn}}onclick="upvote({{question_uid}});" title="This question was helpful"{{/loggedIn}}{{^loggedIn}}title="You must be logged in to upvote"{{/loggedIn}}><i class="fas fa-chevron-circle-up"></i></div>
 						<div class="upvotecount" id="{{question_uid}}">{{upvotes}}</div>
+						{{#loggedIn}}<div id="envelope" class="subscribe" title="Subscribe to this question" onclick="toggleSubscription();"><i class="far fa-envelope"></i></div>{{/loggedIn}}
 						{{#isQuestionOwner}}<div class="edit"><a href="/editPost/{{question_uid}}" title="Edit this Question"><i class="far fa-edit"></i></a></div>{{/isQuestionOwner}}
 						{{#isAdmin}}<div class="delete" onclick="deletePost({{question_uid}}, undefined);" title="Delete Question"><i class="fas fa-trash-alt"></i></div>{{/isAdmin}}
 					</div>
@@ -278,6 +306,31 @@
 					// syntax highlight all <pre>'s and <code>'s 
 					$('pre').attr('class', 'prettyprint');
 					$('code').attr('class', 'prettyprint');
+
+					{{#loggedIn}}
+
+					$envelope = $('#envelope');
+
+					function colorSubButton() {
+						if (isSubscribed) {
+							$envelope.css("color", "#808080");
+							$envelope.attr("title", "Unsubscribe from this question");
+						} else {
+							$envelope.css("color", "#0066ff");
+							$envelope.attr("title", "Subscribe to this question");
+						}
+					}
+
+					// establish whether or not user is subscribed to this question
+					var isSubscribed;
+					$.post('/isSubscribedToQuestion', { questionUID: {{question_uid}} })
+						.done(function(data) {
+							isSubscribed = data.isSubscribed;
+							colorSubButton();
+						});
+
+					{{/loggedIn}}
+
 				</script>
 			</div>
 		</div>

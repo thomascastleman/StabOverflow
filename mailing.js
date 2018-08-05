@@ -26,11 +26,12 @@ var templates = {};
 // read email templates
 fs.readFile('./views/mailingtemplates.html', 'UTF8', function(err, data) {
 	if (!err) {
+		// email templates are in one file, separated using ~ as delimiter
 		data = data.split('~');
 
 		// extract email templates for different messages
 		templates = {
-			questionSubEmail: data[0],
+			questionSubNotification: data[0],
 			categorySubSuccess: data[1],
 			categoryUnsubSuccess: data[2],
 			categoryDigest: data[3]
@@ -43,12 +44,12 @@ module.exports = {
 	init: function(app) {
 		// add a new user subscription to a question
 		app.post('/subscribeToQuestion', auth.isAuthenticated, function(req, res) {
-			if (req.body.userUID == req.user.local.uid && req.body.questionUID) {
+			if (req.user.local.uid && req.body.questionUID) {
 				// ensure question exists
 				con.query('SELECT COUNT(*) AS count FROM posts WHERE uid = ?;', [req.body.questionUID], function(err, rows) {
 					if (!err && rows !== undefined && rows.length > 0 && rows[0].count == 1) {
 						// add new subscription to db
-						con.query('INSERT INTO question_subs (user_uid, question_uid) VALUES (?, ?);', [req.body.userUID, req.body.questionUID], function(err, rows) {
+						con.query('INSERT INTO question_subs (user_uid, question_uid) VALUES (?, ?);', [req.user.local.uid, req.body.questionUID], function(err, rows) {
 							if (!err) {
 								res.send({ success: 1 });
 							} else {
@@ -66,8 +67,8 @@ module.exports = {
 
 		// unsubscribe a user from a question
 		app.post('/unsubscribeToQuestion', auth.isAuthenticated, function(req, res) {
-			if (req.body.userUID == req.user.local.uid && req.body.questionUID) {
-				con.query('DELETE FROM question_subs WHERE user_uid = ? AND question_uid = ?;', [req.body.userUID, req.body.questionUID], function(err, rows) {
+			if (req.user.local.uid && req.body.questionUID) {
+				con.query('DELETE FROM question_subs WHERE user_uid = ? AND question_uid = ?;', [req.user.local.uid, req.body.questionUID], function(err, rows) {
 					if (!err) {
 						res.send({ success: 1 });
 					} else {
@@ -79,19 +80,33 @@ module.exports = {
 			}
 		});
 
+		// check if you are subscribed to a question
+		app.post('/isSubscribedToQuestion', auth.isAuthenticated, function(req, res) {
+			if (req.body.questionUID) {
+				// check for subscription link with this user UID and question UID
+				con.query('SELECT COUNT(*) AS count FROM question_subs WHERE user_uid = ? AND question_uid = ?;', [req.user.local.uid, req.body.questionUID], function(err, rows) {
+					if (!err && rows !== undefined && rows.length > 0 && rows[0].count == 1) {
+						res.send({ isSubscribed: 1 });
+					} else {
+						res.send({ isSubscribed: 0 });
+					}
+				});
+			}
+		});
+
 		// add a new user subscription to a category
 		app.post('/subscribeToCategory', auth.isAuthenticated, function(req, res) {
-			if (req.body.userUID == req.user.local.uid && req.body.categoryUID) {
+			if (req.user.local.uid && req.body.categoryUID) {
 				// ensure that category exists
 				con.query('SELECT COUNT(*) AS count FROM categories WHERE uid = ?;', [req.body.categoryUID], function(err, rows) {
 					if (!err && rows !== undefined && rows.length > 0 && rows[0].count == 1) {
 						// add new category subscription to db
-						con.query('INSERT INTO category_subs (user_uid, category_uid) VALUES (?, ?);', [req.body.userUID, req.body.categoryUID], function(err, rows) {
+						con.query('INSERT INTO category_subs (user_uid, category_uid) VALUES (?, ?);', [req.user.local.uid, req.body.categoryUID], function(err, rows) {
 							if (!err) {
 								res.send({ success: 1 });
 
 								// send email confirming successful subscription
-								module.exports.confirmCategorySub(req.body.userUID, req.body.categoryUID);
+								module.exports.confirmCategorySub(req.user.local.uid, req.body.categoryUID);
 							} else {
 								res.send({ success: 0 });
 							}
@@ -107,13 +122,13 @@ module.exports = {
 
 		// unsubscribe a user from a category
 		app.post('/unsubscribeToCategory', auth.isAuthenticated, function(req, res) {
-			if (req.body.userUID == req.user.local.uid) {
-				con.query('DELETE FROM category_subs WHERE user_uid = ? AND category_uid = ?;', [req.body.userUID, req.body.categoryUID], function(err, rows) {
+			if (req.user.local.uid && req.body.categoryUID) {
+				con.query('DELETE FROM category_subs WHERE user_uid = ? AND category_uid = ?;', [req.user.local.uid, req.body.categoryUID], function(err, rows) {
 					if (!err) {
 						res.send({ success: 1 });
 
 						// send email confirming successful unsubscription
-						module.exports.confirmCategoryUnsub(req.body.userUID, req.body.categoryUID);
+						module.exports.confirmCategoryUnsub(req.user.local.uid, req.body.categoryUID);
 					} else {
 						res.send({ success: 0 });
 					}
@@ -189,12 +204,12 @@ module.exports = {
 									subscribers.push(rows[i].email);
 								}
 
-								if (templates.questionSubEmail) {
+								if (templates.questionSubNotification) {
 									// configure subscription message
 									var options = {
 										subject: "[Question Subscription] " + render.questionTitle,
 										text: "",
-										html: mustache.render(templates.questionSubEmail, render)
+										html: mustache.render(templates.questionSubNotification, render)
 									}
 
 									// send group mail notification

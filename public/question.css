@@ -202,3 +202,9 @@ hr {
 	margin-top: 5px;
 	margin-bottom: 5px;
 }
+
+.subscribe {
+	font-size: 20px;
+	color: #333333;
+	cursor: pointer;
+}

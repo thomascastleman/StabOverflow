@@ -89,6 +89,7 @@ CREATE TABLE category_subs (
 	category_uid INT,
 	user_uid INT,
 	PRIMARY KEY(uid),
+	UNIQUE (category_uid, user_uid),
 	FOREIGN KEY (category_uid) REFERENCES categories(uid) ON DELETE CASCADE,
 	FOREIGN KEY (user_uid) REFERENCES users(uid)
 );
@@ -99,6 +100,7 @@ CREATE TABLE question_subs (
 	question_uid INT,
 	user_uid INT,
 	PRIMARY KEY (uid),
+	UNIQUE (question_uid, user_uid),
 	FOREIGN KEY (question_uid) REFERENCES posts(uid) ON DELETE CASCADE,
 	FOREIGN KEY (user_uid) REFERENCES users(uid)
 );
