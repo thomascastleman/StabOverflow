@@ -9,8 +9,13 @@
 		<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.1.0/css/all.css" integrity="sha384-lKuwvrZot6UHsBSfcMvOkWwlCMgc0TaWr+30HWe3a4ltaBwTZhyTEggF5tJv8tbt" crossorigin="anonymous">
 		<link href="https://fonts.googleapis.com/css?family=Kanit:300,400" rel="stylesheet">
 
+		<!-- jQuery -->
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
 
+		<!-- checkbox css lib -->
+		<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/pretty-checkbox@3.0/dist/pretty-checkbox.min.css">
+
+		<!-- page css -->
 		<link rel="stylesheet" type="text/css" href="/subscriptions.css">
 	</head>
 	<body>
@@ -61,12 +66,17 @@
 			<div id="container">
 				<h1>Manage Your Subscriptions</h1>
 				<h3>Categories</h3>
-				<p id="categoryMessage" hidden></p>
 				{{#categories}}
-					<input type="checkbox" value="{{uid}}" onclick="toggleCategorySub(this, {{uid}}, '{{name}}');" {{#isSubscribed}}checked{{/isSubscribed}}> {{name}}<br>
+				   <div class="pretty p-switch p-fill">
+				       	<input type="checkbox" value="{{uid}}" onclick="toggleCategorySub(this, {{uid}}, '{{name}}');" {{#isSubscribed}}checked{{/isSubscribed}}>
+				        <div class="state p-primary">
+				            <label>{{name}}</label>
+				        </div>
+				    </div>
+				    <br>
 				{{/categories}}
+				<p id="categoryMessage" hidden></p>
 			</div>
-
 		</div>
 
 		<footer>
@@ -81,6 +91,7 @@
 
 		var $categoryMessage = $('#categoryMessage');
 
+		// show confirmation message on subscribe or unsubscribe
 		function displayCategoryMessage(subscribed, name, success) {
 			if (success) {
 				$categoryMessage.text('Successfully ' + (subscribed ? 'subscribed to' : 'unsubscribed from') + ' ' + name + '!');
