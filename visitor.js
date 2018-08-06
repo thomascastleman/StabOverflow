@@ -100,7 +100,7 @@ module.exports = {
 					if (render.category_uid == null) render.noCategory = true;
 
 					// get associated answers, highest upvotes first
-					con.query('SELECT posts.*, users.real_name AS owner_real, users.display_name AS owner_display, users.image_url FROM posts JOIN users ON posts.owner_uid = users.uid WHERE parent_question_uid = ? ORDER BY upvotes DESC;', [question_uid], function(err, rows) {
+					con.query('SELECT posts.*, users.real_name AS owner_real, users.display_name AS owner_display, users.image_url FROM posts JOIN users ON posts.owner_uid = users.uid WHERE parent_question_uid = ? AND type = 0 ORDER BY upvotes DESC;', [question_uid], function(err, rows) {
 						if (!err && rows !== undefined && rows.length > 0) {
 							render.answers = rows;
 

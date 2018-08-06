@@ -14,26 +14,16 @@ module.exports = {
 	// set up routes
 	init: function(app) {
 
-		// post search query, render results
 		app.post('/search', function(req, res) {
-
-			// generate SQL to filter by category and answer status
-			var catFilter = module.exports.categoryFilter(req.body.category);
-			var ansFilter = module.exports.answerFilter(req.body.answeredStatus);
-
-			// get default render object and add query to template
-			var render = auth.defaultRender(req);
-			render.query = req.body.query;
+			var render = auth.defaultRender(req);	// prep default render object
+			render.query = req.body.query;	// add query to template
 
 			// parse page number
-			var page = parseInt(req.body.page, 10);
-			if (isNaN(page) || page < 1) page = 1;
-
-			// add page info to render object
-			render.page = page;
+			render.page = parseInt(req.body.page, 10);
+			if (isNaN(render.page) || render.page < 1) render.page = 1;
 
 			// calculate starting index for retrieving posts for this page
-			var startIndex = (page - 1) * settings.resultsPerPage;
+			var startIndex = (render.page - 1) * settings.resultsPerPage;
 
 			// pull question categories for rendering search filters
 			con.query('SELECT * FROM categories;', function(err, categories) {
@@ -63,32 +53,108 @@ module.exports = {
 						// parse query into correct format
 						query = module.exports.parseQuery(query);
 
-						// get relevant posts
-						con.query('CALL query(?, ?, ?, ?, ?);', [query, catFilter, ansFilter, userConstraint, settings.maxNumResults], function(err, rows) {
-							if (!err && rows !== undefined && rows.length > 0 && rows[0].length > 0) {
-								// prepare page render object
-								module.exports.prepRender(render, rows[0], startIndex, settings.resultsPerPage);
-							}
+						// // get relevant posts
+						// con.query('CALL query(?, ?, ?, ?, ?);', [query, catFilter, ansFilter, userConstraint, settings.maxNumResults], function(err, rows) {
+						// 	if (!err && rows !== undefined && rows.length > 0 && rows[0].length > 0) {
+						// 		// prepare page render object
+						// 		module.exports.prepRender(render, rows[0], startIndex, settings.resultsPerPage);
+						// 	}
 
-							res.render('search.html', render);
-						});
+						// 	res.render('search.html', render);
+						// });
 
 					// search only by constraints if they exist
 					} else {
-						// get posts meeting constraints
-						con.query('CALL noquery(?, ?, ?, ?);', [catFilter, ansFilter, userConstraint, settings.maxNumResults], function(err, rows) {
-							if (!err && rows !== undefined && rows.length > 0 && rows[0].length > 0) {
-								// prepare page render object
-								module.exports.prepRender(render, rows[0], startIndex, settings.resultsPerPage);
-							}
+						// // get posts meeting constraints
+						// con.query('CALL noquery(?, ?, ?, ?);', [catFilter, ansFilter, userConstraint, settings.maxNumResults], function(err, rows) {
+						// 	if (!err && rows !== undefined && rows.length > 0 && rows[0].length > 0) {
+						// 		// prepare page render object
+						// 		module.exports.prepRender(render, rows[0], startIndex, settings.resultsPerPage);
+						// 	}
 
-							res.render('search.html', render);	
-						});
+						// 	res.render('search.html', render);	
+						// });
 					}
 
 				});
 			});
 		});
+
+		// // post search query, render results
+		// app.post('/search', function(req, res) {
+
+		// 	// generate SQL to filter by category and answer status
+		// 	var catFilter = module.exports.categoryFilter(req.body.category);
+		// 	var ansFilter = module.exports.answerFilter(req.body.answeredStatus);
+
+		// 	// get default render object and add query to template
+		// 	var render = auth.defaultRender(req);
+		// 	render.query = req.body.query;
+
+		// 	// parse page number
+		// 	var page = parseInt(req.body.page, 10);
+		// 	if (isNaN(page) || page < 1) page = 1;
+
+		// 	// add page info to render object
+		// 	render.page = page;
+
+		// 	// calculate starting index for retrieving posts for this page
+		// 	var startIndex = (page - 1) * settings.resultsPerPage;
+
+		// 	// pull question categories for rendering search filters
+		// 	con.query('SELECT * FROM categories;', function(err, categories) {
+		// 		if (!err && categories !== undefined && categories.length > 0) {
+		// 			render.categories = categories;
+
+		// 			// register which category filter was last applied (if any)
+		// 			for (var i = 0; i < categories.length; i++) {
+		// 				if (categories[i].uid == req.body.category) {
+		// 					categories[i].isSelected = true;
+		// 					break;
+		// 				}
+		// 			}
+		// 		}
+
+		// 		render[req.body.answeredStatus] = true;	// register which answer filter was used
+
+		// 		var userConstraint, query;
+
+		// 		// check query for user constraint ("user:uid"), and extract if found
+		// 		module.exports.parseUserConstraint(req.body.query, function(data) {
+		// 			query = data.query;
+		// 			userConstraint = data.userConstraint;
+
+		// 			// search by query if possible
+		// 			if (query) {
+		// 				// parse query into correct format
+		// 				query = module.exports.parseQuery(query);
+
+		// 				// get relevant posts
+		// 				con.query('CALL query(?, ?, ?, ?, ?);', [query, catFilter, ansFilter, userConstraint, settings.maxNumResults], function(err, rows) {
+		// 					if (!err && rows !== undefined && rows.length > 0 && rows[0].length > 0) {
+		// 						// prepare page render object
+		// 						module.exports.prepRender(render, rows[0], startIndex, settings.resultsPerPage);
+		// 					}
+
+		// 					res.render('search.html', render);
+		// 				});
+
+		// 			// search only by constraints if they exist
+		// 			} else {
+		// 				// get posts meeting constraints
+		// 				con.query('CALL noquery(?, ?, ?, ?);', [catFilter, ansFilter, userConstraint, settings.maxNumResults], function(err, rows) {
+		// 					if (!err && rows !== undefined && rows.length > 0 && rows[0].length > 0) {
+		// 						// prepare page render object
+		// 						module.exports.prepRender(render, rows[0], startIndex, settings.resultsPerPage);
+		// 					}
+
+		// 					res.render('search.html', render);	
+		// 				});
+		// 			}
+
+		// 		});
+		// 	});
+		// });
 
 		// render search page with recent questions
 		app.get('/search', function(req, res) {
