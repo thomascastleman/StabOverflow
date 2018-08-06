@@ -35,7 +35,7 @@ Only users who hold accounts in the system may participate in the posting of que
 
 ## Identity Integrity
 
-While users are allowed certain degrees of freedom in customizing their display name and optionally writing a profile description, their full name according to Google is kept on record and available, in most cases, by simply hovering over their display name. Their email is also available to administrators.
+While users are allowed certain degrees of freedom in customizing their display name and optionally writing a profile description, their first name and last initial according to Google is kept on record and available, in most cases, by simply hovering over their display name. Their email is also available to administrators.
 
 ![Demonstration of identity preservation](./readme/identity.png)
 
@@ -51,6 +51,14 @@ Special administrator accounts have access to a host of features unavailable to 
 - deleting questions, answers, comments
 
 Using these tools, administrators are able to manage and monitor the site even as time progresses and the curriculum and faculty change.
+
+## Mailing
+
+By linking an email account to the service, it is able to send notifications to users in order to make them better aware of activity on the site.
+
+Users are able to subscribe to questions by clicking the mail icon to the left of the question body. Doing so will have the system notify the user when any new answer is posted under this question.
+
+In addition, users are also able to subscribe to categories, meaning they will receive digests every day with questions that have been posted under that category in the past 24 hours.
 
 
 ## Installation
@@ -75,11 +83,15 @@ module.exports = {
 	MySQL_username: '<YOUR MYSQL USERNAME HERE>',
 	MySQL_password: '<YOUR MYSQL PASSWORD HERE>',
 
-	// localhost for testing purposes
-	domain: 'http://localhost:8080'
+	// localhost for testing purposes (replace this with an actual domain)
+	domain: 'http://localhost:8080',
+	
+	// email credentials (for mailing / subscription services)
+	emailUsername: '<YOUR SERVICE EMAIL HERE>',
+	emailPassword: '<YOUR SERVICE EMAIL PASSWORD HERE>'
 }
  ```
- This will allow the system to access the Google API as well as execute database queries.
+ This will allow the system to access the Google API as well as execute database queries. Providing email credentials also allows the system to send mail notifications to its users (though this requires enabling less-secure apps on this Google account).
  
  Now, you may run `server.js` to start the system using the command
  ```
