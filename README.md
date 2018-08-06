@@ -22,6 +22,7 @@ The current functionality of StabOverflow includes:
 - user profiles
 - a fully-featured search engine with options to narrow results based on category, user, and number of answers
 - user search tools
+- options to subscribe to questions and categories to receive email notifications on new activity
 - authentication system to limit certain functionality to students only
 
 ## Authentication
