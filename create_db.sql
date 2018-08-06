@@ -41,7 +41,7 @@ CREATE TABLE posts (
 	FOREIGN KEY (owner_uid) REFERENCES users(uid)
 );
 
--- create index on posts body for search engine
+-- create index on posts title and body for search engine
 CREATE FULLTEXT INDEX posts_index ON posts(title, body);
 
 -- all comments
@@ -128,8 +128,15 @@ CREATE PROCEDURE query(IN textquery VARCHAR(65535), IN category_constraint INT, 
 BEGIN
 	SELECT * FROM (
 
-		SELECT 
-			q.*, 
+		SELECT
+			q.uid,
+			q.title,
+			SUBSTRING(q.body, 1, 200) AS body,
+			q.owner_uid,
+			DATE_FORMAT(q.creation_date, '%b %D, %Y at %l:%i %p') AS creation_date,
+			q.answer_count,
+			q.upvotes,
+			q.category_uid,
 			u.real_name AS owner_real,
 			u.display_name AS owner_display,
 			u.image_url, 
@@ -179,7 +186,14 @@ END;
 CREATE PROCEDURE noquery(IN category_constraint INT, IN user_constraint INT, IN min_answers INT, IN start_index INT, IN num_results INT)
 BEGIN
 	SELECT 
-		p.*, 
+		p.uid,
+		p.title,
+		SUBSTRING(p.body, 1, 200) AS body,
+		p.owner_uid,
+		DATE_FORMAT(p.creation_date, '%b %D, %Y at %l:%i %p') AS creation_date,
+		p.answer_count,
+		p.upvotes,
+		p.category_uid,
 		u.real_name AS owner_real,
 		u.display_name AS owner_display,
 		u.image_url, 

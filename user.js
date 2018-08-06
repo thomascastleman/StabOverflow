@@ -6,7 +6,6 @@
 var moment = require('moment');
 var auth = require('./auth.js');
 var con = require('./database.js').connection;
-var search = require('./search.js');
 var mail = require('./mailing.js');
 
 module.exports = {
@@ -81,7 +80,6 @@ module.exports = {
 					con.query('CALL create_question(?, ?, ?, ?);', [req.body.category_uid, req.user.local.uid, req.body.title, req.body.body], function(err, rows) {
 						if (!err && rows !== undefined && rows.length > 0 && rows[0].length > 0) {
 							var questionUID = rows[0][0].redirect_uid;
-							search.indexPost(questionUID, req.body.title, req.body.body);	// index the new question
 							res.redirect('/questions/' + questionUID);	// redirect to this question's page
 
 							// automatically subscribe the asker to this question so that they will be notified of answers
@@ -98,8 +96,6 @@ module.exports = {
 						// insert answer into posts
 						con.query('CALL create_answer(?, ?, ?);', [req.body.parent_question, req.user.local.uid, req.body.body], function(err, rows) {
 							if (!err && rows !== undefined && rows.length > 0 && rows[0].length > 0) {
-								search.indexPost(rows[0][0].answer_uid, "", req.body.body);	// index the new answer
-
 								// send bulk mail updating subscribers of this question that a new answer is available
 								mail.updateQuestionSubscribers(req.body.parent_question, req.user.local.uid, req.body.body);
 
@@ -156,9 +152,6 @@ module.exports = {
 								// redirect to edited post
 								var redirect_uid = rows[0].type == 1 ? req.body.uid : rows[0].parent_question_uid
 								res.redirect(redirect_uid ? '/questions/' + redirect_uid : '/');
-
-								// index new appendage
-								search.indexPost(req.body.uid, "", req.body.appendage);
 							} else {
 								res.render('error.html', auth.errorRender(req, "Failed to apply edits to post"));
 							}

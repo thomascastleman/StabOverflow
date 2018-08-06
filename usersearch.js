@@ -5,7 +5,6 @@
 
 var auth = require('./auth.js');
 var con = require('./database.js').connection;
-var search = require('./search.js');
 var settings = require('./settings.js').userSearch;
 
 module.exports = {
@@ -23,7 +22,7 @@ module.exports = {
 			// just pull all users
 			con.query('SELECT * FROM users LIMIT ?;', [settings.maxNumResults], function(err, rows) {
 				if (!err && rows !== undefined && rows.length > 0) {
-					search.prepRender(render, rows, 0, settings.usersPerPage);
+					module.exports.prepRender(render, rows, 0, settings.usersPerPage);
 				}
 
 				res.render('usersearch.html', render);
@@ -49,7 +48,7 @@ module.exports = {
 			con.query("SELECT * FROM users WHERE real_name LIKE ? OR display_name LIKE ? LIMIT ?;", [render.query, render.query, settings.maxNumResults], function(err, rows) {
 				if (!err && rows !== undefined && rows.length > 0) {
 					// prepare page
-					search.prepRender(render, rows, startIndex, settings.usersPerPage);
+					module.exports.prepRender(render, rows, startIndex, settings.usersPerPage);
 				}
 
 				render.query = render.query.replace(/%/g, "");	// reformat query
@@ -59,5 +58,28 @@ module.exports = {
 		});
 
 		return module.exports;
+	},
+
+	// calculate page info and extract single page of search results
+	prepRender: function(render, fullResults, start, perPage) {
+		// calculate number of pages for full results
+		var totalPages = Math.ceil(fullResults.length / perPage);
+
+		// generate array of possible pages for this search
+		render.pages = Array.apply(null, {length: totalPages + 1}).map(Function.call, Number);
+		render.pages.shift();
+
+		// get references to previous and following page numbers
+		if (render.page < render.pages.length) render.nextPage = render.page + 1;
+		if (render.page - 1 > 0) render.prevPage = render.page - 1;
+
+		// extract single page
+		render.results = fullResults.slice(start, start + perPage);
+
+		// send count of results showing on this page
+		render.onThisPage = render.results.length;
+
+		// register that results exist if any found
+		if (render.results.length > 0) render.hasResults = true;
 	}
 }

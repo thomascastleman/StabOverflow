@@ -1,6 +1,6 @@
 
 /* 
-	visitor.js: Routes for any functionality not restricted to authenticated users (except search)
+	visitor.js: Routes for any functionality not restricted to authenticated users
 */
 
 var moment = require('moment');
