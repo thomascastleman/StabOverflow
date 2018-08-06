@@ -80,8 +80,12 @@ module.exports = {
 					// insert question into posts
 					con.query('CALL create_question(?, ?, ?, ?);', [req.body.category_uid, req.user.local.uid, req.body.title, req.body.body], function(err, rows) {
 						if (!err && rows !== undefined && rows.length > 0 && rows[0].length > 0) {
-							search.indexPost(rows[0][0].redirect_uid, req.body.title, req.body.body);	// index the new question
-							res.redirect('/questions/' + rows[0][0].redirect_uid);	// redirect to this question's page
+							var questionUID = rows[0][0].redirect_uid;
+							search.indexPost(questionUID, req.body.title, req.body.body);	// index the new question
+							res.redirect('/questions/' + questionUID);	// redirect to this question's page
+
+							// automatically subscribe the asker to this question so that they will be notified of answers
+							mail.addNewQuestionSub(req.user.local.uid, questionUID);
 						} else {
 							res.render('error.html', auth.errorRender(req, "Failed to post question."));
 						}

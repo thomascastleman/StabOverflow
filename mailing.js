@@ -186,6 +186,11 @@ module.exports = {
 		});
 	},
 
+	// add a new question subscription link
+	addNewQuestionSub: function(userUID, questionUID) {
+		con.query('INSERT INTO question_subs (user_uid, question_uid) VALUES (?, ?);', [userUID, questionUID], function(err, rows) {});
+	},
+
 	// send group mail to question subscribers updating that activity has occurred on a question
 	updateQuestionSubscribers: function(questionUID, answererUID, answerBody) {
 		// prep render object
