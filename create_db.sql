@@ -68,24 +68,6 @@ CREATE TABLE upvotes (
 	FOREIGN KEY (user_uid) REFERENCES users(uid)
 );
 
--- -- word stems from posts (search engine)
--- CREATE TABLE stems (
--- 	uid INT NOT NULL AUTO_INCREMENT,
--- 	stem VARCHAR(16) UNIQUE,
--- 	PRIMARY KEY (uid)
--- );
-
--- -- stem scoring with posts (search engine)
--- CREATE TABLE scores (
--- 	uid INT NOT NULL AUTO_INCREMENT,
--- 	stem_uid INT,
--- 	post_uid INT,
--- 	score FLOAT,
--- 	PRIMARY KEY (uid),
--- 	FOREIGN KEY (stem_uid) REFERENCES stems(uid),
--- 	FOREIGN KEY (post_uid) REFERENCES posts(uid) ON DELETE CASCADE
--- );
-
 -- relation between users and categories: user subscribes to category
 CREATE TABLE category_subs (
 	uid INT NOT NULL AUTO_INCREMENT,
@@ -118,7 +100,6 @@ END;
 //;
 
 -- create new question and get its uid for redirection
-DELIMITER //;
 CREATE PROCEDURE create_question (IN category_uid INT, IN owner_uid INT, IN title TEXT, IN body TEXT)
 BEGIN
 	INSERT INTO posts (type, category_uid, owner_uid, title, body) VALUES (1, category_uid, owner_uid, title, body);
@@ -128,29 +109,40 @@ END;
 //;
 
 -- create new answer update answer_count of parent, return uid
-DELIMITER //;
-CREATE PROCEDURE create_answer (IN parent_question_uid INT, IN owner_uid INT, IN body TEXT)
+CREATE PROCEDURE create_answer (IN parent_q_uid INT, IN owner_uid INT, IN body TEXT)
 BEGIN
-	INSERT INTO posts (type, parent_question_uid, owner_uid, body) VALUES (0, parent_question_uid, owner_uid, body);
-	UPDATE posts SET answer_count = answer_count + 1 WHERE uid = parent_question_uid;
+	INSERT INTO posts (type, parent_question_uid, owner_uid, body) VALUES (0, parent_q_uid, owner_uid, body);
+	UPDATE posts SET answer_count = answer_count + 1 WHERE uid = parent_q_uid;
 	SELECT LAST_INSERT_ID() AS answer_uid;
 END;
 //;
 
 -- use query to get relevant question posts
--- 	textquery: the query to be searched with
--- 	category_constraint: uid of category to restrict to, if null no restriction
--- 	user_constraint: uid of user to restrict to, if null no restriction
--- 	min_answers: minimum number of answers on a result, if null then unanswered only (e.g. answered only = 1, all = 0)
-DELIMITER //;
+-- 		textquery: the query to be searched with
+-- 		category_constraint: uid of category to restrict to, if null no restriction
+-- 		user_constraint: uid of user to restrict to, if null no restriction
+-- 		min_answers: minimum number of answers on a result, if null then unanswered only (e.g. answered only = 1, all = 0)
+-- 		start_index: the index from which to return results
+-- 		num_results: number of rows to return (maximum)
 CREATE PROCEDURE query(IN textquery VARCHAR(65535), IN category_constraint INT, IN user_constraint INT, IN min_answers INT, IN start_index INT, IN num_results INT)
 BEGIN
 	SELECT * FROM (
-		SELECT *, SUM(MATCH (title, body) AGAINST (textquery IN BOOLEAN MODE)) as score
-		FROM posts
-		WHERE MATCH (title, body) AGAINST (textquery IN BOOLEAN MODE)
-		GROUP BY parent_question_uid
-	) AS all_results WHERE
+
+		SELECT 
+			q.*, 
+			u.real_name AS owner_real,
+			u.display_name AS owner_display,
+			u.image_url, 
+			c.name AS category, 
+			SUM(MATCH (p.title, p.body) AGAINST (textquery IN BOOLEAN MODE)) as score
+		FROM posts p 
+			JOIN posts q ON p.parent_question_uid = q.uid
+			JOIN users u ON q.owner_uid = u.uid
+			LEFT JOIN categories c ON q.category_uid = c.uid
+		WHERE MATCH (p.title, p.body) AGAINST (textquery IN BOOLEAN MODE)
+		GROUP BY p.parent_question_uid
+
+	) AS results WHERE
 		(category_uid = category_constraint OR category_constraint IS NULL)
 		AND (owner_uid = user_constraint OR user_constraint IS NULL)
 		AND ((min_answers IS NOT NULL AND answer_count >= min_answers) OR (min_answers IS NULL AND answer_count = 0))
@@ -159,68 +151,61 @@ BEGIN
 END;
 //;
 
+-- count the full number of found results for a given query, with constraints applied (args same as query())
+CREATE PROCEDURE query_count(IN textquery VARCHAR(65535), IN category_constraint INT, IN user_constraint INT, IN min_answers INT)
+BEGIN
+	SELECT COUNT(*) AS count FROM (
+
+		SELECT 
+			q.*
+		FROM posts p 
+			JOIN posts q ON p.parent_question_uid = q.uid
+		WHERE MATCH (p.title, p.body) AGAINST (textquery IN BOOLEAN MODE)
+		GROUP BY p.parent_question_uid
+
+	) AS results WHERE
+		(category_uid = category_constraint OR category_constraint IS NULL)
+		AND (owner_uid = user_constraint OR user_constraint IS NULL)
+		AND ((min_answers IS NOT NULL AND answer_count >= min_answers) OR (min_answers IS NULL AND answer_count = 0));
+END;
+//;
+
+-- get any questions that satisfy a number of constraints, without using query
+-- 		category_constraint: uid of category to restrict to, if null no restriction
+-- 		user_constraint: uid of user to restrict to, if null no restriction
+-- 		min_answers: minimum number of answers on a result, if null then unanswered only (e.g. answered only = 1, all = 0)
+-- 		start_index: the index from which to return results
+-- 		num_results: number of rows to return (maximum)
+CREATE PROCEDURE noquery(IN category_constraint INT, IN user_constraint INT, IN min_answers INT, IN start_index INT, IN num_results INT)
+BEGIN
+	SELECT 
+		p.*, 
+		u.real_name AS owner_real,
+		u.display_name AS owner_display,
+		u.image_url, 
+		c.name AS category
+	FROM posts p
+		JOIN users u ON p.owner_uid = u.uid
+		LEFT JOIN categories c ON p.category_uid = c.uid
+	WHERE
+		p.type = 1
+		AND (p.category_uid = category_constraint OR category_constraint IS NULL)
+		AND (p.owner_uid = user_constraint OR user_constraint IS NULL)
+		AND ((min_answers IS NOT NULL AND p.answer_count >= min_answers) OR (min_answers IS NULL AND p.answer_count = 0))
+	ORDER BY p.uid DESC
+	LIMIT start_index, num_results;
+END;
+//;
+
+-- count the full number of found results for a search made with just constraints (args same as noquery())
+CREATE PROCEDURE noquery_count(IN category_constraint INT, IN user_constraint INT, IN min_answers INT)
+BEGIN
+	SELECT COUNT(*) AS count FROM posts WHERE 
+		type = 1
+		AND (category_uid = category_constraint OR category_constraint IS NULL)
+		AND (owner_uid = user_constraint OR user_constraint IS NULL)
+		AND ((min_answers IS NOT NULL AND answer_count >= min_answers) OR (min_answers IS NULL AND answer_count = 0));
+END;
+//;
+
 DELIMITER ;
-
--- -- get posts relevant to query ordered by score
--- DELIMITER //
--- CREATE PROCEDURE query(IN q VARCHAR(65535), IN category_filter VARCHAR(65535), IN answer_filter VARCHAR(65535), IN user_constraint VARCHAR(65535), IN num_results INT)
--- BEGIN
---     SET @query = CONCAT ("
---     	SELECT redirect_uid, SUM(score) AS score, title, preview, owner_uid, owner_real, owner_display, image_url, creation_date, answer_count, upvotes, category FROM (
--- 			SELECT 
--- 					scores.score,
--- 					q.uid AS redirect_uid,
--- 					q.title,
--- 					SUBSTRING(q.body, 1, 200) AS preview,
--- 					q.owner_uid,
--- 					users.real_name AS owner_real,
--- 					users.display_name AS owner_display,
--- 					users.image_url,
--- 					DATE_FORMAT(q.creation_date, '%b %D, %Y at %l:%i %p') AS creation_date,
--- 					q.answer_count,
--- 					q.upvotes,
--- 					c.name AS category
--- 			FROM
--- 				stems JOIN scores ON stems.uid = scores.stem_uid
--- 				JOIN posts p ON scores.post_uid = p.uid
--- 				JOIN posts q ON p.parent_question_uid = q.uid OR (p.type = 1 AND p.uid = q.uid)
--- 				JOIN users ON q.owner_uid = users.uid
--- 				LEFT JOIN categories c ON q.category_uid = c.uid
--- 				WHERE 
--- 					stems.stem IN (", q, ")", category_filter, answer_filter, user_constraint, ") AS results 
--- 		GROUP BY redirect_uid 
--- 		ORDER BY score DESC
--- 		LIMIT ", num_results, ";");
--- 	PREPARE stmt FROM @query;
---     EXECUTE stmt;
---     DEALLOCATE PREPARE stmt;
--- END //
-
-
--- -- search posts without a query; only filter by category and/or answered status
--- DELIMITER //
--- CREATE PROCEDURE noquery(IN category_filter VARCHAR(65535), IN answer_filter VARCHAR(65535), IN user_constraint VARCHAR(65535), IN num_results INT)
--- BEGIN
--- 	SET @query = CONCAT("
--- 		SELECT 
--- 			q.uid AS redirect_uid, 
--- 			q.title,
--- 			SUBSTRING(q.body, 1, 200) AS preview,
--- 			q.owner_uid,
--- 			users.real_name AS owner_real,
--- 			users.display_name AS owner_display,
--- 			users.image_url,
--- 			DATE_FORMAT(q.creation_date, '%b %D, %Y at %l:%i %p') AS creation_date,
--- 			q.upvotes, 
--- 			q.answer_count, 
--- 			c.name AS category 
--- 		FROM 
--- 			posts q LEFT JOIN categories c ON q.category_uid = c.uid
--- 			JOIN users ON q.owner_uid = users.uid
--- 		WHERE q.type = 1", category_filter, answer_filter, user_constraint, " 
--- 		ORDER BY q.uid DESC
--- 		LIMIT ", num_results, ";");
--- 	PREPARE stmt FROM @query;
--- 	EXECUTE stmt;
--- 	DEALLOCATE PREPARE stmt;
--- END //

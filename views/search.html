@@ -119,7 +119,7 @@
 						<tr>
 							<!-- category, upvotes, answers -->
 							<td class="meta">
-								<a class="metawrapper" href='/questions/{{redirect_uid}}'>
+								<a class="metawrapper" href='/questions/{{uid}}'>
 									{{#category}}<div class="category"><em>{{category}}</em></div>{{/category}}
 									<div>
 										<div class="upvotes"><span class="number">{{upvotes}}</span><br>upvotes</div>
@@ -130,8 +130,8 @@
 
 							<!-- title, owner, time -->
 							<td class="postpreview">
-								<div><a href='/questions/{{redirect_uid}}'>{{title}}</a></div>
-								<p class="preview">{{preview}} ...</p>
+								<div><a href='/questions/{{uid}}'>{{title}}</a></div>
+								<p class="preview">{{body}} ...</p>
 								<div class="asker">asked {{creation_date}} by <a href="/users/{{owner_uid}}" title="{{owner_real}}">{{owner_display}}</a></div>
 							</td>
 						</tr>
