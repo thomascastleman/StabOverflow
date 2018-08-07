@@ -10,7 +10,7 @@
 	background-color: #f2f2f2;
 	padding: 20px;
 	border-radius: 5px;
-	line-height: 50px;
+	line-height: 40px;
 }
 
 /* every element in container */
@@ -28,4 +28,10 @@
 	padding: 3px;
 	border-radius: 4px;
 	border: none;
+}
+
+p {
+	line-height: 20px;
+	margin-top: 15px;
+	margin-bottom: 15px;
 }

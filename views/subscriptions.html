@@ -84,7 +84,7 @@
 
 			<div id="container">
 				<h1>Manage Your Subscriptions</h1>
-				<h3>Categories</h3>
+				<p>Subscribing to a category signs you up to receive emails summarizing new questions from that category that have been posted recently.</p>
 				{{#categories}}
 				   <div class="pretty p-switch p-fill" title="Toggle to change your subscription status with this category">
 				       	<input type="checkbox" value="{{uid}}" onclick="toggleCategorySub(this, {{uid}}, '{{name}}');" {{#isSubscribed}}checked{{/isSubscribed}}>
