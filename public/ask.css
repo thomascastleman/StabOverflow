@@ -10,7 +10,7 @@
 }
 
 /* "Ask A Question" header */
-h1 {
+.container > h1 {
 	font-family: 'Kanit', sans-serif;
 	font-weight: 400;
 }

@@ -17,6 +17,7 @@
 
         <link rel="stylesheet" type="text/css" href="/editpost.css">
         <link rel="stylesheet" type="text/css" href="/code.css">
+        <link rel="stylesheet" type="text/css" href="/markdowninstructions.css">
 
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
 
@@ -103,6 +104,29 @@
 				<div class="wmd-panel">
 	                <div id="wmd-button-bar"></div>
 	                <textarea name="appendage" class="wmd-input" id="wmd-input"></textarea>
+	                <div class="markdown-instructions">
+		            	<div id="toggle-instructions" onclick="$('#instructions-list').slideToggle();">Toggle Instructions</div>
+						<ul id="instructions-list" hidden>
+							<li><p><strong>**bold text**</strong></p></li>
+							<li><p><em>*emphasized text*</em></p></li>
+							<li>
+								<p>
+									Links:<br>
+									[link to Google](https://www.google.com)<br>
+									&lt;https://www.google.com&gt;
+								</p>
+							</li>
+							<li><p>Indent code with tab</p></li>
+							<li><p>Put backticks around <code>`inline code`</code></p></li>
+							<li>
+								<p>
+									# Big Header<br>
+									## Medium Header<br>
+									### Small Header
+								</p>
+							</li>
+						</ul>
+					</div>
 	            </div>
 
 	            <div id="wmd-preview" class="wmd-panel wmd-preview"></div>

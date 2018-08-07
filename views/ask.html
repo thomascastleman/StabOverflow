@@ -98,14 +98,15 @@
 	                <div id="wmd-button-bar"></div>
 	                <textarea name="body" class="wmd-input" id="wmd-input"></textarea>
 		            <div class="markdown-instructions">
-						<ul>
+		            	<div id="toggle-instructions" onclick="$('#instructions-list').slideToggle();">Toggle Instructions</div>
+						<ul id="instructions-list" hidden>
 							<li><p><strong>**bold text**</strong></p></li>
 							<li><p><em>*emphasized text*</em></p></li>
 							<li>
 								<p>
 									Links:<br>
-									[link to Google](https://google.com)<br>
-									&lt;https://google.com&gt;
+									[link to Google](https://www.google.com)<br>
+									&lt;https://www.google.com&gt;
 								</p>
 							</li>
 							<li><p>Indent code with tab</p></li>
