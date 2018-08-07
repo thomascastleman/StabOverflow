@@ -3,12 +3,78 @@
 <html>
 <head>
 	<title></title>
+	<link href="https://fonts.googleapis.com/css?family=Kanit:300,400" rel="stylesheet">
+	<style>
+		#container {
+			/*font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;*/
+			font-family: 'Kanit', sans-serif;
+			width: 60%;
+			min-width: 500px;
+			margin-left: auto;
+			margin-right: auto;
+			border: none;
+			border-radius: 5px;
+			background-color: #f2f2f2;
+			padding: 10px;
+		}
+
+		a, a:visited {
+			color: #0066ff;
+			text-decoration: none;
+			outline: none;
+		}
+
+		a:hover {
+			color: #4d94ff;
+		}
+
+
+
+		/* asker metadata */
+		.asker {
+			background-color: #e0e0e0;
+			font-size: 13px;
+			color: #4d4d4d;
+			padding: 7px;
+			margin-top: 5px;
+			border-radius: 3px;
+		}
+
+		/* links in asker div */
+		.asker > a, .asker a:visited {
+			text-decoration: none;
+			outline: none;
+			color: #0066ff;
+			font-size: 15px;
+		}
+
+		/* div container for date asked */
+		.asker > div {
+			margin-bottom: 4px;
+		}
+
+		/* asker profile image */
+		.asker > img {
+			border: none;
+			border-radius: 3px;
+		}
+
+		p, blockquote {
+			font-size: 14px;
+		}
+	</style>
 </head>
 <body>
-	<h1><a href="{{domain}}/questions/{{questionUID}}">{{questionTitle}}</a></h1>
-	<h2>asked by <a href='{{domain}}/users/{{askerUID}}'>{{askerName}}</a></h2>
-	<p>A new answer from <a href='{{domain}}/users/{{answererUID}}'>{{answererName}}</a> has been posted:</p>
-	<p>{{answerBody}}...</p>
+	<div id="container">
+		<h1><a href="{{domain}}/questions/{{questionUID}}">{{questionTitle}}</a></h1>
+		<div class="asker">
+			<div>asked {{creation_date}}</div>
+			{{#image_url}}<img src="{{image_url}}" width="40" align="middle"/>{{/image_url}}
+			<a href="{{domain}}/users/{{askerUID}}">{{askerName}}</a>
+		</div>
+		<p>A new answer from <a href='{{domain}}/users/{{answererUID}}'>{{answererName}}</a> has been posted:</p>
+		<blockquote>{{answerBody}}...</blockquote>
+	</div>
 </body>
 </html>
 ~
@@ -17,12 +83,75 @@
 <html>
 <head>
 	<title></title>
+	<link href="https://fonts.googleapis.com/css?family=Kanit:300,400" rel="stylesheet">
+	<style>
+		#container {
+			font-family: 'Kanit', sans-serif;
+			width: 60%;
+			min-width: 500px;
+			margin-left: auto;
+			margin-right: auto;
+			border: none;
+			border-radius: 5px;
+			background-color: #f2f2f2;
+			padding: 10px;
+		}
+
+		a, a:visited {
+			color: #0066ff;
+			text-decoration: none;
+			outline: none;
+		}
+
+		a:hover {
+			color: #4d94ff;
+		}
+
+		/* asker metadata */
+		.asker {
+			background-color: #e0e0e0;
+			font-size: 13px;
+			color: #4d4d4d;
+			padding: 7px;
+			margin-top: 5px;
+			border-radius: 3px;
+		}
+
+		/* links in asker div */
+		.asker > a, .asker a:visited {
+			text-decoration: none;
+			outline: none;
+			color: #0066ff;
+			font-size: 15px;
+		}
+
+		/* div container for date asked */
+		.asker > div {
+			margin-bottom: 4px;
+		}
+
+		/* asker profile image */
+		.asker > img {
+			border: none;
+			border-radius: 3px;
+		}
+
+		p, blockquote {
+			font-size: 14px;
+		}
+	</style>
 </head>
 <body>
-	<h1><a href="{{domain}}/questions/{{questionUID}}">{{questionTitle}}</a></h1>
-	<h2>asked by <a href='{{domain}}/users/{{askerUID}}'>{{askerName}}</a></h2>
-	<p>New edits have been made to this question by {{askerName}}:</p>
-	<p>{{appendage}}...</p>
+	<div id="container">
+		<h1><a href="{{domain}}/questions/{{questionUID}}">{{questionTitle}}</a></h1>
+		<div class="asker">
+			<div>edited {{edit_date}}</div>
+			{{#image_url}}<img src="{{image_url}}" width="40" align="middle"/>{{/image_url}}
+			<a href="{{domain}}/users/{{askerUID}}">{{askerName}}</a>
+		</div>
+		<p>New edits have been made to this question:</p>
+		<blockquote>{{appendage}}...</blockquote>
+	</div>
 </body>
 </html>
 ~
@@ -31,10 +160,31 @@
 <html>
 <head>
 	<title></title>
+	<link href="https://fonts.googleapis.com/css?family=Kanit:300,400" rel="stylesheet">
+	<style>
+		#container {
+			font-family: 'Kanit', sans-serif;
+			width: 60%;
+			min-width: 500px;
+			margin-left: auto;
+			margin-right: auto;
+			border: none;
+			border-radius: 5px;
+			background-color: #f2f2f2;
+			padding: 10px;
+		}
+
+		p {
+			font-size: 14px;
+		}
+	</style>
 </head>
 <body>
-	<h2>You have successfully subscribed to the category {{category}}!</h2>
-	<p>You will now receive emails with new content posted under this category.</p>
+	<div id="container">
+		<h2>You have successfully subscribed to {{category}}!</h2>
+		<p>You will now receive emails with new content posted under this category.</p>
+		<p>Click <a href="{{domain}}/subscriptions">here</a> to manage your subscriptions.</p>
+	</div>
 </body>
 </html>
 ~
@@ -43,10 +193,31 @@
 <html>
 <head>
 	<title></title>
+	<link href="https://fonts.googleapis.com/css?family=Kanit:300,400" rel="stylesheet">
+	<style>
+		#container {
+			font-family: 'Kanit', sans-serif;
+			width: 60%;
+			min-width: 500px;
+			margin-left: auto;
+			margin-right: auto;
+			border: none;
+			border-radius: 5px;
+			background-color: #f2f2f2;
+			padding: 10px;
+		}
+
+		p {
+			font-size: 14px;
+		}
+	</style>
 </head>
 <body>
-	<h2>You have successfully unsubscribed from the category {{category}}!</h2>
-	<p>You will no longer receive emails regarding new content from this category.</p>
+	<div id="container">
+		<h2>You have successfully unsubscribed from {{category}}!</h2>
+		<p>You will no longer receive emails regarding new content from this category.</p>
+		<p>Click <a href="{{domain}}/subscriptions">here</a> to manage your subscriptions.</p>
+	</div>
 </body>
 </html>
 ~
@@ -58,6 +229,27 @@
 	<link href="https://fonts.googleapis.com/css?family=Kanit:300,400" rel="stylesheet">
 	<style>
 
+		#container {
+			font-family: 'Kanit', sans-serif;
+			width: 60%;
+			min-width: 500px;
+			margin-left: auto;
+			margin-right: auto;
+			border: none;
+			border-radius: 5px;
+			background-color: #f2f2f2;
+			padding: 10px;
+		}
+
+		#header {
+			font-family: 'Kanit', sans-serif;
+			font-weight: 400;
+		}
+
+		#title {
+			font-size: 16px;
+		}
+
 		/* table of questions */
 		table {
 			margin-left:auto;
@@ -65,7 +257,7 @@
 			font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 			margin-top: 20px;
 			border-collapse: collapse;
-			width: 60%;
+			width: 100%;
 			min-width: 500px;
 		}
 
@@ -124,6 +316,7 @@
 			padding: 3px;
 			border: 1px solid #0066ff;
 			border-radius: 3px;
+			margin-bottom: 2px;
 		}
 
 		/* enlarged count number for upvotes / answers */
@@ -160,28 +353,30 @@
 	</style>
 </head>
 <body>
-	<h2>Check out these new {{name}} questions!</h2>
-	<table>
-		{{#posts}}
-			<tr>
-				<!-- category, upvotes, answers -->
-				<td class="meta">
-					<a class="metawrapper" href='{{domain}}/questions/{{uid}}'>
-						<div>
-							<div class="upvotes"><span class="number">{{upvotes}}</span><br>upvotes</div>
-							<div class="answers"><span class="number">{{answer_count}}</span><br>answers</div>
-						</div>
-					</a>
-				</td>
+	<div id="container">
+		<h2 id="header">Check out these new {{name}} questions!</h2>
+		<table>
+			{{#posts}}
+				<tr>
+					<!-- category, upvotes, answers -->
+					<td class="meta">
+						<a class="metawrapper" href='{{domain}}/questions/{{uid}}'>
+							<div>
+								<div class="upvotes"><span class="number">{{upvotes}}</span><br>upvotes</div>
+								<div class="answers"><span class="number">{{answer_count}}</span><br>answers</div>
+							</div>
+						</a>
+					</td>
 
-				<!-- title, owner, time -->
-				<td class="postpreview">
-					<div><a href='{{domain}}/questions/{{uid}}'>{{title}}</a></div>
-					<p class="preview">{{body}} ...</p>
-					<div class="asker">asked {{creation_date}} by <a href="{{domain}}/users/{{owner_uid}}">{{owner_name}}</a></div>
-				</td>
-			</tr>
-		{{/posts}}
-	</table>
+					<!-- title, owner, time -->
+					<td class="postpreview">
+						<div id="title"><a href='{{domain}}/questions/{{uid}}'>{{title}}</a></div>
+						<p class="preview">{{body}} ...</p>
+						<div class="asker">asked {{creation_date}} by <a href="{{domain}}/users/{{owner_uid}}">{{owner_name}}</a></div>
+					</td>
+				</tr>
+			{{/posts}}
+		</table>
+	</div>
 </body>
 </html>

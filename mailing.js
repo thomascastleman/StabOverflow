@@ -203,11 +203,13 @@ module.exports = {
 		};
 
 		// get original post info
-		con.query('SELECT posts.title AS title, users.display_name AS username, users.uid AS uid FROM posts JOIN users ON posts.owner_uid = users.uid WHERE posts.uid = ?;', [questionUID], function(err, rows) {
+		con.query('SELECT posts.title AS title, posts.creation_date AS creation_date, users.display_name AS username, users.uid AS uid, users.image_url AS image_url FROM posts JOIN users ON posts.owner_uid = users.uid WHERE posts.uid = ?;', [questionUID], function(err, rows) {
 			if (!err && rows !== undefined && rows.length > 0) {
 				render.questionTitle = rows[0].title;
 				render.askerName = rows[0].username;
 				render.askerUID = rows[0].uid;
+				render.creation_date = moment(rows[0].creation_date).format('MMM Do, YYYY [at] h:mm A');
+				render.image_url = rows[0].image_url;
 
 				// get answerer name
 				con.query('SELECT display_name FROM users WHERE uid = ?;', [answererUID], function(err, rows) {
@@ -226,7 +228,7 @@ module.exports = {
 								if (templates.newAnswerNotification) {
 									// configure subscription message
 									var options = {
-										subject: "[Question Subscription] " + render.questionTitle,
+										subject: "[New Answer] " + render.questionTitle,
 										text: "",
 										html: mustache.render(templates.newAnswerNotification, render)
 									}
@@ -249,13 +251,15 @@ module.exports = {
 			questionUID: questionUID,
 			questionTitle: title,
 			appendage: appendage.substring(0, 200),
-			domain: creds.domain
+			domain: creds.domain,
+			edit_date: moment().format('MMM Do, YYYY [at] h:mm A')
 		};
 
 		// get editor info
-		con.query('SELECT display_name FROM users WHERE uid = ?;', [askerUID], function(err, rows) {
+		con.query('SELECT display_name, image_url FROM users WHERE uid = ?;', [askerUID], function(err, rows) {
 			if (!err && rows !== undefined && rows.length > 0) {
 				render.askerName = rows[0].display_name;
+				render.image_url = rows[0].image_url;
 			}
 
 			// get emails of all users who subscribe to this question
@@ -270,7 +274,7 @@ module.exports = {
 					if (templates.newEditsNotification) {
 						// configure subscription message
 						var options = {
-							subject: "[Question Subscription] " + render.questionTitle,
+							subject: "[New Edits] " + render.questionTitle,
 							text: "",
 							html: mustache.render(templates.newEditsNotification, render)
 						}
@@ -301,7 +305,8 @@ module.exports = {
 								subject: "Successfully subscribed to " + rows[0].name + "!",
 								text: "",
 								html: mustache.render(templates.categorySubSuccess, {
-									category: rows[0].name
+									category: rows[0].name,
+									domain: creds.domain
 								})
 							};
 
@@ -332,7 +337,8 @@ module.exports = {
 								subject: "Successfully unsubscribed from " + rows[0].name + "!",
 								text: "",
 								html: mustache.render(templates.categoryUnsubSuccess, {
-									category: rows[0].name
+									category: rows[0].name,
+									domain: creds.domain
 								})
 							};
 

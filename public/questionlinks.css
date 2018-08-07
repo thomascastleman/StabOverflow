@@ -64,6 +64,7 @@ td {
 	padding: 3px;
 	border: 1px solid #0066ff;
 	border-radius: 3px;
+	margin-bottom: 2px;
 }
 
 /* enlarged count number for upvotes / answers */
