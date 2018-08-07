@@ -31,10 +31,11 @@ fs.readFile('./views/mailingtemplates.html', 'UTF8', function(err, data) {
 
 		// extract email templates for different messages
 		templates = {
-			questionSubNotification: data[0],
-			categorySubSuccess: data[1],
-			categoryUnsubSuccess: data[2],
-			categoryDigest: data[3]
+			newAnswerNotification: data[0],
+			newEditsNotification: data[1],
+			categorySubSuccess: data[2],
+			categoryUnsubSuccess: data[3],
+			categoryDigest: data[4]
 		};
 	}
 });
@@ -191,8 +192,8 @@ module.exports = {
 		con.query('INSERT INTO question_subs (user_uid, question_uid) VALUES (?, ?);', [userUID, questionUID], function(err, rows) {});
 	},
 
-	// send group mail to question subscribers updating that activity has occurred on a question
-	updateQuestionSubscribers: function(questionUID, answererUID, answerBody) {
+	// send group mail to question subscribers updating that a new answer has been posted on a question they subscribe to
+	notifyNewAnswer: function(questionUID, answererUID, answerBody) {
 		// prep render object
 		var render = {
 			questionUID: questionUID,
@@ -222,12 +223,12 @@ module.exports = {
 									subscribers.push(rows[i].email);
 								}
 
-								if (templates.questionSubNotification) {
+								if (templates.newAnswerNotification) {
 									// configure subscription message
 									var options = {
 										subject: "[Question Subscription] " + render.questionTitle,
 										text: "",
-										html: mustache.render(templates.questionSubNotification, render)
+										html: mustache.render(templates.newAnswerNotification, render)
 									}
 
 									// send group mail notification
@@ -238,6 +239,47 @@ module.exports = {
 					}
 				});
 			}
+		});
+	},
+
+	// send group email to question subscribers updating that edits have been made to a question they subscribe to
+	notifyNewEdits: function(askerUID, questionUID, title, appendage) {
+		var render = {
+			askerUID: askerUID,
+			questionUID: questionUID,
+			questionTitle: title,
+			appendage: appendage.substring(0, 200),
+			domain: creds.domain
+		};
+
+		// get editor info
+		con.query('SELECT display_name FROM users WHERE uid = ?;', [askerUID], function(err, rows) {
+			if (!err && rows !== undefined && rows.length > 0) {
+				render.askerName = rows[0].display_name;
+			}
+
+			// get emails of all users who subscribe to this question
+			con.query('SELECT users.email FROM users JOIN question_subs ON users.uid = question_subs.user_uid WHERE question_subs.question_uid = ?;', [questionUID], function(err, rows) {
+				if (!err && rows !== undefined && rows.length > 0) {
+					var subscribers = [];
+					// fetch subscriber emails
+					for (var i = 0; i < rows.length; i++) {
+						subscribers.push(rows[i].email);
+					}
+
+					if (templates.newEditsNotification) {
+						// configure subscription message
+						var options = {
+							subject: "[Question Subscription] " + render.questionTitle,
+							text: "",
+							html: mustache.render(templates.newEditsNotification, render)
+						}
+
+						// send group mail notification
+						module.exports.sendGroupMail(subscribers, options);
+					}
+				}
+			});
 		});
 	},
 

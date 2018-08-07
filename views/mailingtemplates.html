@@ -1,4 +1,4 @@
-<!-- Question subscription notification email -->
+<!-- New answer notification email -->
 <!DOCTYPE html>
 <html>
 <head>
@@ -9,6 +9,20 @@
 	<h2>asked by <a href='{{domain}}/users/{{askerUID}}'>{{askerName}}</a></h2>
 	<p>A new answer from <a href='{{domain}}/users/{{answererUID}}'>{{answererName}}</a> has been posted:</p>
 	<p>{{answerBody}}...</p>
+</body>
+</html>
+~
+<!-- New edits notification email -->
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+</head>
+<body>
+	<h1><a href="{{domain}}/questions/{{questionUID}}">{{questionTitle}}</a></h1>
+	<h2>asked by <a href='{{domain}}/users/{{askerUID}}'>{{askerName}}</a></h2>
+	<p>New edits have been made to this question by {{askerName}}:</p>
+	<p>{{appendage}}...</p>
 </body>
 </html>
 ~

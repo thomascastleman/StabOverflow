@@ -97,7 +97,7 @@ module.exports = {
 						con.query('CALL create_answer(?, ?, ?);', [req.body.parent_question, req.user.local.uid, req.body.body], function(err, rows) {
 							if (!err && rows !== undefined && rows.length > 0 && rows[0].length > 0) {
 								// send bulk mail updating subscribers of this question that a new answer is available
-								mail.updateQuestionSubscribers(req.body.parent_question, req.user.local.uid, req.body.body);
+								mail.notifyNewAnswer(req.body.parent_question, req.user.local.uid, req.body.body);
 
 								res.redirect('/questions/' + req.body.parent_question);	// redirect to parent question's page
 							} else {
@@ -140,8 +140,11 @@ module.exports = {
 			// avoid empty appendage
 			if (req.body.appendage != '' && !isNaN(parseInt(req.body.uid, 10))) {
 				// ensure editing own post
-				con.query('SELECT type, parent_question_uid FROM posts WHERE uid = ? AND owner_uid = ?;', [req.body.uid, req.user.local.uid], function(err, rows) {
+				con.query('SELECT type, parent_question_uid, title FROM posts WHERE uid = ? AND owner_uid = ?;', [req.body.uid, req.user.local.uid], function(err, rows) {
 					if (!err && rows !== undefined && rows.length > 0) {
+						// register if post is question or answer
+						var isQuestion = rows[0].type == 1;
+						var title = rows[0].title;
 
 						// format editing message to record time of edit
 						var editMessage = '\n\n<br>*Edited ' + moment().format('h:mm A M/D/YYYY') + ':*\n\n';
@@ -150,8 +153,14 @@ module.exports = {
 						con.query('UPDATE posts SET body = concat(body, ?) WHERE uid = ?;', [editMessage + req.body.appendage, req.body.uid], function(err, rows2) {
 							if (!err) {
 								// redirect to edited post
-								var redirect_uid = rows[0].type == 1 ? req.body.uid : rows[0].parent_question_uid
+								var redirect_uid = isQuestion ? req.body.uid : rows[0].parent_question_uid
 								res.redirect(redirect_uid ? '/questions/' + redirect_uid : '/');
+
+								// if edited post is question, notify all subscribers that new edits have been made
+								if (isQuestion) {
+									mail.notifyNewEdits(req.user.local.uid, req.body.uid, title, req.body.appendage);
+								}
+
 							} else {
 								res.render('error.html', auth.errorRender(req, "Failed to apply edits to post"));
 							}
