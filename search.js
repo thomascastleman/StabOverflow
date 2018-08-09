@@ -59,7 +59,7 @@ module.exports = {
 					if (query) {
 
 						// count total number of search results
-						con.query('CALL query_count(?, ?, ?, ?);', [query, req.body.category, userUID, answerConstraint], function(err, rows) {
+						con.query('CALL query_count(?, ?, ?, ?, ?);', [query, req.body.category, userUID, answerConstraint, settings.maxNumResults], function(err, rows) {
 							if (!err && rows !== undefined && rows.length > 0 && rows[0].length > 0) {
 								module.exports.formatPageInfo(render, rows[0][0].count);
 							}
@@ -77,7 +77,7 @@ module.exports = {
 					// search only by constraints if they exist
 					} else {
 						// count total number of search results
-						con.query('CALL noquery_count(?, ?, ?);', [req.body.category, userUID, answerConstraint], function(err, rows) {
+						con.query('CALL noquery_count(?, ?, ?, ?);', [req.body.category, userUID, answerConstraint, settings.maxNumResults], function(err, rows) {
 							if (!err && rows !== undefined && rows.length > 0 && rows[0].length > 0) {
 								module.exports.formatPageInfo(render, rows[0][0].count);
 							}
@@ -108,7 +108,7 @@ module.exports = {
 				}
 
 				// count total number of search results
-				con.query('CALL noquery_count(?, ?, ?);', [null, null, 0], function(err, rows) {
+				con.query('CALL noquery_count(?, ?, ?, ?);', [null, null, 0, settings.maxNumResults], function(err, rows) {
 					if (!err && rows !== undefined && rows.length > 0 && rows[0].length > 0) {
 						module.exports.formatPageInfo(render, rows[0][0].count);
 					}

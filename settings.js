@@ -8,7 +8,7 @@ module.exports = {
 	// search settings
 	search: {
 		resultsPerPage: 2,	// number of search results per each page
-		maxNumResults: 300	// maximum number of total results yielded by a search request
+		maxNumResults: 300	// maximum number of total results yielded by a search request (this should be > resultsPerPage)
 	},
 
 	// user search settings

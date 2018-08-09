@@ -159,7 +159,7 @@ END;
 //;
 
 -- count the full number of found results for a given query, with constraints applied (args same as query())
-CREATE PROCEDURE query_count(IN textquery VARCHAR(65535), IN category_constraint INT, IN user_constraint INT, IN min_answers INT)
+CREATE PROCEDURE query_count(IN textquery VARCHAR(65535), IN category_constraint INT, IN user_constraint INT, IN min_answers INT, IN max_results INT)
 BEGIN
 	SELECT COUNT(*) AS count FROM (
 
@@ -169,6 +169,7 @@ BEGIN
 			JOIN posts q ON p.parent_question_uid = q.uid
 		WHERE MATCH (p.title, p.body) AGAINST (textquery IN BOOLEAN MODE)
 		GROUP BY p.parent_question_uid
+		LIMIT max_results
 
 	) AS results WHERE
 		(category_uid = category_constraint OR category_constraint IS NULL)
@@ -212,13 +213,16 @@ END;
 //;
 
 -- count the full number of found results for a search made with just constraints (args same as noquery())
-CREATE PROCEDURE noquery_count(IN category_constraint INT, IN user_constraint INT, IN min_answers INT)
+CREATE PROCEDURE noquery_count(IN category_constraint INT, IN user_constraint INT, IN min_answers INT, IN max_results INT)
 BEGIN
-	SELECT COUNT(*) AS count FROM posts WHERE 
-		type = 1
-		AND (category_uid = category_constraint OR category_constraint IS NULL)
-		AND (owner_uid = user_constraint OR user_constraint IS NULL)
-		AND ((min_answers IS NOT NULL AND answer_count >= min_answers) OR (min_answers IS NULL AND answer_count = 0));
+	SELECT COUNT(*) AS count FROM (
+		SELECT * FROM posts WHERE 
+			type = 1
+			AND (category_uid = category_constraint OR category_constraint IS NULL)
+			AND (owner_uid = user_constraint OR user_constraint IS NULL)
+			AND ((min_answers IS NOT NULL AND answer_count >= min_answers) OR (min_answers IS NULL AND answer_count = 0))
+		LIMIT max_results
+	) AS results;
 END;
 //;
 
