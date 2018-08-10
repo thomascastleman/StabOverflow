@@ -12,13 +12,18 @@ var mustache = require('mustache');
 var moment = require('moment');
 var fs = require('fs');
 
-// create gmail mail-sender 
-var transporter = nodemailer.createTransport({
-	service: 'gmail',
-	auth: {
-		user: creds.emailUsername,
-		pass: creds.emailPassword
-	}
+let transporter = nodemailer.createTransport({
+    host: 'smtp.gmail.com',
+    port: 465,
+    secure: true,
+    auth: {
+        type: 'OAuth2',
+        user: creds.MAIL_ADDRESS,
+        clientId: creds.MAIL_CLIENT_ID,
+        clientSecret: creds.MAIL_CLIENT_SECRET,
+        refreshToken: creds.MAIL_REFRESH_TOKEN,
+        accessToken: creds.MAIL_ACCESS_TOKEN
+    }
 });
 
 var templates = {};

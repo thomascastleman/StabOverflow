@@ -60,6 +60,7 @@ Users are able to subscribe to questions by clicking the mail icon to the left o
 
 In addition, users are also able to subscribe to categories, meaning they will receive digests every day with questions that have been posted under that category in the past 24 hours.
 
+The mailing system uses [nodemailer](https://nodemailer.com/about/) with Google OAuth2 to securely access and send emails from a google account used only for this service. This requires a Google Client ID, Client Secret, Refresh Token, and Access Token. Most of the instructions for obtaining these credentials can be found [here](http://masashi-k.blogspot.com/2013/06/sending-mail-with-gmail-using-xoauth2.html).
 
 ## Installation
 
@@ -76,6 +77,13 @@ module.exports = {
 	GOOGLE_CLIENT_ID: '<YOUR GOOGLE CLIENT ID HERE>',
 	GOOGLE_CLIENT_SECRET: '<YOUR GOOGLE CLIENT SECRET HERE>',
 
+	// OAuth2 credentials for access to service email account
+	MAIL_ADDRESS: '<YOUR SERVICE MAILING ADDRESS HERE>',
+	MAIL_CLIENT_ID: '<YOUR MAILING CLIENT ID HERE>',
+	MAIL_CLIENT_SECRET: '<YOUR MAILING CLIENT SECRET HERE>',
+	MAIL_REFRESH_TOKEN: '<YOUR MAILING REFRESH TOKEN HERE>',
+	MAIL_ACCESS_TOKEN: '<YOUR MAILING ACCESS TOKEN HERE>',
+
 	// session encryption secret
 	SESSION_SECRET: '<YOUR SESSION SECRET HERE>',
 
@@ -84,14 +92,10 @@ module.exports = {
 	MySQL_password: '<YOUR MYSQL PASSWORD HERE>',
 
 	// localhost for testing purposes (replace this with an actual domain)
-	domain: 'http://localhost:8080',
-	
-	// email credentials (for mailing / subscription services)
-	emailUsername: '<YOUR SERVICE EMAIL HERE>',
-	emailPassword: '<YOUR SERVICE EMAIL PASSWORD HERE>'
+	domain: 'http://localhost:8080'
 }
  ```
- This will allow the system to access the Google API as well as execute database queries. Providing email credentials also allows the system to send mail notifications to its users (though this requires enabling less-secure apps on this Google account).
+ This will allow the system to access the Google API as well as execute database queries. Providing email credentials also allows the system to send mail notifications to its users.
  
  Now, you may run `server.js` to start the system using the command
  ```
