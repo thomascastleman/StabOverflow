@@ -12,6 +12,7 @@ var mustache = require('mustache');
 var moment = require('moment');
 var fs = require('fs');
 
+// create email-sender with nodemailer using Google OAuth2
 let transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com',
     port: 465,
@@ -74,6 +75,7 @@ module.exports = {
 		// unsubscribe a user from a question
 		app.post('/unsubscribeToQuestion', auth.isAuthenticated, function(req, res) {
 			if (req.user.local.uid && req.body.questionUID) {
+				// remove question subscription link
 				con.query('DELETE FROM question_subs WHERE user_uid = ? AND question_uid = ?;', [req.user.local.uid, req.body.questionUID], function(err, rows) {
 					if (!err) {
 						res.send({ success: 1 });
@@ -146,11 +148,12 @@ module.exports = {
 
 		// get subscription management page for this user
 		app.get('/subscriptions', auth.restrictAuth, function(req, res) {
-			var render = auth.defaultRender(req);
+			var render = auth.defaultRender(req);	// prepare default render object
 
 			// select all categories, noting which ones the user is currently subscribed to
 			con.query('SELECT categories.name, categories.uid, CASE WHEN category_subs.uid IS NULL THEN NULL ELSE 1 END AS isSubscribed FROM categories LEFT JOIN category_subs ON categories.uid = category_subs.category_uid AND category_subs.user_uid = ? WHERE categories.is_archived = 0;', [req.user.local.uid], function(err, rows) {
 				if (!err && rows !== undefined && rows.length > 0) {
+					// attach unarchived categories to render object
 					render.categories = rows;
 				}
 				res.render('subscriptions.html', render);
@@ -164,36 +167,29 @@ module.exports = {
 	sendMail: function(options) {
 		// set up message info (options should use: to (recipient address), subject (email subject), text (plaintext message), html (formatted message))
 		var mailOptions = Object.assign(options, {
-			from: creds.emailUsername
+			from: creds.MAIL_ADDRESS
 		});
 
 		// use transporter to send mail
-		transporter.sendMail(mailOptions, function(err, info){
-			if (err) {
-				console.log(err);
-			}
-		});
+		transporter.sendMail(mailOptions);
 	},
 
 	// send a bulk mail
 	sendGroupMail: function(receivers, options) {
 		// set up message info (use bcc to hide recipient emails)
 		var mailOptions = Object.assign(options, {
-			from: creds.emailUsername,
+			from: creds.MAIL_ADDRESS,
 			to: [],
 			bcc: receivers.join(', ')
 		});
 
 		// use transporter to send mail
-		transporter.sendMail(mailOptions, function(err, info){
-			if (err) {
-				console.log(err);
-			}
-		});
+		transporter.sendMail(mailOptions);
 	},
 
 	// add a new question subscription link
 	addNewQuestionSub: function(userUID, questionUID) {
+		// insert the question subscription link
 		con.query('INSERT INTO question_subs (user_uid, question_uid) VALUES (?, ?);', [userUID, questionUID], function(err, rows) {});
 	},
 
@@ -210,6 +206,7 @@ module.exports = {
 		// get original post info
 		con.query('SELECT posts.title AS title, posts.creation_date AS creation_date, users.display_name AS username, users.uid AS uid, users.image_url AS image_url FROM posts JOIN users ON posts.owner_uid = users.uid WHERE posts.uid = ?;', [questionUID], function(err, rows) {
 			if (!err && rows !== undefined && rows.length > 0) {
+				// add info to render object
 				render.questionTitle = rows[0].title;
 				render.askerName = rows[0].username;
 				render.askerUID = rows[0].uid;
@@ -251,6 +248,7 @@ module.exports = {
 
 	// send group email to question subscribers updating that edits have been made to a question they subscribe to
 	notifyNewEdits: function(askerUID, questionUID, title, appendage) {
+		// prepare render object
 		var render = {
 			askerUID: askerUID,
 			questionUID: questionUID,
@@ -276,6 +274,7 @@ module.exports = {
 						subscribers.push(rows[i].email);
 					}
 
+					// if template exists
 					if (templates.newEditsNotification) {
 						// configure subscription message
 						var options = {
@@ -356,7 +355,7 @@ module.exports = {
 		});
 	},
 
-	// send category digests to all category subscribers
+	// send category digests for every category to all category subscribers
 	sendAllCategoryDigests: function() {
 		// object to map category uid's to info / emails / posts
 		var categories = {};
@@ -365,15 +364,17 @@ module.exports = {
 		con.query('SELECT users.email, categories.name AS category_name, category_subs.category_uid FROM category_subs JOIN users ON category_subs.user_uid = users.uid JOIN categories ON category_subs.category_uid = categories.uid;', function(err, rows) {
 			if (!err && rows !== undefined && rows.length > 0) {
 
-				// construct objects for each category containing cat name, and list of subscriber objects
+				// construct objects for each category containing cat name, and list of subscriber emails
 				for (var i = 0; i < rows.length; i++) {
 					if (!categories[rows[i].category_uid]) {
+						// if no existing object, add a new one, record category uid, name, and list of subscriber emails
 						categories[rows[i].category_uid] = {
 							uid: rows[i].category_uid,
 							name: rows[i].category_name,
 							emails: [rows[i].email],
 						};
 					} else {
+						// if object for this category already exists, just add this user to the list of emails
 						categories[rows[i].category_uid].emails.push(rows[i].email);
 					}
 				}
@@ -393,6 +394,7 @@ module.exports = {
 								// trim post body to use as preview
 								rows[i].body = rows[i].body.substring(0, 200);
 
+								// add to category object's list of post data
 								if (!categories[rows[i].category_uid].posts) {
 									categories[rows[i].category_uid].posts = [rows[i]];
 								} else {
@@ -415,9 +417,11 @@ module.exports = {
 
 	// send group email for a category subscription
 	sendDigest(categoryInfo) {
+		// if email template as well as new posts under this category exist
 		if (templates.categoryDigest && categoryInfo.posts) {
 			categoryInfo.domain = creds.domain;
 
+			// get today's date
 			var date = moment().format('M/D/YY');
 
 			// configure subscription message
