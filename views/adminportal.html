@@ -96,25 +96,25 @@
 						Authorize a new account:<br>
 						<input name="name" type="text" placeholder="Full name" maxlength="32" autocomplete="off"><br>
 						<input name="email" type="text" placeholder="Email" maxlength="45" autocomplete="off" oninput="renderMatches(document.account.email.value, 'Possible Email Conflicts:');"><br>
-						<button type="submit">Authorize</button>
+						<button type="submit" title="Authorizing an account will add them to the database and allow them to log in to the service regardless of their email domain, provided it is a Google account.">Authorize</button>
 					</form>
 					<br>
 					<form method="POST" action="/makeAdmin" name="makeAdmin" onsubmit="return validate(document.makeAdmin.email.value) && confirm('Are you sure you want to make ' + document.makeAdmin.email.value + ' an administrator?');">
 						Grant admin privileges:<br>
 						<input name="email" type="text" placeholder="Email (existing account)" oninput="renderMatches(document.makeAdmin.email.value);" autocomplete="off">
-						<button type="submit">Grant privileges</button>
+						<button type="submit" title="Granting administrator privileges to an existing user will give them access to the Administrator Portal as well as the power to delete posts and comments.">Grant privileges</button>
 					</form>
 					<br>
 					<form method="POST" action="/removeAdmin" name="removeAdmin" onsubmit="return validate(document.removeAdmin.email.value) && confirm('Are you sure you want to revoke the privileges of ' + document.removeAdmin.email.value + '?');">
 						Revoke admin privileges:<br>
 						<input name="email" type="text" placeholder="Email (existing account)" oninput="renderMatches(document.removeAdmin.email.value);" autocomplete="off">
-						<button type="submit">Revoke privileges</button>
+						<button type="submit" title="Revoking administrator privileges will restrict a user's ability to utilize administrator functionality.">Revoke privileges</button>
 					</form>
 					<br>
 					<form method="POST" action="/newCategory" name="newCat" onsubmit="return validate(document.newCat.category.value) && confirm('Are you sure you want to create the category ' + document.newCat.category.value + '?');">
 						Create a new category:<br>
 						<input name="category" type="text" placeholder="Category name" maxlength="32" autocomplete="off">
-						<button type="submit">Create Category</button>
+						<button type="submit" title="Creating a category allows users to post questions under a label so that they can be found easily.">Create Category</button>
 					</form>
 					{{#loadedUnarchived}}
 					<br>
@@ -125,7 +125,7 @@
 							<option value="{{uid}}">{{name}}</option>
 							{{/unarchived}}
 						</select>
-						<button type="submit">Archive Category</button>
+						<button type="submit" title="Archiving a category prevents users from making future posts under this category, but the label is still searchable and remains on any posts that were submitted before archiving.">Archive Category</button>
 					</form>
 					{{/loadedUnarchived}}
 					{{#loadedAllCategories}}
@@ -137,7 +137,7 @@
 							<option value="{{uid}}">{{name}}</option>
 							{{/categories}}
 						</select>
-						<button type="submit">Delete Category</button>
+						<button type="submit" title="Deleting a category removes it fully from the site. It is no longer searchable and will not appear on any posts.">Delete Category</button>
 					</form>
 					{{/loadedAllCategories}}
 				</div>

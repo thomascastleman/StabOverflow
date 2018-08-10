@@ -206,7 +206,7 @@
 						<div>{{{body}}}</div>
 						<div class="asker">
 							<div>asked {{creation_date}}</div>
-							{{#image_url}}<img src="{{image_url}}" width="40" align="middle"/>{{/image_url}}
+							{{#image_url}}<a href="/users/{{owner_uid}}"><img src="{{image_url}}" width="40" align="middle"/></a>{{/image_url}}
 							<a href="/users/{{owner_uid}}" title="{{owner_real}}">{{owner_display}}</a>
 						</div>
 					</div>
@@ -251,7 +251,7 @@
 								<div>{{{body}}}</div>
 								<div class="asker">
 									<div>answered {{creation_date}}</div>
-									{{#image_url}}<img src="{{image_url}}" width="40" align="middle"/>{{/image_url}}
+									{{#image_url}}<a href="/users/{{owner_uid}}"><img src="{{image_url}}" width="40" align="middle"/></a>{{/image_url}}
 									<a href="/users/{{owner_uid}}" title="{{owner_real}}">{{owner_display}}</a>
 								</div>
 							</div>

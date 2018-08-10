@@ -34,7 +34,7 @@
 }
 
 /* asker profile image */
-.asker > img {
+.asker img {
 	border: none;
 	border-radius: 3px;
 }

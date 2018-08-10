@@ -80,7 +80,7 @@
 				<div id="tools">
 				{{#ownProfile}}
 					<a href="/subscriptions" title="Manage Your Subscriptions"><i class="far fa-envelope"></i></a>
-					<a id="edit" title="Edit Profile" href="/users/edit/{{uid}}"><i class="fas fa-user-edit"></i></a>
+					<a id="edit" title="Edit Your Profile" href="/users/edit/{{uid}}"><i class="fas fa-user-edit"></i></a>
 					{{#is_admin}}<a id="admin" title="Administrator Portal" href="/adminPortal"><i class="fas fa-unlock-alt"></i></a>{{/is_admin}}
 				{{/ownProfile}}
 				</div>
@@ -97,7 +97,7 @@
 
 				{{#hasPosts}}
 				<br>
-				<form method="POST" action="/search"><input name="query" value="user:{{uid}}" hidden><input class="seemoreposts" type="submit" value="Search Questions From This User"></form>
+				<form method="POST" action="/search"><input name="query" value="user:{{uid}}" hidden><input class="seemoreposts" type="submit" value="Search Questions From {{display_name}}" title="See more questions from {{display_name}}"></form>
 				<h3>Recent Posts:</h3>
 				<table>
 					{{#posts}}
