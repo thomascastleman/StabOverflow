@@ -109,7 +109,7 @@
 				<input hidden name="type" value="1">
 
 				<div class="container">
-					<h1>Ask a Question</h1><br>
+					<div id="ask-a-question"><h1>Ask a Question</h1></div><br>
 					<center><span id="title">Title </span><input id="titleinput" name="title" type="text" autocomplete="off"></center>
 				</div>
 
@@ -144,7 +144,7 @@
 
 	            <div id="wmd-preview" class="wmd-panel wmd-preview"></div><br>
 
-				<div class="container">
+				<div id="category-and-submit" class="container">
 					<center>
 						Category
 						<select id="category" name="category_uid">
@@ -153,7 +153,6 @@
 								<option value="{{uid}}">{{name}}</option>
 							{{/categories}}
 						</select>
-						<br>
 						<button id="post" type="submit" onclick="window.onbeforeunload = undefined;">Post Your Question</button>
 					</center>
 				</div>
@@ -189,15 +188,5 @@
 				}
 			});
         </script>
-
-		<style>
-			pre {
-				background-color: #e6e6e6;
-				border: none !important;
-			}
-			code {
-				background-color: #e6e6e6;
-			}
-		</style>
 	</body>
 </html>
