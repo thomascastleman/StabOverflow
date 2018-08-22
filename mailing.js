@@ -13,7 +13,7 @@ var moment = require('moment');
 var fs = require('fs');
 
 // create email-sender with nodemailer using Google OAuth2
-let transporter = nodemailer.createTransport({
+var transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com',
     port: 465,
     secure: true,

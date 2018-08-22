@@ -31,7 +31,7 @@ CREATE TABLE posts (
 	type TINYINT(1),	-- implicitly "is question" (0 --> answer, 1 --> question)
 	category_uid INT,
 	owner_uid INT,
-	creation_date DATETIME DEFAULT NOW(),
+	creation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 	answer_count INT DEFAULT 0,
 	upvotes INT DEFAULT 0,
 	title TEXT,
@@ -50,7 +50,7 @@ CREATE TABLE comments (
 	parent_uid INT,
 	parent_question_uid INT,
 	owner_uid INT,
-	creation_date DATETIME DEFAULT NOW(),
+	creation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 	body TEXT,
 	PRIMARY KEY (uid),
 	FOREIGN KEY (parent_uid) REFERENCES posts(uid) ON DELETE CASCADE,
