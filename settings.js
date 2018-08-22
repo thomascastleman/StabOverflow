@@ -21,5 +21,7 @@ module.exports = {
 	visitor: {
 		numQuestionsOnLanding: 50,		// number of recent questions shown on the landing page
 		numPostsOnUserPage: 15			// number of posts shown in the "Recent Posts" section of each user page
-	}
+	},
+
+	port: 8080
 }

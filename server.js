@@ -34,9 +34,10 @@ var search = require('./search.js').init(app);
 var userSearch = require('./usersearch.js').init(app);
 var admin = require('./admin.js').init(app);
 var mailer = require('./mailing.js').init(app);
+var settings = require('./settings.js');
 
 // start server
-var server = app.listen(8080, function() {
+var server = app.listen(settings.port, function() {
 	console.log('StabOverflow server listening on port %d', server.address().port);
 });
 
