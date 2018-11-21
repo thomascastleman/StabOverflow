@@ -4,12 +4,8 @@
 		<meta charset="UTF-8">
 		<title>User search {{#query}} for '{{query}}'{{/query}} - Stab Overflow</title>
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
-		<link rel="stylesheet" type="text/css" href="/navbar.css">
-		<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.1.0/css/all.css" integrity="sha384-lKuwvrZot6UHsBSfcMvOkWwlCMgc0TaWr+30HWe3a4ltaBwTZhyTEggF5tJv8tbt" crossorigin="anonymous">
-		<link href="https://fonts.googleapis.com/css?family=Kanit:300,400" rel="stylesheet">
 
-		<link rel="stylesheet" type="text/css" href="/search.css">
-		<link rel="stylesheet" type="text/css" href="/usersearch.css">
+		<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.1.0/css/all.css" integrity="sha384-lKuwvrZot6UHsBSfcMvOkWwlCMgc0TaWr+30HWe3a4ltaBwTZhyTEggF5tJv8tbt" crossorigin="anonymous">
 
 		<!-- favicons -->
 		<link rel="apple-touch-icon" sizes="57x57" href="/favicons/apple-icon-57x57.png">
@@ -121,7 +117,7 @@
 
 				<table>
 					{{#results}}
-						<tr>	
+						<tr>
 							<td><center><a href="/users/{{uid}}"><img src="{{image_url}}" width="50" class="profileImg"></a></center></td>
 							<td><a href="/users/{{uid}}"><span class="displayName">{{display_name}}</span> - <span class="realName"><em>{{real_name}}</em></span></a></td>
 							<td><button class="searchUnder" onclick="searchUnder({{uid}});" title="Search for questions by {{display_name}}"><i class="fas fa-search"></i></button></td>
@@ -145,7 +141,7 @@
 				{{/hasResults}}
 			</div>
 		</div>
-		
+
 		<footer>
 			<div>
 				<span>Stab Overflow - 2018</span><br>

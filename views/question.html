@@ -4,21 +4,13 @@
 		<meta charset="UTF-8">
 		<title>{{title}} - Stab Overflow</title>
 
-		<!-- navbar style -->
-		<link rel="stylesheet" type="text/css" href="/navbar.css">
 		<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.1.0/css/all.css" integrity="sha384-lKuwvrZot6UHsBSfcMvOkWwlCMgc0TaWr+30HWe3a4ltaBwTZhyTEggF5tJv8tbt" crossorigin="anonymous">
-		<link href="https://fonts.googleapis.com/css?family=Kanit:300,400" rel="stylesheet"> 
 
 		<!-- jQuery -->
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
 
 		<!-- Google code prettify -->
 		<script src="https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js"></script>
-
-		<link href="https://fonts.googleapis.com/css?family=Kanit:300,400" rel="stylesheet">
-		<link rel="stylesheet" type="text/css" href="/question.css">
-		<link rel="stylesheet" type="text/css" href="/code.css">
-		<link rel="stylesheet" type="text/css" href="/markdowninstructions.css">
 
 		<!-- favicons -->
 		<link rel="apple-touch-icon" sizes="57x57" href="/favicons/apple-icon-57x57.png">
@@ -180,7 +172,7 @@
 					</ul>
 				</div>
 			</header>
-			
+
 			<div id="container">
 				<!-- question -->
 				<div class="post">
@@ -192,7 +184,7 @@
 						{{#isAdmin}}<div class="delete" onclick="deletePost({{question_uid}}, undefined);" title="Delete Question"><i class="fas fa-trash-alt"></i></div>{{/isAdmin}}
 					</div>
 
-					<div class="postbody"> 
+					<div class="postbody">
 						<h1>{{title}}</h1>
 						{{#category}}
 						<form name="getCategory" method="POST" action="/search">
@@ -235,7 +227,7 @@
 					</table>
 				</div>
 
-				<br> 
+				<br>
 				<!-- answers -->
 				<div>
 					<h2>{{answer_count}} Answers</h2><br>
@@ -347,7 +339,7 @@
 		        {{/loggedIn}}
 
 				<script>
-					// syntax highlight all <pre>'s and <code>'s 
+					// syntax highlight all <pre>'s and <code>'s
 					$('pre').attr('class', 'prettyprint');
 					$('code').attr('class', 'prettyprint');
 
@@ -378,7 +370,7 @@
 				</script>
 			</div>
 		</div>
-		
+
 		<footer>
 			<div>
 				<span>Stab Overflow - 2018</span><br>

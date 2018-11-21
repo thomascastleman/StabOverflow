@@ -6,13 +6,7 @@
 
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
 
-		<!-- navbar style -->
-		<link rel="stylesheet" type="text/css" href="/navbar.css">
 		<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.1.0/css/all.css" integrity="sha384-lKuwvrZot6UHsBSfcMvOkWwlCMgc0TaWr+30HWe3a4ltaBwTZhyTEggF5tJv8tbt" crossorigin="anonymous">
-		<link href="https://fonts.googleapis.com/css?family=Kanit:300,400" rel="stylesheet"> 
-
-		<link rel="stylesheet" type="text/css" href="/questionlinks.css">
-		<link rel="stylesheet" type="text/css" href="/search.css">
 
 		<!-- favicons -->
 		<link rel="apple-touch-icon" sizes="57x57" href="/favicons/apple-icon-57x57.png">
@@ -90,7 +84,7 @@
 			<div id="container">
 
 				<a id="userSearch" href="/search/users">Search Users <i class="fas fa-user"></i></a>
-				
+
 				<div id="searchFilters">
 					<form name="secondarySearch" method="POST" action="/search">
 						<input id="query" name="query" type="text" value="{{query}}" autocomplete="off" placeholder="Search StabOverflow" onchange="document.secondarySearch.page.value = 1;">
