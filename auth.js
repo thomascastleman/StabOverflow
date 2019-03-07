@@ -3,7 +3,7 @@
 	auth.js: Authentication routes / configurations and middleware for restricting pages / requests to various levels of authentication
 */
 
-var GoogleStrategy = require('passport-google-oauth2').Strategy;
+var GoogleStrategy = require('passport-google-oauth20').Strategy;
 var querystring = require('querystring');
 var con = require('./database.js').connection;
 var creds = require('./credentials.js');
@@ -16,12 +16,12 @@ module.exports = {
 		// cache user info from our system into their session
 		passport.serializeUser(function(user, done) {
 			// lookup user in system
-			con.query('SELECT * FROM users WHERE email = ?;', [user.email], function(err, rows) {
+			con.query('SELECT * FROM users WHERE email = ?;', [user._json.email], function(err, rows) {
 				if (!err && rows !== undefined && rows.length > 0) {
 					user.local = rows[0];
 
 					// check for profile image update
-					var img = module.exports.stripImageURL(user._json.image.url);
+					var img = user._json.picture; // module.exports.stripImageURL(user._json.image.url);
 					if (img != user.local.image_url) {
 						// apply updates to session and in db
 						user.local.image_url = img;
@@ -37,11 +37,11 @@ module.exports = {
 					done(null, user);
 
 				// if not existing user but email domain legitimate
-				} else if (/.+?@(students\.)?stab\.org/.test(user.email)) {
+				} else if (/.+?@(students\.)?stab\.org/.test(user._json.email)) {
 					var real = module.exports.getRealName(user);
 
 					// create new user
-					con.query('CALL create_user(?, ?, ?);', [user.email, real, module.exports.stripImageURL(user._json.image.url)], function(err, rows) {
+					con.query('CALL create_user(?, ?, ?);', [user._json.email, real, user._json.picture], function(err, rows) {
 						if (!err && rows !== undefined && rows.length > 0 && rows[0].length > 0) {
 							// update their cached info in session
 							user.local = rows[0][0];
@@ -65,7 +65,10 @@ module.exports = {
 				clientID:		creds.GOOGLE_CLIENT_ID,
 				clientSecret:	creds.GOOGLE_CLIENT_SECRET,
 				callbackURL:	creds.domain + "/auth/google/callback",
-				passReqToCallback: true
+				passReqToCallback: true,
+
+				// tells passport to use userinfo endpoint instead of Google+
+				userProfileURL: "https://www.googleapis.com/oauth2/v3/userinfo"
 			},
 			function(request, accessToken, refreshToken, profile, done) {
 				process.nextTick(function () {
@@ -79,8 +82,8 @@ module.exports = {
 
 		// authentication with google endpoint
 		app.get('/auth/google', module.exports.checkReturnTo, passport.authenticate('google', { scope: [
-				'https://www.googleapis.com/auth/userinfo.profile',
-				'https://www.googleapis.com/auth/userinfo.email'
+				'profile',
+				'email'
 			]
 		}));
 
@@ -105,6 +108,7 @@ module.exports = {
 		return module.exports;
 	},
 
+	// get first name, last initial as real name for identity theft purposes
 	getRealName: function(user) {
 		return user.name.givenName + ' ' + user.name.familyName[0];
 	},
