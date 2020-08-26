@@ -56,11 +56,11 @@ Using these tools, administrators are able to manage and monitor the site even a
 
 By linking an email account to the service, it is able to send notifications to users in order to make them better aware of activity on the site.
 
-Users are able to subscribe to questions by clicking the mail icon to the left of the question body. Doing so will have the system notify the user when any new answer is posted under this question.
+Users are able to subscribe to questions by clicking the mail icon to the left of the question body. Doing so will have the system notify the user when any new answer is posted under this question, or the question is edited.
 
 In addition, users are also able to subscribe to categories, meaning they will receive digests every day with questions that have been posted under that category in the past 24 hours.
 
-The mailing system uses [nodemailer](https://nodemailer.com/about/) with Google OAuth2 to securely access and send emails from a google account used only for this service. This requires a Google Client ID, Client Secret, Refresh Token, and Access Token. Most of the instructions for obtaining these credentials can be found [here](http://masashi-k.blogspot.com/2013/06/sending-mail-with-gmail-using-xoauth2.html).
+The mailing system uses [mailgun](https://www.mailgun.com/), which requires you to provide an API key, domain, and from address. The domain must be verified with mailgun and thus have certain DNS records, detailed [here](https://documentation.mailgun.com/en/latest/quickstart-sending.html#verify-your-domain). The from address can be anything you want (does not have to be real).
 
 ## Installation
 
@@ -77,12 +77,10 @@ module.exports = {
 	GOOGLE_CLIENT_ID: '<YOUR GOOGLE CLIENT ID HERE>',
 	GOOGLE_CLIENT_SECRET: '<YOUR GOOGLE CLIENT SECRET HERE>',
 
-	// OAuth2 credentials for access to service email account
-	MAIL_ADDRESS: '<YOUR SERVICE MAILING ADDRESS HERE>',
-	MAIL_CLIENT_ID: '<YOUR MAILING CLIENT ID HERE>',
-	MAIL_CLIENT_SECRET: '<YOUR MAILING CLIENT SECRET HERE>',
-	MAIL_REFRESH_TOKEN: '<YOUR MAILING REFRESH TOKEN HERE>',
-	MAIL_ACCESS_TOKEN: '<YOUR MAILING ACCESS TOKEN HERE>',
+	// Mailgun credentials
+	MAILGUN_API_KEY: '<MAILGUN API KEY HERE>',
+	MAILGUN_DOMAIN: '<DOMAN TO SEND MAIL THROUGH HERE>',
+	MAILGUN_FROM_ADDRESS: '<SERVICE MAIL ADDRESS HERE>',
 
 	// session encryption secret
 	SESSION_SECRET: '<YOUR SESSION SECRET HERE>',

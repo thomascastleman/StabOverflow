@@ -6,25 +6,13 @@
 var auth = require('./auth.js');
 var creds = require('./credentials.js');
 var con = require('./database.js').connection;
-var nodemailer = require('nodemailer');
 var nodeschedule = require('node-schedule');
 var mustache = require('mustache');
 var moment = require('moment');
 var fs = require('fs');
-
-// create email-sender with nodemailer using Google OAuth2
-var transporter = nodemailer.createTransport({
-    host: 'smtp.gmail.com',
-    port: 465,
-    secure: true,
-    auth: {
-        type: 'OAuth2',
-        user: creds.MAIL_ADDRESS,
-        clientId: creds.MAIL_CLIENT_ID,
-        clientSecret: creds.MAIL_CLIENT_SECRET,
-        refreshToken: creds.MAIL_REFRESH_TOKEN,
-        accessToken: creds.MAIL_ACCESS_TOKEN
-    }
+var mailgun = require('mailgun-js')({ 
+	apiKey: creds.MAILGUN_API_KEY, 
+	domain: creds.MAILGUN_DOMAIN 
 });
 
 var templates = {};
@@ -165,26 +153,42 @@ module.exports = {
 
 	// send a message to an individual account
 	sendMail: function(options) {
-		// set up message info (options should use: to (recipient address), subject (email subject), text (plaintext message), html (formatted message))
+		// set up mailing options (should use: to (recipient address), 
+		// subject (email subject), text (plaintext message), html (formatted message))
 		var mailOptions = Object.assign(options, {
-			from: creds.MAIL_ADDRESS
+			from: creds.MAILGUN_FROM_ADDRESS
 		});
 
-		// use transporter to send mail
-		transporter.sendMail(mailOptions);
+		// send the mail
+		mailgun.messages().send(mailOptions, (err, body) => {
+			if (err) console.log(err);
+		});
 	},
 
 	// send a bulk mail
 	sendGroupMail: function(receivers, options) {
-		// set up message info (use bcc to hide recipient emails)
+		let recipientVars = {};
+
+		// map each 'to' address to an empty object
+		for (let i = 0; i < receivers.length; i++) {
+			recipientVars[receivers[i]] = {};
+		}
+
+		recipientVars = JSON.stringify(recipientVars);
+
+		// Set up mailing options
+		// We use recipient variables to act like bcc, so 
+		// receivers cannot see each other's email addresses
 		var mailOptions = Object.assign(options, {
-			from: creds.MAIL_ADDRESS,
-			to: [],
-			bcc: receivers.join(', ')
+			'from': creds.MAILGUN_FROM_ADDRESS,
+			'to': receivers.join(','),
+			'recipient-variables': recipientVars
 		});
 
-		// use transporter to send mail
-		transporter.sendMail(mailOptions);
+		// send the mail
+		mailgun.messages().send(mailOptions, (err, body) => {
+			if (err) console.log(err);
+		});
 	},
 
 	// add a new question subscription link
@@ -426,7 +430,7 @@ module.exports = {
 
 			// configure subscription message
 			var options = {
-				subject: "[" + categoryInfo.name + " " + date + "] New questions from " + categoryInfo.name + "!",
+				subject: "[Digest] [" + categoryInfo.name + " " + date + "] New Questions from " + categoryInfo.name + "!",
 				text: "",
 				html: mustache.render(templates.categoryDigest, categoryInfo)
 			}
