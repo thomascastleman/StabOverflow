@@ -62,6 +62,8 @@ In addition, users are also able to subscribe to categories, meaning they will r
 
 The mailing system uses [mailgun](https://www.mailgun.com/), which requires you to provide an API key, domain, and from address. The domain must be verified with mailgun and thus have certain DNS records, detailed [here](https://documentation.mailgun.com/en/latest/quickstart-sending.html#verify-your-domain). The from address can be anything you want (does not have to be real).
 
+Details on the scheduling of digest emails (how often/how large a window to cover) are determined in `settings.js`.
+
 ## Installation
 
 Project dependencies can be installed by running `npm install` in the repository directory. 
@@ -79,7 +81,7 @@ module.exports = {
 
 	// Mailgun credentials
 	MAILGUN_API_KEY: '<MAILGUN API KEY HERE>',
-	MAILGUN_DOMAIN: '<DOMAN TO SEND MAIL THROUGH HERE>',
+	MAILGUN_DOMAIN: '<DOMAIN TO SEND MAIL THROUGH HERE>',
 	MAILGUN_FROM_ADDRESS: '<SERVICE MAIL ADDRESS HERE>',
 
 	// session encryption secret
@@ -93,7 +95,7 @@ module.exports = {
 	domain: 'http://localhost:8080'
 }
  ```
- This will allow the system to access the Google API as well as execute database queries. Providing email credentials also allows the system to send mail notifications to its users.
+ This will allow the system to access the Google API as well as execute database queries. Providing email credentials also allows the system to send email notifications to its users.
  
  Now, you may run `server.js` to start the system using the command
  ```
