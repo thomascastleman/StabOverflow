@@ -3,6 +3,7 @@
 	mailing.js: Handles all emailing functionality
 */
 
+var settings = require('./settings.js');
 var auth = require('./auth.js');
 var creds = require('./credentials.js');
 var con = require('./database.js').connection;
@@ -383,8 +384,8 @@ module.exports = {
 					}
 				}
 
-				// calculate date one day ago
-				var cutoff = moment().subtract(1, 'days').format('YYYY-MM-DD HH:mm');
+				// calculate how far back to look for new posts
+				var cutoff = moment().subtract(settings.digests_window).format('YYYY-MM-DD HH:mm');
 
 				// get all posts posted in the past day
 				con.query('SELECT posts.*, users.display_name AS owner_name FROM posts JOIN users ON posts.owner_uid = users.uid WHERE posts.creation_date > ?;', cutoff, function(err, rows) {
@@ -441,5 +442,5 @@ module.exports = {
 	}
 }
 
-// every morning at 4 AM, send category digests
-nodeschedule.scheduleJob('0 0 4 * * *', module.exports.sendAllCategoryDigests);
+// schedule category digests at time interval specified by cron string
+nodeschedule.scheduleJob(settings.digests_cron_string, module.exports.sendAllCategoryDigests);
